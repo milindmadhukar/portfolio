@@ -14,8 +14,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Milind Madhukar - Software Engineer",
-  description: "Portfolio of Milind Madhukar - Software Engineer crafting digital experiences with passion & precision",
+  metadataBase: new URL("https://milind.dev"),
+  title: "Milind Madhukar — Software Engineer",
+  description: "Crafting modern web experiences, systems, and tools.",
+  keywords: [
+    "Milind",
+    "Madhukar",
+    "Software Engineer",
+    "Fullstack",
+    "Next.js",
+    "TypeScript",
+    "React",
+  ],
+  openGraph: {
+    type: "website",
+    url: "https://milind.dev",
+    title: "Milind Madhukar — Software Engineer",
+    description: "Crafting modern web experiences, systems, and tools.",
+    siteName: "milind.dev",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Milind Madhukar — Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    creator: "@milind_1504",
+    title: "Milind Madhukar — Software Engineer",
+    description: "Crafting modern web experiences, systems, and tools.",
+    images: ["/og.png"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({

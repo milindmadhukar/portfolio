@@ -1,11 +1,17 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Github, Linkedin, Instagram, Mail, Music, Twitter } from "lucide-react"
+import { GithubIcon as Github, LinkedinIcon as Linkedin, InstagramIcon as Instagram, Mail, Music, Twitter as X } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
+  const projects = [
+    { title: "Neon UI Kit", desc: "A glowing component library with accessible neon aesthetics.", href: "https://github.com/milindmadhukar", tags: ["React", "Design", "A11y"] },
+    { title: "Edge Analytics", desc: "Realtime dashboards powered by edge functions and websockets.", href: "https://github.com/milindmadhukar", tags: ["Next.js", "Edge", "Websocket"] },
+    { title: "AI Prompt Tools", desc: "Open-source utilities for structured prompts and workflows.", href: "https://github.com/milindmadhukar", tags: ["AI", "TypeScript", "DX"] },
+  ]
+
   const socialLinks = [
     {
       name: "GitHub",
@@ -28,13 +34,14 @@ export default function Home() {
       color: "hover:text-blue-600 dark:hover:text-blue-400",
       bgColor: "hover:bg-blue-50 dark:hover:bg-blue-900/20"
     },
-    {
-      name: "Twitter",
-      url: "https://x.com/milind_1504",
-      icon: Twitter,
-      color: "hover:text-sky-600 dark:hover:text-sky-400",
-      bgColor: "hover:bg-sky-50 dark:hover:bg-sky-900/20"
-    },
+      {
+        name: "Twitter",
+        url: "https://x.com/milind_1504",
+        icon: X,
+        color: "hover:text-sky-600 dark:hover:text-sky-400",
+        bgColor: "hover:bg-sky-50 dark:hover:bg-sky-900/20"
+      },
+
     {
       name: "Instagram",
       url: "https://www.instagram.com/milind_1504/",
@@ -52,7 +59,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20">
+    <div className="min-h-screen relative overflow-hidden">
       <ThemeToggle />
       
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-8">
