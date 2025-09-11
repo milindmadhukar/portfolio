@@ -141,27 +141,6 @@ export default function Home() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1.8 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-muted-foreground/60"
-          >
-            <div className="w-6 h-10 border-2 border-current rounded-full flex justify-center relative">
-              <motion.div 
-                className="w-1 h-3 bg-current rounded-full mt-2"
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-            </div>
-          </motion.div>
-        </motion.div>
-
-        <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 1.4 }}
