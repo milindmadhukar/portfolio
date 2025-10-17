@@ -48,4 +48,35 @@ export const screenConfig: ScreenConfig = {
       },
     },
   },
+  matrix: {
+    colors: {
+      primary: '#FF5C00',      // Uniform orange to match text
+      secondary: '#FF5C00',    // Same orange for consistency
+      background: '#001100',   // Keep dark background
+    },
+    animation: {
+      speed: 1.0,              // Normal speed
+      intensity: 0.3,          // Reduced intensity for less brightness
+      glitchFrequency: 0.1,    // Occasional glitches
+    },
+    timing: {
+      textDuration: 4.0,       // 4 seconds of text
+      matrixDuration: 3.0,     // 3 seconds of matrix
+      cloudDuration: 3.0,      // 3 seconds of cloud
+      transitionDuration: 0.8, // Longer transition for smoother effect
+      delayAfterStartup: 2.0,  // Wait 2 seconds after screen startup
+    },
+  },
+  cloud: {
+    colors: {
+      primary: '#FF5C00',      // Uniform orange to match text
+      secondary: '#000000',    // Dark orange background
+      accent: '#FF5C00',       // Same orange for accents
+    },
+    animation: {
+      speed: 1.0,              // Normal animation speed
+      intensity: 0.5,          // Medium cloud density
+      flowRate: 1.5,           // Moderate flow speed
+    },
+  },
 };

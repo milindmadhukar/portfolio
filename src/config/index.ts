@@ -153,6 +153,37 @@ export interface ScreenConfig {
       };
     };
   };
+  matrix: {
+    colors: {
+      primary: string;      // Main matrix numbers color
+      secondary: string;    // Glow/highlight color  
+      background: string;   // Background tint
+    };
+    animation: {
+      speed: number;        // Overall animation speed multiplier
+      intensity: number;    // Digital effect intensity
+      glitchFrequency: number; // Frequency of glitch effects
+    };
+    timing: {
+      textDuration: number;     // How long to show text (seconds)
+      matrixDuration: number;   // How long to show matrix (seconds)
+      cloudDuration: number;    // How long to show cloud (seconds)
+      transitionDuration: number; // Transition fade time (seconds)
+      delayAfterStartup: number; // Wait time after screen startup
+    };
+  };
+  cloud: {
+    colors: {
+      primary: string;      // Main cloud color
+      secondary: string;    // Background/base color
+      accent: string;       // Accent highlights
+    };
+    animation: {
+      speed: number;        // Animation speed multiplier
+      intensity: number;    // Cloud density/intensity
+      flowRate: number;     // How fast the clouds move
+    };
+  };
 }
 
 export interface PostProcessingConfig {
