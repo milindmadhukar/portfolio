@@ -8,7 +8,7 @@ The Scene3D component now uses a centralized configuration system located in `/s
 
 The configuration is organized into logical sections:
 
-- **`devMode`**: Toggle development features (orbit controls, debug indicators)
+- **`debug`**: Toggle development features (orbit controls, debug stats)
 - **`camera`**: Animation duration, positions, and initial settings
 - **`lighting`**: Ambient light, directional light, and all point lights
 - **`environment`**: Floor and wall properties (materials, positions, sizes)
@@ -19,12 +19,12 @@ The configuration is organized into logical sections:
 
 ## Example Customizations
 
-### Change Dev Mode
+### Change Debug Mode
 ```typescript
 // In /src/config/index.ts
 export function loadConfig(): SceneConfig {
   return {
-    devMode: true, // Enable orbit controls and debug indicator
+    debug: true, // Enable orbit controls and debug stats
     // ... rest of config
   };
 }

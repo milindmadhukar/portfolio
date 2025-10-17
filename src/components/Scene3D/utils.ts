@@ -73,51 +73,42 @@ export function generateCRTShader(screenConfig: any) {
       float startupDuration = ${screenConfig.startup.duration.toFixed(1)};
       float startupProgress = clamp(screenStartupTime / startupDuration, 0.0, 1.0);
       
-      // Apply CRT curvature to content
-      vec2 uvC = crtCurve(fragCoord, 1.0);
+      // Use flat UV coordinates (no curvature)
+      vec2 uvC = vUv;
       
       // Display content with CRT effects
-      if (uvC.x > 0.0 && uvC.x < 1.0 && uvC.y > 0.0 && uvC.y < 1.0) {
-        vec4 content = texture2D(iChannel0, uvC);
-        
-        // CRT scanlines
-        float scanline = sin(uvC.y * iResolution.y * 2.0) * ${screenConfig.crt.scanlineIntensity.toFixed(3)} + 0.96;
-        content *= scanline;
-        
-        // Enhanced phosphor glow for bloom
-        content *= ${screenConfig.crt.phosphorGlow.toFixed(1)};
-        
-        // Screen edge fade
-        float edge = smoothstep(0.0, ${screenConfig.crt.edgeFade.toFixed(3)}, uvC.x) * 
-                    smoothstep(0.0, ${screenConfig.crt.edgeFade.toFixed(3)}, uvC.y) * 
-                    smoothstep(1.0, ${(1.0 - screenConfig.crt.edgeFade).toFixed(3)}, uvC.x) * 
-                    smoothstep(1.0, ${(1.0 - screenConfig.crt.edgeFade).toFixed(3)}, uvC.y);
-        content *= edge;
-        
-        // Startup flicker effects
-        if (startupProgress < 1.0) {
-          // Initial power-on flash
-          if (screenStartupTime < ${screenConfig.startup.flashDuration.toFixed(1)}) {
-            float flash = smoothstep(0.0, ${screenConfig.startup.flashDuration.toFixed(1)}, screenStartupTime) * 
-                         (1.0 + sin(screenStartupTime * 60.0) * 0.5);
-            content *= flash;
-          } else {
-            // Stabilization flickers
-            float flickerFreq = mix(${screenConfig.startup.flickerFrequency.start.toFixed(1)}, ${screenConfig.startup.flickerFrequency.end.toFixed(1)}, startupProgress);
-            float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq) + 
-                           0.1 * random(uvC + screenStartupTime * 0.1);
-            
-            // Brightness stabilization
-            float brightness = mix(${screenConfig.startup.brightness.start.toFixed(1)}, ${screenConfig.startup.brightness.end.toFixed(1)}, startupProgress);
-            content *= flicker * brightness;
-          }
+      vec4 content = texture2D(iChannel0, uvC);
+      
+      // CRT scanlines
+      float scanline = sin(uvC.y * iResolution.y * 2.0) * ${screenConfig.crt.scanlineIntensity.toFixed(3)} + 0.96;
+      content *= scanline;
+      
+      // Enhanced phosphor glow for bloom
+      content *= ${screenConfig.crt.phosphorGlow.toFixed(1)};
+      
+      // Startup flicker effects
+      if (startupProgress < 1.0) {
+        // Initial power-on flash
+        if (screenStartupTime < ${screenConfig.startup.flashDuration.toFixed(1)}) {
+          float flash = smoothstep(0.0, ${screenConfig.startup.flashDuration.toFixed(1)}, screenStartupTime) * 
+                       (1.0 + sin(screenStartupTime * 60.0) * 0.5);
+          content *= flash;
+        } else {
+          // Stabilization flickers
+          float flickerFreq = mix(${screenConfig.startup.flickerFrequency.start.toFixed(1)}, ${screenConfig.startup.flickerFrequency.end.toFixed(1)}, startupProgress);
+          float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq) + 
+                         0.1 * random(uvC + screenStartupTime * 0.1);
+          
+          // Brightness stabilization
+          float brightness = mix(${screenConfig.startup.brightness.start.toFixed(1)}, ${screenConfig.startup.brightness.end.toFixed(1)}, startupProgress);
+          content *= flicker * brightness;
         }
-        
-        // Add glow for bloom effect - boost bright areas
-        content += content * content * 0.5;
-        
-        c = content;
       }
+      
+      // Add glow for bloom effect - boost bright areas
+      content += content * content * 0.5;
+      
+      c = content;
       
       gl_FragColor = c;
     }

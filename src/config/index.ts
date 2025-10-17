@@ -1,6 +1,6 @@
 // TypeScript interfaces
 export interface SceneConfig {
-  devMode: boolean;
+  debug: boolean;
   camera: CameraConfig;
   lighting: LightingConfig;
   environment: EnvironmentConfig;
@@ -21,6 +21,10 @@ export interface CameraConfig {
   initial: {
     position: [number, number, number];
     fov: number;
+  };
+  debug: {
+    position: [number, number, number];
+    lookAt: [number, number, number];
   };
 }
 
@@ -183,7 +187,7 @@ import { canvasConfig } from './canvas';
 // Load configuration
 export function loadConfig(): SceneConfig {
   return {
-    devMode: false,
+    debug: true,
     camera: cameraConfig,
     lighting: lightingConfig,
     environment: environmentConfig,

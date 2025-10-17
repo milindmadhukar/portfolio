@@ -12,4 +12,8 @@ export const cameraConfig: CameraConfig = {
     position: [0, 5, 15],
     fov: 75,
   },
+  debug: {
+    position: [0, 7.5, 5.5],
+    lookAt: [0.00, 7.5, 4.5],
+  },
 };

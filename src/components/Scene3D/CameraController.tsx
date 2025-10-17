@@ -8,15 +8,23 @@ export let cameraAnimationComplete = false;
 export function CameraController() {
   const { camera } = useThree();
   const startTime = useRef(Date.now());
+  const debugCameraSet = useRef(false);
 
   useFrame(() => {
-    if (config.devMode) {
-      // In dev mode, immediately mark camera as complete
-      if (!cameraAnimationComplete) {
+    if (config.debug) {
+      // In debug mode, continuously enforce camera position and lookAt
+      const { position, lookAt } = config.camera.debug;
+      
+      if (!debugCameraSet.current) {
+        camera.position.set(position[0], position[1], position[2]);
+        camera.lookAt(lookAt[0], lookAt[1], lookAt[2]);
+        camera.updateMatrixWorld();
         cameraAnimationComplete = true;
+        debugCameraSet.current = true;
       }
       return;
     }
+
 
     const elapsed = (Date.now() - startTime.current) / 1000;
     const duration = config.camera.animation.duration;

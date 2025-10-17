@@ -48,51 +48,42 @@ void main() {
   // Screen startup animation
   float startupProgress = clamp(screenStartupTime / STARTUP_DURATION, 0.0, 1.0);
   
-  // Apply CRT curvature to content
-  vec2 uvC = crtCurve(fragCoord, 1.0);
+  // Use flat UV coordinates (no curvature)
+  vec2 uvC = vUv;
   
   // Display content with CRT effects
-  if (uvC.x > 0.0 && uvC.x < 1.0 && uvC.y > 0.0 && uvC.y < 1.0) {
-    vec4 content = texture2D(iChannel0, uvC);
-    
-    // CRT scanlines
-    float scanline = sin(uvC.y * iResolution.y * 2.0) * SCANLINE_INTENSITY + 0.96;
-    content *= scanline;
-    
-    // Enhanced phosphor glow for bloom
-    content *= PHOSPHOR_GLOW;
-    
-    // Screen edge fade
-    float edge = smoothstep(0.0, EDGE_FADE, uvC.x) * 
-                smoothstep(0.0, EDGE_FADE, uvC.y) * 
-                smoothstep(1.0, (1.0 - EDGE_FADE), uvC.x) * 
-                smoothstep(1.0, (1.0 - EDGE_FADE), uvC.y);
-    content *= edge;
-    
-    // Startup flicker effects
-    if (startupProgress < 1.0) {
-      // Initial power-on flash
-      if (screenStartupTime < FLASH_DURATION) {
-        float flash = smoothstep(0.0, FLASH_DURATION, screenStartupTime) * 
-                     (1.0 + sin(screenStartupTime * 60.0) * 0.5);
-        content *= flash;
-      } else {
-        // Stabilization flickers
-        float flickerFreq = mix(FLICKER_FREQ_START, FLICKER_FREQ_END, startupProgress);
-        float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq) + 
-                       0.1 * random(uvC + screenStartupTime * 0.1);
-        
-        // Brightness stabilization
-        float brightness = mix(BRIGHTNESS_START, BRIGHTNESS_END, startupProgress);
-        content *= flicker * brightness;
-      }
+  vec4 content = texture2D(iChannel0, uvC);
+  
+  // CRT scanlines
+  float scanline = sin(uvC.y * iResolution.y * 2.0) * SCANLINE_INTENSITY + 0.96;
+  content *= scanline;
+  
+  // Enhanced phosphor glow for bloom
+  content *= PHOSPHOR_GLOW;
+  
+  // Startup flicker effects
+  if (startupProgress < 1.0) {
+    // Initial power-on flash
+    if (screenStartupTime < FLASH_DURATION) {
+      float flash = smoothstep(0.0, FLASH_DURATION, screenStartupTime) * 
+                   (1.0 + sin(screenStartupTime * 60.0) * 0.5);
+      content *= flash;
+    } else {
+      // Stabilization flickers
+      float flickerFreq = mix(FLICKER_FREQ_START, FLICKER_FREQ_END, startupProgress);
+      float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq) + 
+                     0.1 * random(uvC + screenStartupTime * 0.1);
+      
+      // Brightness stabilization
+      float brightness = mix(BRIGHTNESS_START, BRIGHTNESS_END, startupProgress);
+      content *= flicker * brightness;
     }
-    
-    // Add glow for bloom effect - boost bright areas
-    content += content * content * 0.5;
-    
-    c = content;
   }
+  
+  // Add glow for bloom effect - boost bright areas
+  content += content * content * 0.5;
+  
+  c = content;
   
   gl_FragColor = c;
 }

@@ -19,8 +19,8 @@ export const modelsConfig: ModelsConfig = {
     position: [0.8, 7.58, 2.7],
     rotation: [0, 0, 0],
     surface: {
-      position: [0, 0, 0.01],
-      size: [0.3, 0.2],
+      position: [0.00, 0, 0.003],
+      size: [0.27, 0.15],
     },
   },
 };
