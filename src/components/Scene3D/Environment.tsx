@@ -34,6 +34,20 @@ export function Walls() {
         />
       </mesh>
 
+      {/* Front wall */}
+      <mesh 
+        position={walls.front.position as [number, number, number]} 
+        rotation={[0, Math.PI, 0]} 
+        receiveShadow
+      >
+        <planeGeometry args={walls.front.size} />
+        <meshStandardMaterial 
+          color={walls.front.material.color} 
+          metalness={walls.front.material.metalness} 
+          roughness={walls.front.material.roughness} 
+        />
+      </mesh>
+
       {/* Side walls */}
       <mesh 
         position={walls.sides.positions.left as [number, number, number]} 
@@ -58,6 +72,20 @@ export function Walls() {
           color={walls.sides.material.color} 
           metalness={walls.sides.material.metalness} 
           roughness={walls.sides.material.roughness} 
+        />
+      </mesh>
+
+      {/* Ceiling */}
+      <mesh 
+        position={walls.ceiling.position as [number, number, number]} 
+        rotation={walls.ceiling.rotation as [number, number, number]} 
+        receiveShadow
+      >
+        <planeGeometry args={walls.ceiling.size} />
+        <meshStandardMaterial 
+          color={walls.ceiling.material.color} 
+          metalness={walls.ceiling.material.metalness} 
+          roughness={walls.ceiling.material.roughness} 
         />
       </mesh>
     </>

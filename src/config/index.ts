@@ -1,4 +1,4 @@
-// TypeScript interfaces
+// TypeScript interfacesindex
 export interface SceneConfig {
   debug: boolean;
   camera: CameraConfig;
@@ -74,6 +74,11 @@ export interface EnvironmentConfig {
       size: [number, number];
       material: { color: string; metalness: number; roughness: number };
     };
+    front: {
+      position: [number, number, number];
+      size: [number, number];
+      material: { color: string; metalness: number; roughness: number };
+    };
     sides: {
       size: [number, number];
       material: { color: string; metalness: number; roughness: number };
@@ -81,6 +86,12 @@ export interface EnvironmentConfig {
         left: [number, number, number];
         right: [number, number, number];
       };
+    };
+    ceiling: {
+      position: [number, number, number];
+      rotation: [number, number, number];
+      size: [number, number];
+      material: { color: string; metalness: number; roughness: number };
     };
   };
 }
@@ -203,6 +214,14 @@ export interface CanvasConfig {
     enableRotate: boolean;
     minDistance: number;
     maxDistance: number;
+    minPolarAngle?: number;
+    maxPolarAngle?: number;
+    minAzimuthAngle?: number;
+    maxAzimuthAngle?: number;
+    boundingBox?: {
+      min: [number, number, number];
+      max: [number, number, number];
+    };
   };
 }
 
@@ -218,7 +237,7 @@ import { canvasConfig } from './canvas';
 // Load configuration
 export function loadConfig(): SceneConfig {
   return {
-    debug: true,
+    debug: false,
     camera: cameraConfig,
     lighting: lightingConfig,
     environment: environmentConfig,

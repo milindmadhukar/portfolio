@@ -1,7 +1,7 @@
 import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { Suspense, useRef, useState } from "react";
-import { EffectComposer, Bloom, SMAA, SSAO } from "@react-three/postprocessing";
+import { EffectComposer, Bloom, SMAA, N8AO } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { config } from "../../config";
 
@@ -149,23 +149,23 @@ export default function Scene3D() {
               enableRotate={canvasConfig.orbitControls.enableRotate}
               minDistance={canvasConfig.orbitControls.minDistance}
               maxDistance={canvasConfig.orbitControls.maxDistance}
+              minPolarAngle={canvasConfig.orbitControls.minPolarAngle}
+              maxPolarAngle={canvasConfig.orbitControls.maxPolarAngle}
+              minAzimuthAngle={canvasConfig.orbitControls.minAzimuthAngle}
+              maxAzimuthAngle={canvasConfig.orbitControls.maxAzimuthAngle}
               target={config.camera.debug.lookAt}
             />
           )}
 
           {/* Post-processing effects for bloom and ambient occlusion */}
           <EffectComposer>
-            <SSAO 
+            <N8AO 
               intensity={0.3}
-              radius={0.15}
-              samples={32}
-              rings={4}
-              distanceThreshold={0.6}
+              aoRadius={0.15}
+              aoSamples={32}
+              denoiseSamples={4}
               distanceFalloff={0.1}
-              rangeThreshold={0.5}
-              rangeFalloff={0.1}
-              luminanceInfluence={0.6}
-              bias={0.5}
+              quality="medium"
             />
             <Bloom 
               intensity={bloom.intensity} 
