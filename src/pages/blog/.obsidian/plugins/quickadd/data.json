@@ -56,6 +56,18 @@
           }
         ]
       }
+    },
+    {
+      "id": "82fd8b1a-c142-406b-bef3-59c174a12ca7",
+      "name": "Commit and push blog",
+      "type": "Macro",
+      "command": false,
+      "runOnStartup": false,
+      "macro": {
+        "name": "Commit and push blog",
+        "id": "96e04801-2110-4e80-a021-5ebf3d5eac81",
+        "commands": []
+      }
     }
   ],
   "inputPrompt": "single-line",
