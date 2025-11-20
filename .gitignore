@@ -26,4 +26,4 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-.obsidian/workspace.json
+./src/pages/blog/.obsidian/workspace.json
