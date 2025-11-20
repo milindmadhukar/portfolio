@@ -23,4 +23,14 @@ export const modelsConfig: ModelsConfig = {
       size: [0.27, 0.15],
     },
   },
+  fanBlades: {
+    path: '/models/fans/fan_blades.glb',
+    scale: [15, 15, 15],
+    position: [0, -2, -2],
+    rotation: [0, 0, 0],
+    animation: {
+      speed: 1,
+      easeInDuration: 2,
+    },
+  },
 };

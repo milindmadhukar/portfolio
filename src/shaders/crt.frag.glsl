@@ -2,6 +2,7 @@ varying vec2 vUv;
 
 uniform float iTime;
 uniform vec2 iResolution;
+uniform vec2 displayResolution;
 uniform sampler2D iChannel0;
 uniform float cameraComplete;
 uniform float screenStartupTime;
@@ -35,6 +36,29 @@ float random(vec2 st) {
   return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
 }
 
+// Simple chunky pixel VFD functions
+vec2 getPixelCoord(vec2 uv, vec2 resolution) {
+  return floor(uv * resolution);
+}
+
+float createChunkyPixel(vec2 uv, vec2 resolution) {
+  // Get which pixel we're in
+  vec2 pixelCoord = getPixelCoord(uv, resolution);
+  vec2 pixelCenter = (pixelCoord + 0.5) / resolution;
+  
+  // Sample text at pixel center
+  vec4 textSample = texture2D(iChannel0, pixelCenter);
+  float textIntensity = (textSample.r + textSample.g + textSample.b) / 3.0;
+  
+  // Create pixel boundaries with gaps
+  vec2 pixelUV = fract(uv * resolution);
+  float pixelMask = step(0.1, pixelUV.x) * step(pixelUV.x, 0.9) * 
+                    step(0.1, pixelUV.y) * step(pixelUV.y, 0.9);
+  
+  // Only light up if text is present AND we're inside pixel bounds
+  return pixelMask * step(0.1, textIntensity);
+}
+
 void main() {
   vec2 fragCoord = vUv * iResolution;
   vec4 c = vec4(0.0);
@@ -48,40 +72,31 @@ void main() {
   // Screen startup animation
   float startupProgress = clamp(screenStartupTime / STARTUP_DURATION, 0.0, 1.0);
   
-  // Use flat UV coordinates (no curvature)
-  vec2 uvC = vUv;
+  // Create chunky VFD pixels
+  float pixelLit = createChunkyPixel(vUv, displayResolution);
   
-  // Display content with CRT effects
-  vec4 content = texture2D(iChannel0, uvC);
+  vec4 content = vec4(0.0, 0.0, 0.0, 1.0); // Default black
   
-  // CRT scanlines
-  float scanline = sin(uvC.y * iResolution.y * 2.0) * SCANLINE_INTENSITY + 0.96;
-  content *= scanline;
-  
-  // Enhanced phosphor glow for bloom
-  content *= PHOSPHOR_GLOW;
-  
-  // Startup flicker effects
-  if (startupProgress < 1.0) {
-    // Initial power-on flash
-    if (screenStartupTime < FLASH_DURATION) {
-      float flash = smoothstep(0.0, FLASH_DURATION, screenStartupTime) * 
-                   (1.0 + sin(screenStartupTime * 60.0) * 0.5);
-      content *= flash;
-    } else {
-      // Stabilization flickers
-      float flickerFreq = mix(FLICKER_FREQ_START, FLICKER_FREQ_END, startupProgress);
-      float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq) + 
-                     0.1 * random(uvC + screenStartupTime * 0.1);
-      
-      // Brightness stabilization
-      float brightness = mix(BRIGHTNESS_START, BRIGHTNESS_END, startupProgress);
-      content *= flicker * brightness;
+  if (pixelLit > 0.0) {
+    // Light up pixel with orange VFD color
+    content = vec4(1.0, 0.36, 0.0, 1.0); // Orange #FF5C00
+    
+    // Apply basic CRT effects only to lit pixels
+    if (startupProgress < 1.0) {
+      if (screenStartupTime < FLASH_DURATION) {
+        float flash = smoothstep(0.0, FLASH_DURATION, screenStartupTime);
+        content *= flash;
+      } else {
+        float flickerFreq = mix(FLICKER_FREQ_START, FLICKER_FREQ_END, startupProgress);
+        float flicker = 0.8 + 0.2 * sin(screenStartupTime * flickerFreq);
+        float brightness = mix(BRIGHTNESS_START, BRIGHTNESS_END, startupProgress);
+        content *= flicker * brightness;
+      }
     }
+    
+    // Add glow for bloom
+    content += content * content * 0.3;
   }
-  
-  // Add glow for bloom effect - boost bright areas
-  content += content * content * 0.5;
   
   c = content;
   

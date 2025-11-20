@@ -18,6 +18,9 @@ export const screenConfig: ScreenConfig = {
     width: 512,
     height: 256,
   },
+  display: {
+    resolution: { width: 20, height: 10 }, // Very low resolution for chunky pixels
+  },
   text: {
     title: {
       content: 'milind madhukar',

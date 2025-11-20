@@ -42,6 +42,7 @@ export function ScreenFrontModel() {
       uniforms: {
         iTime: { value: 0 },
         iResolution: { value: new THREE.Vector2(screenConfig.canvas.width, screenConfig.canvas.height) },
+        displayResolution: { value: new THREE.Vector2(screenConfig.display.resolution.width, screenConfig.display.resolution.height) },
         iChannel0: { value: textTexture.texture },
         textLine1: { value: screenConfig.text.title.content },
         textLine2: { value: '> system_ready_' },
@@ -71,6 +72,9 @@ export function ScreenFrontModel() {
       if (cameraAnimationComplete && screenStartTime.current === null) {
         screenStartTime.current = state.clock.elapsedTime;
         cycleTiming.current.lastSwitch = state.clock.elapsedTime; // Start cycling timer
+        
+        // Dispatch event to start fan animation
+        window.dispatchEvent(new CustomEvent('display-animation-start'));
       }
       
       if (screenStartTime.current !== null) {

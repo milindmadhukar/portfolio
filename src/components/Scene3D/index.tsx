@@ -8,7 +8,7 @@ import { config } from "../../config";
 import { CameraController } from "./CameraController";
 import { Lighting } from "./Lighting";
 import { Floor, Walls } from "./Environment";
-import { ServerModel, ScreenBodyModel } from "./Models";
+import { ServerModel, ScreenBodyModel, FanBladesModel } from "./Models";
 import { ScreenFrontModel } from "./ScreenFront";
 import { LoadingManager } from "./LoadingManager";
 
@@ -137,6 +137,7 @@ export default function Scene3D() {
             <ServerModel />
             <ScreenBodyModel />
             <ScreenFrontModel />
+            <FanBladesModel />
           </Suspense>
 
           {config.debug && <DebugStats onStatsUpdate={handleStatsUpdate} />}

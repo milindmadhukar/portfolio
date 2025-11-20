@@ -119,6 +119,16 @@ export interface ModelsConfig {
       size: [number, number];
     };
   };
+  fanBlades: {
+    path: string;
+    scale: [number, number, number];
+    position: [number, number, number];
+    rotation: [number, number, number];
+    animation: {
+      speed: number;
+      easeInDuration: number;
+    };
+  };
 }
 
 export interface ScreenConfig {
@@ -138,6 +148,9 @@ export interface ScreenConfig {
   canvas: {
     width: number;
     height: number;
+  };
+  display: {
+    resolution: { width: number; height: number };
   };
   text: {
     title: {
@@ -237,7 +250,7 @@ import { canvasConfig } from './canvas';
 // Load configuration
 export function loadConfig(): SceneConfig {
   return {
-    debug: false,
+    debug: true,
     camera: cameraConfig,
     lighting: lightingConfig,
     environment: environmentConfig,

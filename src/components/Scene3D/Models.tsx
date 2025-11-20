@@ -1,5 +1,7 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import type { Group } from "three";
+import * as THREE from "three";
+import { useFrame } from "@react-three/fiber";
 import { config } from "../../config";
 import { useGLBModel } from "./utils";
 
@@ -31,6 +33,21 @@ export function ScreenBodyModel() {
       scale={screenBody.scale}
       position={screenBody.position}
       rotation={screenBody.rotation}
+    >
+      <primitive object={clonedScene} />
+    </group>
+  );
+}
+
+export function FanBladesModel() {
+  const { fanBlades } = config.models;
+  const clonedScene = useGLBModel(fanBlades.path);
+
+  return (
+    <group
+      scale={fanBlades.scale}
+      position={fanBlades.position}
+      rotation={fanBlades.rotation}
     >
       <primitive object={clonedScene} />
     </group>

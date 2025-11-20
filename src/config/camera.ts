@@ -23,7 +23,7 @@ export function calculateResponsiveCamera(viewportWidth: number, viewportHeight:
   if (isMobile) {
     distance = Math.max(distance, 7.25); // Even closer on mobile: reduced from 3.5 to 2.5
   } else {
-    distance = Math.max(distance, 4.25); // Keep desktop close
+    distance = Math.max(distance, 8.25); // Keep desktop close
   }
 
   // Camera Y position - adjust for mobile to look head-on at screen
