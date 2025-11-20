@@ -183,8 +183,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "e1129a0f89394f37",
+  "active": "9057b6c4e71b68fa",
   "lastOpenFiles": [
+    "_templates/scripts/slugify.js",
     "_templates/scripts/Untitled.md",
     "_templates/blog-post.md",
     "_templates/scripts",
@@ -199,7 +200,6 @@
     "this is a test",
     "hello world/index.md",
     "hello world",
-    "_templates/scripts/slugify.js",
     "_templates/scripts",
     "Untitled.md",
     "_templates",

@@ -1,5 +1,5 @@
 ---
-title: {{name}}
+title: {{VALUE:title}}
 description:
 date: {{DATE:MMMM D, YYYY}}
 tags:

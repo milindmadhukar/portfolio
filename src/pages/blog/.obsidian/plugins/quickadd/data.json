@@ -48,11 +48,9 @@
           {
             "name": "slugify",
             "type": "UserScript",
-            "id": "345e69c8-4e92-49bb-ac54-3709c8f768e7",
+            "id": "f9553eb1-ec56-4bd8-bee0-f1fb8bf2f0d9",
             "path": "_templates/scripts/slugify.js",
-            "settings": {
-              "Type": "Folder"
-            }
+            "settings": {}
           }
         ]
       }
