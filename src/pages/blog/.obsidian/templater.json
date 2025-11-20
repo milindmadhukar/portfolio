@@ -1,0 +1,26 @@
+{
+  "folders": [
+    {
+      "path": "/",
+      "template": "_templates/blog-post.md",
+      "enabled": true
+    }
+  ],
+  "enable_folder_templates": true,
+  "enable_system_commands": true,
+  "shell_path": "",
+  "user_scripts_folder": "",
+  "enable_recursive_folder_templates": false,
+  "folder_templates": [
+    {
+      "folder": "/",
+      "template": "_templates/blog-post.md"
+    }
+  ],
+  "syntax_highlighting": true,
+  "enabled": true,
+  "startup_templates": [],
+  "enable_ribbon_icon": true,
+  "syntax_highlighting_mobile": false,
+  "user_functions": {}
+}
