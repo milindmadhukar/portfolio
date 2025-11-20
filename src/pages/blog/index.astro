@@ -2,104 +2,146 @@
 import Layout from '../../layouts/Layout.astro';
 import { Image } from 'astro:assets';
 
-// Get all blog posts from the file system
-const blogPosts = await Astro.glob('./**/index.md');
+// Get all blog posts from the file system using import.meta.glob
+const allPosts = import.meta.glob('./**/index.md', { eager: true });
 
-// Filter out drafts (folders starting with _)
+// Convert glob result to array format
+const blogPosts: any[] = Object.entries(allPosts).map(([path, module]: [string, any]) => {
+  // Extract slug from path
+  const pathParts = path.split('/');
+  const slug = pathParts[pathParts.length - 2];
+  
+  return {
+    ...module,
+    url: `/blog/${slug}/`,
+    slug,
+  };
+});
+
+// Filter out template folders and drafts based on frontmatter
 const publishedPosts = blogPosts.filter((post) => {
-  const urlParts = post.url?.split('/') || [];
-  const folder = urlParts[urlParts.length - 2];
-  return folder && !folder.startsWith('_');
+  const { slug } = post;
+  
+  // Exclude template folders (starting with _)
+  if (slug && slug.startsWith('_')) {
+    return false;
+  }
+  
+  // Exclude drafts based on frontmatter
+  if (post.frontmatter?.draft === true) {
+    return false;
+  }
+  
+  return true;
 });
 
 // Process and sort posts by date
-const posts = await Promise.all(
-  publishedPosts.map(async (post) => {
-    const frontmatter = post.frontmatter || {};
-    
-    // Extract the slug from the URL
-    const urlParts = post.url?.split('/') || [];
-    const slug = urlParts[urlParts.length - 2];
-    
-    // Handle cover image if it exists
-    let coverImage: any = null;
-    if (frontmatter.cover) {
-      try {
-        // Import the cover image from the assets folder
-        const images = import.meta.glob<{ default: ImageMetadata }>('./**/assets/*', { eager: true });
-        const coverPath = `./${slug}/assets/${frontmatter.cover}`;
-        coverImage = images[coverPath];
-      } catch (e) {
-        console.warn(`Cover image not found for ${slug}:`, frontmatter.cover);
-      }
+const images = import.meta.glob<{ default: ImageMetadata }>('./**/assets/*', { eager: true });
+
+const posts = publishedPosts.map((post) => {
+  const frontmatter = post.frontmatter || {};
+  const { slug } = post;
+  
+  // Handle cover image if it exists
+  let coverImage: any = null;
+  if (frontmatter.cover) {
+    const coverPath = `./${slug}/assets/${frontmatter.cover}`;
+    coverImage = images[coverPath];
+    if (!coverImage) {
+      console.warn(`Cover image not found for ${slug}:`, frontmatter.cover);
     }
-    
-    return {
-      url: post.url,
-      slug,
-      title: frontmatter.title || 'Untitled',
-      description: frontmatter.description || '',
-      date: frontmatter.date ? new Date(frontmatter.date) : new Date(),
-      author: frontmatter.author || 'Anonymous',
-      tags: (frontmatter.tags || []) as string[],
-      cover: coverImage?.default || null,
-      draft: frontmatter.draft || false,
-    };
-  })
-);
+  }
+  
+  return {
+    url: post.url,
+    slug,
+    title: frontmatter.title || 'Untitled',
+    description: frontmatter.description || '',
+    date: frontmatter.date ? new Date(frontmatter.date) : new Date(),
+    author: frontmatter.author || 'Anonymous',
+    tags: (frontmatter.tags || []) as string[],
+    cover: coverImage?.default || null,
+    draft: frontmatter.draft || false,
+  };
+});
 
 // Sort by date (newest first)
 posts.sort((a, b) => b.date.getTime() - a.date.getTime());
 ---
 
 <Layout title="Blog">
-  <div class="min-h-screen bg-black text-white">
-    <div class="max-w-4xl mx-auto px-4 py-16">
-      <h1 class="text-4xl font-bold mb-8">Blog</h1>
+  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white">
+    <div class="max-w-6xl mx-auto px-4 py-20">
+      <!-- Header -->
+      <div class="text-center mb-16">
+        <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Blog
+        </h1>
+        <p class="text-xl text-gray-400 max-w-2xl mx-auto">
+          Thoughts, ideas, and stories from my journey
+        </p>
+      </div>
       
       {posts.length === 0 ? (
-        <p class="text-gray-400">No blog posts published yet.</p>
+        <div class="text-center py-20">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-800 mb-6">
+            <svg class="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p class="text-2xl text-gray-500 mb-2">No posts yet</p>
+          <p class="text-gray-600">Start writing to see your posts here</p>
+        </div>
       ) : (
-        <div class="space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           {posts.map((post) => (
-            <article class="border border-gray-800 rounded-lg overflow-hidden hover:border-gray-600 transition-colors">
+            <article class="group relative bg-gradient-to-br from-gray-800/50 to-gray-900/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-800/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1">
               <a href={post.url} class="block">
                 {post.cover && (
-                  <div class="aspect-video overflow-hidden bg-gray-900">
+                  <div class="aspect-video overflow-hidden bg-gradient-to-br from-purple-900/20 to-blue-900/20">
                     <Image
                       src={post.cover}
                       alt={post.title}
                       width={800}
                       height={450}
-                      class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
                   </div>
                 )}
                 
-                <div class="p-6">
-                  <div class="flex items-center gap-4 text-sm text-gray-400 mb-3">
-                    <time datetime={post.date.toISOString()}>
+                <div class="p-8">
+                  <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
+                    <time datetime={post.date.toISOString()} class="flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
                       {post.date.toLocaleDateString('en-US', {
                         year: 'numeric',
-                        month: 'long',
+                        month: 'short',
                         day: 'numeric'
                       })}
                     </time>
+                    
                     {post.author && (
                       <>
-                        <span>•</span>
-                        <span>{post.author}</span>
+                        <span class="text-gray-700">•</span>
+                        <span class="flex items-center gap-2">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          {post.author}
+                        </span>
                       </>
                     )}
                   </div>
                   
-                  <h2 class="text-2xl font-bold mb-2 hover:text-blue-400 transition-colors">
+                  <h2 class="text-2xl font-bold mb-3 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
                     {post.title}
                   </h2>
                   
                   {post.description && (
-                    <p class="text-gray-400 mb-4">
+                    <p class="text-gray-400 mb-6 line-clamp-2">
                       {post.description}
                     </p>
                   )}
@@ -107,12 +149,19 @@ posts.sort((a, b) => b.date.getTime() - a.date.getTime());
                   {post.tags.length > 0 && (
                     <div class="flex flex-wrap gap-2">
                       {post.tags.map((tag: string) => (
-                        <span class="text-xs px-2 py-1 bg-gray-800 rounded-full text-gray-300">
-                          {tag}
+                        <span class="text-xs px-3 py-1.5 bg-gradient-to-r from-purple-900/40 to-blue-900/40 rounded-full text-purple-300 border border-purple-500/30">
+                          #{tag}
                         </span>
                       ))}
                     </div>
                   )}
+                  
+                  <div class="mt-6 flex items-center text-purple-400 font-medium group-hover:gap-2 transition-all duration-300">
+                    Read more
+                    <svg class="w-5 h-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
                 </div>
               </a>
             </article>

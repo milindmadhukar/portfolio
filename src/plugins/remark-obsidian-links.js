@@ -3,11 +3,11 @@ import { visit } from 'unist-util-visit';
 /**
  * Remark plugin to convert Obsidian-style wikilinks to standard markdown syntax
  * Converts: 
- * - ![[image.png]] to optimized Astro Image component syntax
+ * - ![[image.png]] to ![](./assets/image.png) with optimization attributes
  * - [[page-name|Display Text]] to markdown links
  * - [[page-name]] to markdown links
  */
-export function remarkObsidianImage() {
+export function remarkObsidianLinks() {
   return (tree) => {
     visit(tree, 'text', (node, index, parent) => {
       if (!node.value || typeof node.value !== 'string') return;
@@ -24,7 +24,7 @@ export function remarkObsidianImage() {
         let match;
         
         while ((match = combinedRegex.exec(node.value)) !== null) {
-          const [fullMatch, imageFilename, imageExt, linkPath, linkText] = match;
+          const [fullMatch, imageFilename, _imageExt, linkPath, linkText] = match;
           
           // Add text before the match
           if (match.index > lastIndex) {
@@ -36,16 +36,23 @@ export function remarkObsidianImage() {
           
           // Handle image wikilinks
           if (imageFilename) {
+            // Create an image node with data attributes for Astro to handle
             segments.push({
               type: 'image',
               url: `./assets/${imageFilename}`,
               alt: imageFilename.replace(/\.(png|jpg|jpeg|gif|webp|avif|svg)$/i, ''),
+              data: {
+                hProperties: {
+                  loading: 'lazy',
+                  decoding: 'async',
+                  class: 'blog-image'
+                }
+              }
             });
           }
           // Handle internal link wikilinks
           else if (linkPath) {
             // Convert Obsidian path format to blog URL format
-            // Example: "this-is-a-new-blog/index" -> "/blog/this-is-a-new-blog/"
             let url = linkPath;
             
             // Remove .md extension if present

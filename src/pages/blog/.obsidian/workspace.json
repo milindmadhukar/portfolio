@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "753123fd43a58812",
+        "id": "44b70685c3ef4b5c",
         "type": "tabs",
         "children": [
           {
-            "id": "f2fff7aa26393265",
+            "id": "94f2c339b9228a4b",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "this-is-a-new-blog/index.md",
+                "file": "this-is-the-best-blog-ever/index.md",
                 "mode": "source",
                 "source": false
               },
@@ -183,23 +183,29 @@
       "bases:Create new base": false
     }
   },
-  "active": "9057b6c4e71b68fa",
+  "active": "94f2c339b9228a4b",
   "lastOpenFiles": [
-    "this-is-a-new-blog/index.md",
-    "this-is-a-new-blog",
+    "this-is-the-best-blog-ever/assets/Pasted image 20251121044724.png",
+    "this-is-the-best-blog-ever/assets",
     "_templates/blog-post.md",
+    "this-is-the-best-blog-ever/index.md",
+    "this-is-the-best-blog-ever",
+    "Untitled.canvas",
+    "this is the best blog ever",
+    "this-is-a-new-blog/index.md",
+    "2025-11-21.md",
+    "this-is-another-blog-post/index.md",
+    "this-is-another-blog-post",
+    "this is another blog post",
+    "this-is-a-new-blog/assets/Pasted image 20251121043753.png",
+    "this-is-a-new-blog/assets",
+    "this-is-a-new-blog",
     "this is a new blog",
     "this-is-a-new-post-that-i-will-write/index.md",
     "this-is-a-new-post-that-i-will-write",
     "This is a new post that I will write",
     "this-is-a-test/index.md",
-    "this-is-a-test",
-    "this is a test",
     "content/this is a test/index.md",
-    "content/this is a test",
-    "content",
-    "Untitled.base",
-    "_templates/scripts/slugify.js",
     "_templates/scripts/Untitled.md",
     "_templates/Untitled.md",
     "do you work now/index.md",

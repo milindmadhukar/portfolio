@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 import react from '@astrojs/react';
 
-import { remarkObsidianImage } from './src/plugins/remark-obsidian-image.js';
+import { remarkObsidianLinks } from './src/plugins/remark-obsidian-links.js';
 
 // https://astro.build/config
 export default defineConfig({
@@ -21,7 +21,18 @@ export default defineConfig({
   },
 
   markdown: {
-    remarkPlugins: [remarkObsidianImage],
+    remarkPlugins: [remarkObsidianLinks],
+    shikiConfig: {
+      theme: 'dracula',
+      wrap: true
+    }
+  },
+  
+  image: {
+    // Enable image optimization for all images
+    service: {
+      entrypoint: 'astro/assets/services/sharp'
+    }
   },
 
   integrations: [react()]

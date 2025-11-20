@@ -1,3 +1,13 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title?: string;
+}
+
+const { title = '3D Portfolio' } = Astro.props;
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -5,7 +15,7 @@
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>3D Portfolio</title>
+		<title>{title}</title>
 	</head>
 	<body>
 		<slot />
