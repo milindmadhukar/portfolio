@@ -27,7 +27,7 @@
               "folder": {
                 "enabled": true,
                 "folders": [
-                  "./{{name}}"
+                  "{{name}}"
                 ],
                 "chooseWhenCreatingNote": false,
                 "createInSameFolderAsActiveFile": false,
@@ -48,9 +48,11 @@
           {
             "name": "slugify",
             "type": "UserScript",
-            "id": "f9553eb1-ec56-4bd8-bee0-f1fb8bf2f0d9",
+            "id": "4d0c0778-554b-4d58-8e0e-0e92be82a4f5",
             "path": "_templates/scripts/slugify.js",
-            "settings": {}
+            "settings": {
+              "Type": "Folder"
+            }
           }
         ]
       }
