@@ -1,5 +1,5 @@
 ---
-title: this is something nice updated title again
+title: this is something nice updated title again pls work
 description:
 date: 2025-11-21
 tags: []
@@ -7,6 +7,8 @@ banner: ./garrix.png
 draft: false
 ---
 Test
+
+Ok pls work
 
 ![[garrix.png]]
 
