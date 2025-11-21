@@ -42,13 +42,23 @@ const posts = publishedPosts.map((post) => {
   const frontmatter = post.frontmatter || {};
   const { slug } = post;
   
-  // Handle cover image if it exists
-  let coverImage: any = null;
-  if (frontmatter.cover) {
-    const coverPath = `./${slug}/assets/${frontmatter.cover}`;
-    coverImage = images[coverPath];
-    if (!coverImage) {
-      console.warn(`Cover image not found for ${slug}:`, frontmatter.cover);
+  // Handle banner image if it exists (supports both local Obsidian paths and URLs)
+  let bannerImage: any = null;
+  if (frontmatter.banner) {
+    // Check if it's a URL (starts with http:// or https://)
+    if (frontmatter.banner.startsWith('http://') || frontmatter.banner.startsWith('https://')) {
+      bannerImage = frontmatter.banner;
+    } else {
+      // Handle local Obsidian path (e.g., ./garrix.png or assets/garrix.png)
+      const bannerPath = frontmatter.banner.startsWith('./') 
+        ? `./${slug}/assets/${frontmatter.banner.slice(2)}`
+        : `./${slug}/assets/${frontmatter.banner}`;
+      const localImage = images[bannerPath];
+      if (localImage) {
+        bannerImage = localImage.default;
+      } else {
+        console.warn(`Banner image not found for ${slug}:`, frontmatter.banner);
+      }
     }
   }
   
@@ -60,7 +70,7 @@ const posts = publishedPosts.map((post) => {
     date: frontmatter.date ? new Date(frontmatter.date) : new Date(),
     author: frontmatter.author || 'Anonymous',
     tags: (frontmatter.tags || []) as string[],
-    cover: coverImage?.default || null,
+    cover: bannerImage,
     draft: frontmatter.draft || false,
   };
 });

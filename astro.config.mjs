@@ -6,6 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
 
 import { remarkObsidianLinks } from './src/plugins/remark-obsidian-links.js';
+import { remarkBlogLayout } from './src/plugins/remark-blog-layout.js';
 
 // https://astro.build/config
 export default defineConfig({
@@ -21,7 +22,7 @@ export default defineConfig({
   },
 
   markdown: {
-    remarkPlugins: [remarkObsidianLinks],
+    remarkPlugins: [remarkObsidianLinks, remarkBlogLayout],
     shikiConfig: {
       theme: 'dracula',
       wrap: true
