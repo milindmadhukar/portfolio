@@ -12,6 +12,7 @@ Ok pls work
 
 ![[garrix.png]]
 
+I am changing blog but no git update?
 
 Hopefull I am doing all this owrk for someting
 
@@ -20,4 +21,4 @@ Hopefull I am doing all this owrk for someting
 
 ##### this is a start
 
-*niga*
+*ok*
