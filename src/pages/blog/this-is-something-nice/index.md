@@ -1,9 +1,9 @@
 ---
-title: this is something nice
+title: this is something nice updated titlle
 description:
 date: 2025-11-21
 tags: []
-banner: "./garrix.png"
+banner: ./garrix.png
 draft: false
 ---
 Test
