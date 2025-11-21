@@ -1,9 +1,10 @@
 ---
 import Layout from './Layout.astro';
 import '../styles/global.css';
+import { Image } from 'astro:assets';
 
 const { frontmatter } = Astro.props;
-const { title, description, date, author, tags } = frontmatter;
+const { title, description, date, author, tags, banner } = frontmatter;
 
 // Format the date
 const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
@@ -11,6 +12,34 @@ const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
   month: 'long',
   day: 'numeric'
 }) : '';
+
+// Handle banner image if it exists (supports both local Obsidian paths and URLs)
+let bannerImage: any = null;
+if (banner) {
+  // Check if it's a URL (starts with http:// or https://)
+  if (banner.startsWith('http://') || banner.startsWith('https://')) {
+    bannerImage = banner;
+  } else {
+    // Handle local Obsidian path (e.g., ./garrix.png or _assets/garrix.png)
+    // Get the current file path to determine the slug
+    const url = Astro.url.pathname;
+    const pathParts = url.split('/').filter(Boolean);
+    const slug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+    
+    try {
+      const images = import.meta.glob<{ default: ImageMetadata }>('/src/pages/blog/**/_assets/*.{png,jpg,jpeg,gif,webp,svg}', { eager: true });
+      const bannerPath = banner.startsWith('./') 
+        ? `/src/pages/blog/${slug}/_assets/${banner.slice(2)}`
+        : `/src/pages/blog/${slug}/_assets/${banner}`;
+      const localImage = images[bannerPath];
+      if (localImage) {
+        bannerImage = localImage.default;
+      }
+    } catch (e) {
+      console.warn('Banner image not found:', banner);
+    }
+  }
+}
 ---
 
 <Layout>
@@ -39,6 +68,28 @@ const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
             <p class="text-xl md:text-2xl text-gray-400 mb-6 leading-relaxed">
               {description}
             </p>
+          )}
+          
+          {bannerImage && (
+            <div class="my-8 -mx-6 md:mx-0 rounded-none md:rounded-2xl overflow-hidden border-0 md:border border-gray-800/50 shadow-2xl shadow-purple-500/10">
+              {typeof bannerImage === 'string' ? (
+                <img 
+                  src={bannerImage} 
+                  alt={title}
+                  class="w-full h-auto object-cover"
+                  loading="eager"
+                />
+              ) : (
+                <Image
+                  src={bannerImage}
+                  alt={title}
+                  width={1200}
+                  height={675}
+                  class="w-full h-auto object-cover"
+                  loading="eager"
+                />
+              )}
+            </div>
           )}
           
           <div class="flex flex-wrap items-center gap-4 text-sm">
