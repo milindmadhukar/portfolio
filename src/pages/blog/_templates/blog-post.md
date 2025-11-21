@@ -7,4 +7,3 @@ banner:
 layout: ../../../layouts/BlogPost.astro
 draft: true
 ---
-# {{name}}

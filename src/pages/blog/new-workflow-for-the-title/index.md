@@ -5,10 +5,7 @@ date: 2025-11-21
 tags: []
 banner: Pasted image 20251121064119.png
 layout: ../../../layouts/BlogPost.astro
-draft: true
+draft: false
 ---
-# new workflow for the title
-
-
 Hello world?
 

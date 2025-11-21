@@ -36,7 +36,7 @@ const publishedPosts = blogPosts.filter((post) => {
 });
 
 // Process and sort posts by date
-const images = import.meta.glob<{ default: ImageMetadata }>('./**/assets/*', { eager: true });
+const images = import.meta.glob<{ default: ImageMetadata }>('./**/_assets/*.{png,jpg,jpeg,gif,webp,svg}', { eager: true });
 
 const posts = publishedPosts.map((post) => {
   const frontmatter = post.frontmatter || {};
@@ -49,10 +49,10 @@ const posts = publishedPosts.map((post) => {
     if (frontmatter.banner.startsWith('http://') || frontmatter.banner.startsWith('https://')) {
       bannerImage = frontmatter.banner;
     } else {
-      // Handle local Obsidian path (e.g., ./garrix.png or assets/garrix.png)
+      // Handle local Obsidian path (e.g., ./garrix.png or _assets/garrix.png)
       const bannerPath = frontmatter.banner.startsWith('./') 
-        ? `./${slug}/assets/${frontmatter.banner.slice(2)}`
-        : `./${slug}/assets/${frontmatter.banner}`;
+        ? `./${slug}/_assets/${frontmatter.banner.slice(2)}`
+        : `./${slug}/_assets/${frontmatter.banner}`;
       const localImage = images[bannerPath];
       if (localImage) {
         bannerImage = localImage.default;
