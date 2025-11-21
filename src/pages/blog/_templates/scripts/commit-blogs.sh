@@ -19,6 +19,6 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 git commit -m "Update blogs - $TIMESTAMP"
 
 # Push
-git push origin main  # Change 'main' to your branch name if different
+git push origin dev
 
 echo "✓ Committed and pushed successfully!"
