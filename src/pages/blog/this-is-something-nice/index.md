@@ -1,5 +1,5 @@
 ---
-title: this is something nice updated titlle
+title: this is something nice updated title again
 description:
 date: 2025-11-21
 tags: []
