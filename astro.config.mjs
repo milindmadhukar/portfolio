@@ -3,8 +3,6 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import react from '@astrojs/react';
-
 import { remarkObsidianLinks } from './src/plugins/remark-obsidian-links.js';
 
 // https://astro.build/config
@@ -33,7 +31,5 @@ export default defineConfig({
     service: {
       entrypoint: 'astro/assets/services/sharp'
     }
-  },
-
-  integrations: [react()]
+  }
 });

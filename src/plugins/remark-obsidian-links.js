@@ -39,7 +39,7 @@ export function remarkObsidianLinks() {
             // Create an image node with data attributes for Astro to handle
             segments.push({
               type: 'image',
-              url: `./assets/${imageFilename}`,
+              url: `./_assets/${imageFilename}`,
               alt: imageFilename.replace(/\.(png|jpg|jpeg|gif|webp|avif|svg)$/i, ''),
               data: {
                 hProperties: {

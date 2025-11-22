@@ -12,21 +12,8 @@
     "prebuild": "bun run sync-blog"
   },
   "dependencies": {
-    "@astrojs/react": "^4.4.0",
-    "@react-three/drei": "^10.7.6",
-    "@react-three/fiber": "^9.3.0",
-    "@react-three/postprocessing": "^3.0.4",
     "@tailwindcss/vite": "^4.1.14",
-    "@types/react": "^19.1.17",
-    "@types/react-dom": "^19.1.11",
     "astro": "^5.14.1",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "tailwindcss": "^4.1.14",
-    "three": "^0.180.0",
-    "troika-three-text": "^0.52.4"
-  },
-  "devDependencies": {
-    "@types/three": "^0.180.0"
+    "tailwindcss": "^4.1.14"
   }
 }
