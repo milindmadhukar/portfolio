@@ -34,3 +34,7 @@ src/pages/blog/*/
 # Blog sync temporary directory
 blog-content-temp/
 .env.local
+
+*.tsbuildinfo
+next-env.d.ts
+
