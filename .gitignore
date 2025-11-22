@@ -26,4 +26,11 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-src/pages/blog/.obsidian/workspace.json
+# Blog content (fetched from private repo)
+# Keep index.astro but ignore all blog post folders
+src/pages/blog/*/
+!src/pages/blog/_templates/
+
+# Blog sync temporary directory
+blog-content-temp/
+.env.local
