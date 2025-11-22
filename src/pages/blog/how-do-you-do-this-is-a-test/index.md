@@ -5,7 +5,7 @@ date: 2025-11-21
 tags: []
 banner:
 layout: ../../../layouts/BlogPost.astro
-draft: false
+draft: true
 ---
 [[new-workflow-for-the-title/index|index]]
 

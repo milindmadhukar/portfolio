@@ -27,3 +27,4 @@ pnpm-debug.log*
 .idea/
 
 src/pages/blog/.obsidian/workspace.json
+.env.local
