@@ -166,7 +166,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
       ) : (
         <div>
             <!-- Desktop: ls -la style -->
-          <div class="font-mono text-base hidden md:block ls-output" style="opacity: 0;">
+          <div class="font-mono text-base mb-2 hidden md:block ls-output" style="opacity: 0;">
             <!-- Total line (like ls -la shows) -->
             <div class="text-[var(--text-tertiary)] posts-total text-base">
               total {posts.length}
