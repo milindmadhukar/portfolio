@@ -1,5 +1,5 @@
 ---
-import { formatDateOnly } from '../utils/date';
+import { formatDateCompact, formatWordCount } from '../utils/date';
 
 interface Props {
   title: string;
@@ -10,9 +10,10 @@ interface Props {
   cover?: string | any;
   draft?: boolean;
   index: number;
+  wordCount: number;
 }
 
-const { title, description, date, tags, url, cover, draft = false, index } = Astro.props;
+const { title, description, date, tags, url, cover, draft = false, index, wordCount } = Astro.props;
 
 // Helper function to get terminal color class based on index
 function getTerminalColor(idx: number): string {
@@ -26,9 +27,20 @@ function getPostIcon(idx: number): string {
   return icons[idx % icons.length];
 }
 
+// Helper function to get word count color based on count
+function getWordCountColor(count: number): string {
+  if (count < 500) return 'text-blue-400';
+  if (count < 1000) return 'text-purple-400';
+  if (count < 2000) return 'text-pink-400';
+  if (count < 3000) return 'text-orange-400';
+  return 'text-red-400';
+}
+
 const colorClass = getTerminalColor(index);
 const isDraft = draft;
-const formattedDate = formatDateOnly(date);
+const formattedDate = formatDateCompact(date);
+const wordCountFormatted = formatWordCount(wordCount);
+const wordCountColor = getWordCountColor(wordCount);
 // Extract cover URL - handle both string URLs and Astro Image objects
 const coverUrl = typeof cover === 'string' ? cover : (cover?.src || '');
 ---
@@ -42,7 +54,7 @@ const coverUrl = typeof cover === 'string' ? cover : (cover?.src || '');
     data-post-cover={coverUrl}
     data-post-tags={JSON.stringify(tags)}
   >
-    <div class="grid grid-cols-[auto_auto_auto_1fr] gap-4 items-center font-jetbrains">
+    <div class="grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center font-jetbrains">
       <!-- Permissions (colored by section) -->
       <span class="text-base">
         {isDraft ? (
@@ -55,6 +67,11 @@ const coverUrl = typeof cover === 'string' ? cover : (cover?.src || '');
       <!-- Owner -->
       <span class="text-yellow-400 text-base">
         milind
+      </span>
+
+      <!-- Word Count -->
+      <span class={`${wordCountColor} whitespace-nowrap text-base font-semibold`}>
+        {wordCountFormatted}
       </span>
 
       <!-- Date -->

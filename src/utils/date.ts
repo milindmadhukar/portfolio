@@ -95,3 +95,85 @@ export function formatDateLong(date: Date): string {
     day: 'numeric'
   });
 }
+
+/**
+ * Format a date in compact format (e.g., "15 Jan 2024")
+ * @param date - Date object
+ * @returns Formatted date string
+ */
+export function formatDateCompact(date: Date): string {
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear();
+  
+  return `${day} ${month} ${year}`;
+}
+
+/**
+ * Calculate word count from markdown content
+ * @param content - Markdown content string
+ * @returns Word count
+ */
+export function getWordCount(content: string): number {
+  if (!content) return 0;
+  
+  // Remove frontmatter
+  const withoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
+  
+  // Remove code blocks
+  const withoutCodeBlocks = withoutFrontmatter.replace(/```[\s\S]*?```/g, '');
+  
+  // Remove inline code
+  const withoutInlineCode = withoutCodeBlocks.replace(/`[^`]+`/g, '');
+  
+  // Remove markdown links but keep the text
+  const withoutLinks = withoutInlineCode.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+  
+  // Remove images
+  const withoutImages = withoutLinks.replace(/!\[([^\]]*)\]\([^\)]+\)/g, '');
+  
+  // Remove HTML tags
+  const withoutHtml = withoutImages.replace(/<[^>]+>/g, '');
+  
+  // Remove markdown formatting characters
+  const withoutFormatting = withoutHtml
+    .replace(/[#*_~`]/g, '')
+    .replace(/^\s*[-+*]\s+/gm, '') // list markers
+    .replace(/^\s*\d+\.\s+/gm, ''); // numbered list markers
+  
+  // Split by whitespace and filter out empty strings
+  const words = withoutFormatting
+    .split(/\s+/)
+    .filter(word => word.length > 0);
+  
+  return words.length;
+}
+
+/**
+ * Format word count for display (e.g., "500W" for 500 words)
+ * @param count - Word count number
+ * @returns Formatted string
+ */
+export function formatWordCount(count: number): string {
+  return `${count}W`;
+}
+
+/**
+ * Calculate estimated reading time based on word count
+ * @param wordCount - Number of words
+ * @param wordsPerMinute - Average reading speed (default: 200)
+ * @returns Reading time in minutes
+ */
+export function calculateReadingTime(wordCount: number, wordsPerMinute: number = 200): number {
+  return Math.ceil(wordCount / wordsPerMinute);
+}
+
+/**
+ * Format reading time for display
+ * @param minutes - Reading time in minutes
+ * @returns Formatted string (e.g., "5 min read")
+ */
+export function formatReadingTime(minutes: number): string {
+  return `${minutes} min read`;
+}

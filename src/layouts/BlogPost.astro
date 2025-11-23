@@ -4,13 +4,20 @@ import '../styles/global.css';
 import { Image } from 'astro:assets';
 import { personalInfo } from '../data/portfolio';
 import SocialButton from '../components/SocialButton.astro';
-import { formatDateLong, parseCustomDate } from '../utils/date';
+import { formatDateLong, parseCustomDate, getWordCount, formatWordCount, calculateReadingTime, formatReadingTime } from '../utils/date';
 
-const { frontmatter, headings } = Astro.props;
+const { frontmatter, headings, rawContent } = Astro.props;
 const { title, description, date, tags, banner } = frontmatter;
 
 // Format the date (only date part, no time)
 const formattedDate = date ? formatDateLong(parseCustomDate(date)) : '';
+
+// Calculate word count and reading time
+const content = rawContent ? rawContent() : '';
+const wordCount = getWordCount(content);
+const readingTime = calculateReadingTime(wordCount);
+const wordCountFormatted = formatWordCount(wordCount);
+const readingTimeFormatted = formatReadingTime(readingTime);
 
 // Handle banner image if it exists (supports both local Obsidian paths and URLs)
 let bannerImage: any = null;
@@ -115,7 +122,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
             </h1>
             
             {description && (
-              <p class="text-lg sm:text-xl md:text-2xl text-[var(--text-secondary)] mb-6 leading-relaxed">
+              <p class="text-base sm:text-lg text-[var(--text-secondary)] mb-6 leading-relaxed">
                 {description}
               </p>
             )}
@@ -151,12 +158,30 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
                   <time datetime={date} class="font-medium">{formattedDate}</time>
                 </div>
               )}
+              
+              {wordCount > 0 && (
+                <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span class="font-medium">{wordCount} words</span>
+                </div>
+              )}
+              
+              {readingTime > 0 && (
+                <div class="flex items-center gap-2 text-[var(--text-secondary)]">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="font-medium">{readingTimeFormatted}</span>
+                </div>
+              )}
             </div>
             
             {tags && tags.length > 0 && (
               <div class="flex flex-wrap gap-2 mt-6">
                 {tags.map((tag: string) => (
-                  <span class="text-sm px-4 py-2 bg-cyber-purple/10 border border-cyber-purple/30 rounded-full text-cyber-purple font-medium">
+                  <span class="px-3 py-1 text-sm font-mono bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded">
                     #{tag}
                   </span>
                 ))}

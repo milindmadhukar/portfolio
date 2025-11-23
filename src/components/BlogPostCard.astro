@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import { formatDateShort } from '../utils/date';
+import { formatDateShort, formatWordCount } from '../utils/date';
 
 interface Props {
   title: string;
@@ -11,9 +11,10 @@ interface Props {
   cover?: string | any;
   draft?: boolean;
   index: number;
+  wordCount: number;
 }
 
-const { title, description, date, tags, url, cover, draft = false, index } = Astro.props;
+const { title, description, date, tags, url, cover, draft = false, index, wordCount } = Astro.props;
 
 // Helper function to get terminal color class based on index
 function getTerminalColor(idx: number): string {
@@ -27,7 +28,18 @@ function getPostIcon(idx: number): string {
   return icons[idx % icons.length];
 }
 
+// Helper function to get word count color based on count
+function getWordCountColor(count: number): string {
+  if (count < 500) return 'terminal-blue';
+  if (count < 1000) return 'cyber-purple';
+  if (count < 2000) return 'cyber-pink';
+  if (count < 3000) return 'neon-orange';
+  return 'neon-red';
+}
+
 const colorClass = getTerminalColor(index);
+const wordCountFormatted = formatWordCount(wordCount);
+const wordCountColor = getWordCountColor(wordCount);
 ---
 
 <a
@@ -73,7 +85,11 @@ const colorClass = getTerminalColor(index);
   )}
 
   <div class="flex items-center justify-between text-xs text-[var(--text-tertiary)] font-mono">
-    <span>{formatDateShort(date)}</span>
+    <div class="flex items-center gap-2">
+      <span class={`text-${wordCountColor} font-semibold`}>{wordCountFormatted}</span>
+      <span>•</span>
+      <span>{formatDateShort(date)}</span>
+    </div>
     {tags.length > 0 && (
       <div class="flex gap-1 flex-wrap">
         {tags.slice(0, 2).map((tag: string) => (
