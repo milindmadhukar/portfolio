@@ -3,6 +3,7 @@ import type { APIContext } from 'astro';
 import { personalInfo } from '../../data/portfolio';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { parseCustomDate } from '../../utils/date';
 
 export async function GET(context: APIContext) {
   // Get all blog posts
@@ -109,7 +110,7 @@ export async function GET(context: APIContext) {
       return {
         title: frontmatter.title || 'Untitled',
         description: frontmatter.description || '',
-        pubDate: frontmatter.date ? new Date(frontmatter.date) : new Date(),
+        pubDate: frontmatter.date ? parseCustomDate(frontmatter.date) : new Date(),
         link: `${siteUrl}${post.url}`,
         content: finalContent,
       };

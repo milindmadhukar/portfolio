@@ -4,16 +4,13 @@ import '../styles/global.css';
 import { Image } from 'astro:assets';
 import { personalInfo } from '../data/portfolio';
 import SocialButton from '../components/SocialButton.astro';
+import { formatDateLong, parseCustomDate } from '../utils/date';
 
 const { frontmatter, headings } = Astro.props;
 const { title, description, date, tags, banner } = frontmatter;
 
-// Format the date
-const formattedDate = date ? new Date(date).toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-}) : '';
+// Format the date (only date part, no time)
+const formattedDate = date ? formatDateLong(parseCustomDate(date)) : '';
 
 // Handle banner image if it exists (supports both local Obsidian paths and URLs)
 let bannerImage: any = null;

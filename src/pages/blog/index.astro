@@ -2,7 +2,8 @@
 import Layout from '../../layouts/Layout.astro';
 import BlogPostItem from '../../components/BlogPostItem.astro';
 import BlogPostCard from '../../components/BlogPostCard.astro';
-import { Image } from 'astro:assets';
+import { parseCustomDate } from '../../utils/date';
+import type { ImageMetadata } from 'astro';
 
 // Get all blog posts from the file system using import.meta.glob
 const allPosts = import.meta.glob('./**/index.md', { eager: true });
@@ -70,7 +71,7 @@ const posts = publishedPosts.map((post) => {
     slug,
     title: frontmatter.title || 'Untitled',
     description: frontmatter.description || '',
-    date: frontmatter.date ? new Date(frontmatter.date) : new Date(),
+    date: frontmatter.date ? parseCustomDate(frontmatter.date) : new Date(),
     tags: (frontmatter.tags || []) as string[],
     cover: bannerImage,
     draft: frontmatter.draft || false,

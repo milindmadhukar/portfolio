@@ -17,6 +17,38 @@ const BLOG_REPO_URL = process.env.BLOG_REPO_URL || '';
 // Files/folders to exclude from sync
 const EXCLUDE_ITEMS = ['index.astro', '.DS_Store', 'node_modules', '.git', 'README.md', '.obsidian'];
 
+// Files to keep in blog destination (won't be deleted during cleanup)
+const KEEP_FILES = ['index.astro', 'rss.xml.ts'];
+
+async function cleanupBlogFolder() {
+  console.log('🧹 Cleaning up old blog posts...');
+  
+  try {
+    if (!existsSync(BLOG_DEST)) {
+      return; // Nothing to clean
+    }
+
+    const items = await readdir(BLOG_DEST, { withFileTypes: true });
+    
+    for (const item of items) {
+      // Skip files/folders we want to keep
+      if (KEEP_FILES.includes(item.name)) {
+        continue;
+      }
+
+      const itemPath = join(BLOG_DEST, item.name);
+      
+      // Remove everything else (blog posts, old content)
+      await rm(itemPath, { recursive: true, force: true });
+    }
+    
+    console.log('✓ Cleanup complete');
+  } catch (error) {
+    console.error('Error cleaning up blog folder:', error);
+    throw error;
+  }
+}
+
 async function syncFromLocal(sourcePath: string) {
   if (!existsSync(sourcePath)) {
     console.error('Error: Local blog folder not found:', sourcePath);
@@ -109,6 +141,9 @@ async function syncFromGitHub(token: string) {
 }
 
 async function main() {
+  // Clean up old blog posts before syncing
+  await cleanupBlogFolder();
+  
   // Check for local folder first (development)
   let localPath = process.env.BLOG_FOLDER_PATH;
   const githubToken = process.env.BLOG_REPO_GH_TOKEN;
