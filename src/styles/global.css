@@ -171,12 +171,15 @@
 
   /* Terminal cursor animation */
   .terminal-cursor {
-    @apply inline-block w-2.5 h-[1.2em] bg-terminal-green ml-0.5 align-text-bottom animate-cursor-blink;
+    @apply inline-block w-2.5 h-[1.2em] ml-0.5 align-text-bottom animate-cursor-blink;
+    background-color: var(--color-terminal-green);
   }
 
   /* Neovim block cursor style */
   .vim-cursor {
-    @apply inline-block bg-terminal-green text-dark-bg px-0.5 animate-vim-blink;
+    @apply inline-block px-0.5 animate-vim-blink;
+    background-color: var(--color-terminal-green);
+    color: var(--bg-primary);
   }
 
   /* Scanline effect for cyber aesthetic */
@@ -206,6 +209,40 @@
       0 0 40px oklch(0.65 0.28 290 / 0.2),
       inset 0 0 20px oklch(0.75 0.18 195 / 0.1);
   }
+  
+  /* Color utility classes for Tailwind v4 */
+  .bg-cyber-blue { background-color: var(--color-cyber-blue); }
+  .bg-cyber-purple { background-color: var(--color-cyber-purple); }
+  .bg-cyber-pink { background-color: var(--color-cyber-pink); }
+  .bg-cyber-cyan { background-color: var(--color-cyber-cyan); }
+  .bg-neon-green { background-color: var(--color-neon-green); }
+  .bg-neon-orange { background-color: var(--color-neon-orange); }
+  .bg-terminal-green { background-color: var(--color-terminal-green); }
+  .bg-terminal-yellow { background-color: var(--color-terminal-yellow); }
+  .bg-terminal-red { background-color: var(--color-terminal-red); }
+  .bg-terminal-blue { background-color: var(--color-terminal-blue); }
+  
+  .text-cyber-blue { color: var(--color-cyber-blue); }
+  .text-cyber-purple { color: var(--color-cyber-purple); }
+  .text-cyber-pink { color: var(--color-cyber-pink); }
+  .text-cyber-cyan { color: var(--color-cyber-cyan); }
+  .text-neon-green { color: var(--color-neon-green); }
+  .text-neon-orange { color: var(--color-neon-orange); }
+  .text-terminal-green { color: var(--color-terminal-green); }
+  .text-terminal-yellow { color: var(--color-terminal-yellow); }
+  .text-terminal-red { color: var(--color-terminal-red); }
+  .text-terminal-blue { color: var(--color-terminal-blue); }
+  
+  .border-cyber-blue { border-color: var(--color-cyber-blue); }
+  .border-cyber-purple { border-color: var(--color-cyber-purple); }
+  .border-cyber-pink { border-color: var(--color-cyber-pink); }
+  .border-cyber-cyan { border-color: var(--color-cyber-cyan); }
+  .border-neon-green { border-color: var(--color-neon-green); }
+  .border-neon-orange { border-color: var(--color-neon-orange); }
+  .border-terminal-green { border-color: var(--color-terminal-green); }
+  .border-terminal-yellow { border-color: var(--color-terminal-yellow); }
+  .border-terminal-red { border-color: var(--color-terminal-red); }
+  .border-terminal-blue { border-color: var(--color-terminal-blue); }
 }
 
 @layer base {

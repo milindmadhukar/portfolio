@@ -47,12 +47,12 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
 ---
 
 <Layout>
-  <div class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-y-auto">
+  <div class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-y-auto">
     <!-- Mobile TOC Toggle Button (fixed at top) -->
     {tocHeadings.length > 0 && (
       <button 
         id="mobile-toc-toggle"
-        class="lg:hidden fixed top-4 right-4 z-50 p-3 bg-purple-900/80 backdrop-blur-sm rounded-lg border border-purple-500/50 shadow-lg hover:bg-purple-800/80 transition-colors"
+        class="lg:hidden fixed top-4 right-4 z-50 p-3 bg-[var(--bg-elevated)] backdrop-blur-sm rounded-lg border border-[var(--border-color)] shadow-lg hover:bg-[var(--bg-secondary)] transition-colors"
         aria-label="Toggle table of contents"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,15 +67,15 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
         id="mobile-toc-overlay"
         class="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden"
       >
-        <div class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-gradient-to-br from-gray-900 to-black border-l border-purple-500/30 shadow-2xl overflow-y-auto">
+        <div class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[var(--bg-elevated)] border-l border-[var(--border-color)] shadow-2xl overflow-y-auto">
           <div class="p-6">
             <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              <h2 class="text-xl font-bold cyber-text">
                 Table of Contents
               </h2>
               <button 
                 id="mobile-toc-close"
-                class="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+                class="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors"
                 aria-label="Close table of contents"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,7 +89,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
                   <li style={`margin-left: ${(heading.depth - 2) * 1}rem`}>
                     <a 
                       href={`#${heading.slug}`}
-                      class="toc-link block py-2 px-3 text-gray-400 hover:text-purple-400 hover:bg-purple-900/20 rounded transition-all text-sm border-l-2 border-transparent hover:border-purple-500"
+                      class="toc-link block py-2 px-3 text-[var(--text-secondary)] hover:text-cyber-purple hover:bg-cyber-purple/10 rounded transition-all text-sm border-l-2 border-transparent hover:border-cyber-purple"
                       data-heading-id={heading.slug}
                     >
                       {heading.text}
@@ -108,8 +108,8 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
       <div class="flex-1 max-w-4xl lg:max-w-3xl">
         <!-- Back to blog link with home icon -->
         <div class="mb-8 sm:mb-12 flex items-center gap-4">
-          <a href="/blog" class="group inline-flex items-center gap-2 text-gray-400 hover:text-purple-400 transition-colors">
-            <div class="p-2 rounded-lg bg-gray-800/50 group-hover:bg-purple-900/30 transition-colors">
+          <a href="/blog" class="group inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-cyber-purple transition-colors">
+            <div class="p-2 rounded-lg bg-[var(--bg-elevated)] group-hover:bg-cyber-purple/10 transition-colors border border-[var(--border-color)]">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
               </svg>
@@ -120,19 +120,21 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
         
         <!-- Article header with gradient -->
         <article class="prose prose-invert prose-lg max-w-none">
-          <header class="mb-8 sm:mb-12 pb-8 border-b border-gray-800/50">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
-              {title}
+          <header class="mb-8 sm:mb-12 pb-8 border-b border-[var(--border-color)]">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight text-[var(--text-primary)]">
+              <span class="text-[var(--text-tertiary)] font-normal">My thoughts on</span>{' '}
+              <span class="cyber-text">{title}</span>
+              <span class="vim-cursor ml-1">█</span>
             </h1>
             
             {description && (
-              <p class="text-lg sm:text-xl md:text-2xl text-gray-400 mb-6 leading-relaxed">
+              <p class="text-lg sm:text-xl md:text-2xl text-[var(--text-secondary)] mb-6 leading-relaxed">
                 {description}
               </p>
             )}
             
             {bannerImage && (
-              <div class="my-8 -mx-4 sm:mx-0 rounded-none sm:rounded-2xl overflow-hidden border-0 sm:border border-gray-800/50 shadow-2xl shadow-purple-500/10">
+              <div class="my-8 -mx-4 sm:mx-0 rounded-none sm:rounded-2xl overflow-hidden border-0 sm:border border-[var(--border-color)] shadow-2xl shadow-cyber-purple/10">
                 {typeof bannerImage === 'string' ? (
                   <img 
                     src={bannerImage} 
@@ -155,7 +157,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
             
             <div class="flex flex-wrap items-center gap-4 text-sm">
               {formattedDate && (
-                <div class="flex items-center gap-2 text-gray-400">
+                <div class="flex items-center gap-2 text-[var(--text-secondary)]">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
@@ -167,7 +169,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
             {tags && tags.length > 0 && (
               <div class="flex flex-wrap gap-2 mt-6">
                 {tags.map((tag: string) => (
-                  <span class="text-sm px-4 py-2 bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-full text-purple-300 border border-purple-500/30 font-medium">
+                  <span class="text-sm px-4 py-2 bg-cyber-purple/10 border border-cyber-purple/30 rounded-full text-cyber-purple font-medium">
                     #{tag}
                   </span>
                 ))}
@@ -181,8 +183,8 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
           </div>
           
           <!-- Back to blog footer -->
-          <footer class="mt-16 pt-8 border-t border-gray-800/50">
-            <a href="/blog" class="group inline-flex items-center gap-2 text-purple-400 hover:text-purple-300 transition-colors font-medium">
+          <footer class="mt-16 pt-8 border-t border-[var(--border-color)]">
+            <a href="/blog" class="group inline-flex items-center gap-2 text-cyber-purple hover:text-cyber-cyan transition-colors font-medium">
               <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
@@ -196,8 +198,8 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
       {tocHeadings.length > 0 && (
         <aside class="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
           <div class="sticky top-8">
-            <div class="bg-gradient-to-br from-gray-800/30 to-gray-900/30 backdrop-blur-sm border border-gray-800/50 rounded-2xl p-6 shadow-xl">
-              <h2 class="text-lg font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <div class="bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-color)] rounded-2xl p-6 shadow-xl">
+              <h2 class="text-lg font-bold mb-4 cyber-text">
                 Table of Contents
               </h2>
               <nav class="toc-nav">
@@ -206,7 +208,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
                     <li style={`margin-left: ${(heading.depth - 2) * 0.75}rem`}>
                       <a 
                         href={`#${heading.slug}`}
-                        class="toc-link block py-2 px-3 text-gray-400 hover:text-purple-400 hover:bg-purple-900/20 rounded transition-all text-sm border-l-2 border-transparent hover:border-purple-500"
+                        class="toc-link block py-2 px-3 text-[var(--text-secondary)] hover:text-cyber-purple hover:bg-cyber-purple/10 rounded transition-all text-sm border-l-2 border-transparent hover:border-cyber-purple"
                         data-heading-id={heading.slug}
                       >
                         {heading.text}
@@ -232,7 +234,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   
   /* Blog content styles with enhanced typography */
   .blog-content {
-    color: #e5e7eb;
+    color: var(--text-primary);
     font-size: 1.125rem;
     line-height: 1.8;
   }
@@ -243,12 +245,12 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   .blog-content h4,
   .blog-content h5,
   .blog-content h6 {
-    color: white;
+    color: var(--text-primary);
     font-weight: 700;
     margin-top: 3rem;
     margin-bottom: 1.5rem;
     line-height: 1.3;
-    background: linear-gradient(to right, #60a5fa, #a78bfa);
+    background: linear-gradient(to right, var(--color-cyber-blue), var(--color-cyber-purple));
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -263,19 +265,21 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   .blog-content p {
     margin-bottom: 1.5rem;
     line-height: 1.8;
+    color: var(--text-secondary);
   }
   
   .blog-content a {
-    color: #a78bfa;
+    color: var(--color-cyber-purple);
     text-decoration: underline;
-    text-decoration-color: #a78bfa40;
+    text-decoration-color: var(--color-cyber-purple);
+    text-decoration-thickness: 1px;
     text-underline-offset: 3px;
     transition: all 0.2s;
   }
   
   .blog-content a:hover {
-    color: #c4b5fd;
-    text-decoration-color: #a78bfa;
+    color: var(--color-cyber-cyan);
+    text-decoration-color: var(--color-cyber-cyan);
   }
   
   .blog-content img {
@@ -284,8 +288,8 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
     margin-bottom: 3rem;
     width: 100%;
     height: auto;
-    border: 1px solid #374151;
-    box-shadow: 0 20px 50px rgba(139, 92, 246, 0.1);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 20px 50px var(--color-cyber-purple);
   }
   
   .blog-content ul,
@@ -297,6 +301,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   .blog-content li {
     margin-bottom: 0.75rem;
     padding-left: 0.5rem;
+    color: var(--text-secondary);
   }
   
   .blog-content ul li {
@@ -308,38 +313,37 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
     content: "▹";
     position: absolute;
     left: -1.5rem;
-    color: #a78bfa;
+    color: var(--color-terminal-green);
     font-weight: bold;
   }
   
   .blog-content ol li {
     list-style-type: decimal;
     list-style-position: outside;
-    color: #a78bfa;
   }
   
   .blog-content ol li::marker {
-    color: #a78bfa;
+    color: var(--color-cyber-purple);
     font-weight: bold;
   }
   
   .blog-content code {
-    background: linear-gradient(to right, #1f2937, #111827);
+    background: var(--bg-elevated);
     padding: 0.25rem 0.5rem;
     border-radius: 0.375rem;
     font-size: 0.9em;
-    color: #fbbf24;
-    border: 1px solid #374151;
+    color: var(--color-terminal-yellow);
+    border: 1px solid var(--border-color);
     font-family: 'Courier New', monospace;
   }
   
   .blog-content pre {
-    background: linear-gradient(135deg, #111827, #1f2937);
+    background: var(--bg-elevated);
     padding: 1.5rem;
     border-radius: 1rem;
     overflow-x: auto;
     margin: 2rem 0;
-    border: 1px solid #374151;
+    border: 1px solid var(--border-color);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
   }
   
@@ -347,19 +351,19 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
     background: transparent;
     padding: 0;
     border: none;
-    color: #e5e7eb;
+    color: var(--text-primary);
     box-shadow: none;
   }
   
   .blog-content blockquote {
-    border-left: 4px solid #a78bfa;
+    border-left: 4px solid var(--color-cyber-purple);
     padding-left: 1.5rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     font-style: italic;
-    color: #d1d5db;
+    color: var(--text-secondary);
     margin: 2rem 0;
-    background: linear-gradient(to right, #1f293710, transparent);
+    background: var(--bg-elevated);
     border-radius: 0 0.5rem 0.5rem 0;
   }
   
@@ -369,47 +373,47 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
     margin: 2rem 0;
     border-radius: 0.5rem;
     overflow: hidden;
-    border: 1px solid #374151;
+    border: 1px solid var(--border-color);
   }
   
   .blog-content th,
   .blog-content td {
-    border: 1px solid #374151;
+    border: 1px solid var(--border-color);
     padding: 0.75rem 1rem;
     text-align: left;
   }
   
   .blog-content th {
-    background: linear-gradient(to bottom, #1f2937, #111827);
+    background: var(--bg-elevated);
     font-weight: 700;
-    color: #a78bfa;
+    color: var(--color-cyber-purple);
   }
   
   .blog-content tr:nth-child(even) {
-    background: #1f293710;
+    background: var(--bg-elevated);
   }
   
   .blog-content hr {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, #374151, transparent);
+    background: linear-gradient(to right, transparent, var(--border-color), transparent);
     margin: 3rem 0;
   }
   
   .blog-content strong {
-    color: #f3f4f6;
+    color: var(--text-primary);
     font-weight: 700;
   }
   
   .blog-content em {
-    color: #d1d5db;
+    color: var(--text-secondary);
   }
 
   /* TOC Active Link Styles */
   .toc-link.active {
-    color: #a78bfa;
-    background: rgba(167, 139, 250, 0.1);
-    border-left-color: #a78bfa;
+    color: var(--color-cyber-purple);
+    background: var(--color-cyber-purple);
+    border-left-color: var(--color-cyber-purple);
   }
 
   /* Smooth scrolling */

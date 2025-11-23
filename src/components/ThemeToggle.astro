@@ -4,12 +4,13 @@
 
 <button
   id="theme-toggle"
-  class="fixed top-6 right-6 z-50 p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover-glow transition-all duration-300 group"
+  class="fixed top-6 right-6 z-50 p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover-glow transition-all duration-300 group shadow-lg"
   aria-label="Toggle theme"
+  type="button"
 >
   <svg
     id="theme-icon-light"
-    class="w-5 h-5 text-[var(--text-primary)] hidden dark:block transition-transform group-hover:rotate-180 duration-500"
+    class="w-5 h-5 text-cyber-cyan hidden dark:block transition-transform group-hover:rotate-180 duration-500"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -23,7 +24,7 @@
   </svg>
   <svg
     id="theme-icon-dark"
-    class="w-5 h-5 text-[var(--text-primary)] block dark:hidden transition-transform group-hover:-rotate-12 duration-500"
+    class="w-5 h-5 text-cyber-purple block dark:hidden transition-transform group-hover:-rotate-12 duration-500"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -37,52 +38,53 @@
   </svg>
 </button>
 
-<script>
-  // Theme management
-  const THEME_KEY = 'theme';
-  
-  function getTheme(): string {
-    if (typeof localStorage !== 'undefined') {
-      const stored = localStorage.getItem(THEME_KEY);
-      if (stored) {
-        return stored;
+<script is:inline>
+  // Theme management - runs immediately to prevent flash
+  (function() {
+    const THEME_KEY = 'theme';
+    
+    function getTheme() {
+      if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(THEME_KEY);
+        if (stored) {
+          return stored;
+        }
+      }
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      return 'light';
+    }
+
+    function setTheme(theme) {
+      const html = document.documentElement;
+      
+      if (theme === 'dark') {
+        html.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+      }
+      
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(THEME_KEY, theme);
       }
     }
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+
+    function toggleTheme() {
+      const currentTheme = getTheme();
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
     }
-    return 'light';
-  }
 
-  function setTheme(theme: string) {
-    const html = document.documentElement;
-    
-    if (theme === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-    
-    localStorage.setItem(THEME_KEY, theme);
-  }
+    // Set initial theme immediately
+    setTheme(getTheme());
 
-  function toggleTheme() {
-    const currentTheme = getTheme();
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-  }
-
-  // Initialize theme on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    const theme = getTheme();
-    setTheme(theme);
-    
-    const toggleButton = document.getElementById('theme-toggle');
-    if (toggleButton) {
-      toggleButton.addEventListener('click', toggleTheme);
-    }
-  });
-
-  // Also run immediately to prevent flash
-  setTheme(getTheme());
+    // Initialize theme toggle button on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleButton = document.getElementById('theme-toggle');
+      if (toggleButton) {
+        toggleButton.addEventListener('click', toggleTheme);
+      }
+    });
+  })();
 </script>
