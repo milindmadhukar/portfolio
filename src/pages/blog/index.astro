@@ -381,14 +381,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           totalElement.textContent = `total ${visibleCount}`;
         }
 
-        // Update found posts count
-        if (postsCountElement) {
-          postsCountElement.textContent = visibleCount.toString();
-        }
-        if (postsLabelElement) {
-          postsLabelElement.textContent = visibleCount === 1 ? 'post' : 'posts';
-        }
-
         // Update total count for mobile
         if (totalMobileElement) {
           totalMobileElement.textContent = `${visibleCount} ${visibleCount === 1 ? 'post' : 'posts'}`;
