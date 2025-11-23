@@ -29,16 +29,16 @@ import '../styles/global.css';
         <!-- Background Effects -->
         <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-transparent to-purple-500/10"></div>
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse [animation-delay:1s]">        </div>
         
         <!-- Animated Particles -->
         <div class="absolute inset-0 overflow-hidden">
-            <div class="particle particle-1"></div>
-            <div class="particle particle-2"></div>
-            <div class="particle particle-3"></div>
-            <div class="particle particle-4"></div>
-            <div class="particle particle-5"></div>
-            <div class="particle particle-6"></div>
+            <div class="particle particle-1 absolute w-1 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[20%] left-[10%] animate-[float1_8s_ease-in-out_infinite]"></div>
+            <div class="particle particle-2 absolute w-1.5 h-1.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[60%] left-[80%] animate-[float2_10s_ease-in-out_infinite]"></div>
+            <div class="particle particle-3 absolute w-[3px] h-[3px] bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[80%] left-[20%] animate-[float3_12s_ease-in-out_infinite]"></div>
+            <div class="particle particle-4 absolute w-[5px] h-[5px] bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[30%] left-[70%] animate-[float4_9s_ease-in-out_infinite]"></div>
+            <div class="particle particle-5 absolute w-1 h-1 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[70%] left-[90%] animate-[float5_11s_ease-in-out_infinite]"></div>
+            <div class="particle particle-6 absolute w-0.5 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full pointer-events-none opacity-10 blur-px top-[10%] left-[60%] animate-[float6_7s_ease-in-out_infinite]"></div>
         </div>
         
         <!-- Mouse Glow Effect -->
@@ -52,17 +52,17 @@ import '../styles/global.css';
             </h1>
             
             <!-- Title -->
-            <h2 class="text-2xl md:text-3xl font-medium text-gray-300 mb-4 fade-in-up" style="animation-delay: 0.5s;">
+            <h2 class="text-2xl md:text-3xl font-medium text-gray-300 mb-4 fade-in-up [animation-delay:0.5s]">
                 Software Engineer
             </h2>
             
             <!-- Description -->
-            <p class="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto fade-in-up" style="animation-delay: 1s;">
+            <p class="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto fade-in-up [animation-delay:1s]">
                 Turning coffee into code, bugs into features, and dreams into digital reality.
             </p>
             
             <!-- Social Links -->
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg mx-auto fade-in-up" style="animation-delay: 1.5s;">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-lg mx-auto fade-in-up [animation-delay:1.5s]">
                 <!-- GitHub -->
                 <a href="https://github.com/milindmadhukar" target="_blank" rel="noopener noreferrer" 
                    class="group p-4 rounded-xl bg-white/5 border border-white/10 hover:border-cyan-400/50 hover:bg-white/10 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] backdrop-blur-sm">
@@ -133,106 +133,12 @@ import '../styles/global.css';
     </div>
 
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        /* Radial Gradient for Mouse Glow */
+        .bg-gradient-radial {
+            background: radial-gradient(circle, var(--tw-gradient-stops));
         }
         
-        /* Gradient Animation */
-        @keyframes gradient {
-            0%, 100% {
-                background-size: 200% 200%;
-                background-position: left center;
-            }
-            50% {
-                background-size: 200% 200%;
-                background-position: right center;
-            }
-        }
-        
-        .bg-gradient-to-r {
-            animation: gradient 4s ease infinite;
-        }
-        
-        /* Fade In Up Animation */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in-up {
-            opacity: 0;
-            animation: fadeInUp 0.8s ease forwards;
-        }
-        
-        /* Glow Text Effect */
-        .glow-text {
-            filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.3));
-        }
-        
-        /* Particle Animations */
-        .particle {
-            position: absolute;
-            background: linear-gradient(45deg, #06b6d4, #8b5cf6);
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.1;
-            filter: blur(1px);
-        }
-        
-        .particle-1 {
-            width: 4px;
-            height: 4px;
-            top: 20%;
-            left: 10%;
-            animation: float1 8s ease-in-out infinite;
-        }
-        
-        .particle-2 {
-            width: 6px;
-            height: 6px;
-            top: 60%;
-            left: 80%;
-            animation: float2 10s ease-in-out infinite;
-        }
-        
-        .particle-3 {
-            width: 3px;
-            height: 3px;
-            top: 80%;
-            left: 20%;
-            animation: float3 12s ease-in-out infinite;
-        }
-        
-        .particle-4 {
-            width: 5px;
-            height: 5px;
-            top: 30%;
-            left: 70%;
-            animation: float4 9s ease-in-out infinite;
-        }
-        
-        .particle-5 {
-            width: 4px;
-            height: 4px;
-            top: 70%;
-            left: 90%;
-            animation: float5 11s ease-in-out infinite;
-        }
-        
-        .particle-6 {
-            width: 2px;
-            height: 2px;
-            top: 10%;
-            left: 60%;
-            animation: float6 7s ease-in-out infinite;
-        }
-        
+        /* Particle float animations */
         @keyframes float1 {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             25% { transform: translate(100px, -50px) rotate(90deg); }
@@ -275,9 +181,26 @@ import '../styles/global.css';
             75% { transform: translate(-40px, -80px) rotate(270deg); }
         }
         
-        /* Radial Gradient for Mouse Glow */
-        .bg-gradient-radial {
-            background: radial-gradient(circle, var(--tw-gradient-stops));
+        /* Glow text effect */
+        .glow-text {
+            filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.3));
+        }
+        
+        /* Fade in up animation */
+        .fade-in-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
     

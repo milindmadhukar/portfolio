@@ -1,0 +1,88 @@
+---
+// Theme toggle button component
+---
+
+<button
+  id="theme-toggle"
+  class="fixed top-6 right-6 z-50 p-3 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-color)] hover-glow transition-all duration-300 group"
+  aria-label="Toggle theme"
+>
+  <svg
+    id="theme-icon-light"
+    class="w-5 h-5 text-[var(--text-primary)] hidden dark:block transition-transform group-hover:rotate-180 duration-500"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+    />
+  </svg>
+  <svg
+    id="theme-icon-dark"
+    class="w-5 h-5 text-[var(--text-primary)] block dark:hidden transition-transform group-hover:-rotate-12 duration-500"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+    />
+  </svg>
+</button>
+
+<script>
+  // Theme management
+  const THEME_KEY = 'theme';
+  
+  function getTheme(): string {
+    if (typeof localStorage !== 'undefined') {
+      const stored = localStorage.getItem(THEME_KEY);
+      if (stored) {
+        return stored;
+      }
+    }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  }
+
+  function setTheme(theme: string) {
+    const html = document.documentElement;
+    
+    if (theme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+    
+    localStorage.setItem(THEME_KEY, theme);
+  }
+
+  function toggleTheme() {
+    const currentTheme = getTheme();
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+  }
+
+  // Initialize theme on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    const theme = getTheme();
+    setTheme(theme);
+    
+    const toggleButton = document.getElementById('theme-toggle');
+    if (toggleButton) {
+      toggleButton.addEventListener('click', toggleTheme);
+    }
+  });
+
+  // Also run immediately to prevent flash
+  setTheme(getTheme());
+</script>
