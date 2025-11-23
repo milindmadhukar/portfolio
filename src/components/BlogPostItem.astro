@@ -48,13 +48,14 @@ const coverUrl = typeof cover === 'string' ? cover : (cover?.src || '');
 <div class="group relative blog-post-item" data-tags={JSON.stringify(tags)}>
   <a
     href={url}
-    class="post-link block py-1.5 px-4 -mx-4 rounded hover:bg-[var(--bg-elevated)] transition-all duration-200"
+    class="post-link block py-1.5 md:py-1.5 py-2 px-3 md:px-4 -mx-3 md:-mx-4 rounded hover:bg-[var(--bg-elevated)] transition-all duration-200"
     data-post-title={title}
     data-post-description={description}
     data-post-cover={coverUrl}
     data-post-tags={JSON.stringify(tags)}
   >
-    <div class="grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center font-jetbrains">
+    <!-- Desktop: Full ls -la style -->
+    <div class="hidden md:grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center font-jetbrains">
       <!-- Permissions (colored by section) -->
       <span class="text-base">
         {isDraft ? (
@@ -96,6 +97,33 @@ const coverUrl = typeof cover === 'string' ? cover : (cover?.src || '');
           </span>
         )}
       </div>
+    </div>
+
+    <!-- Mobile: Simplified style (date + icon + title) -->
+    <div class="flex md:hidden items-center gap-3 font-jetbrains">
+      <!-- Date -->
+      <span class="text-green-400 whitespace-nowrap text-sm flex-shrink-0">
+        {formattedDate}
+      </span>
+
+      <!-- Icon -->
+      <img 
+        src={`https://cdn.simpleicons.org/${getPostIcon(index)}`}
+        alt=""
+        class="w-4 h-4 flex-shrink-0 opacity-80"
+        style="filter: brightness(0) saturate(100%) invert(100%);"
+      />
+
+      <!-- Title -->
+      <span class={`text-white font-medium group-hover:underline decoration-${colorClass} transition-all text-sm truncate`}>
+        {title}
+      </span>
+
+      {draft && (
+        <span class="px-1.5 py-0.5 text-xs bg-terminal-yellow/20 text-terminal-yellow border border-terminal-yellow/50 rounded flex-shrink-0">
+          draft
+        </span>
+      )}
     </div>
   </a>
 </div>

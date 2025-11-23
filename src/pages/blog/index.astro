@@ -1,7 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BlogPostItem from '../../components/BlogPostItem.astro';
-import BlogPostCard from '../../components/BlogPostCard.astro';
 import { parseCustomDate, getWordCount } from '../../utils/date';
 import type { ImageMetadata } from 'astro';
 
@@ -159,7 +158,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           </div>
         )}
 
-        <div class="mb-1 hidden md:block">
+        <div class="mb-1">
           <p class="text-lg font-mono text-[var(--text-secondary)] mb-1.5">
             <span class="text-terminal-green">milind@thoughts</span>:<span class="text-terminal-blue">~/blog</span>$ <span class="terminal-command"></span><span class="terminal-pipe"></span><span class="terminal-cursor">█</span>
           </p>
@@ -174,15 +173,15 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
         </div>
       ) : (
         <div>
-            <!-- Desktop: ls -la style -->
-          <div class="font-mono text-base mb-2 hidden md:block ls-output" style="opacity: 0;">
-            <!-- Total line (like ls -la shows) -->
-            <div class="text-[var(--text-tertiary)] posts-total text-base">
+          <!-- Unified ls -la style (responsive) -->
+          <div class="font-mono mb-2 ls-output" style="opacity: 0;">
+            <!-- Total line -->
+            <div class="text-[var(--text-tertiary)] posts-total text-base md:text-base text-sm md:mb-0 mb-2">
               total {posts.length}
             </div>
 
-            <!-- Blog posts as ls -la entries -->
-            <div class="space-y-0.5">
+            <!-- Blog posts as ls -la entries (responsive) -->
+            <div class="md:space-y-0.5 space-y-1">
               {posts.map((post, index) => (
                 <BlogPostItem
                   title={post.title}
@@ -206,28 +205,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
             </div>
             <p id="hover-card-description" class="text-sm text-[var(--text-secondary)] leading-relaxed"></p>
             <div id="hover-card-tags" class="flex flex-wrap gap-1 mt-3 pt-3 border-t border-[var(--border-color)]"></div>
-          </div>
-
-          <!-- Mobile: Card style -->
-          <div class="md:hidden space-y-4 mobile-cards" style="opacity: 0;">
-            {posts.map((post, index) => (
-              <BlogPostCard
-                title={post.title}
-                description={post.description}
-                date={post.date}
-                tags={post.tags}
-                url={post.url}
-                cover={post.cover}
-                draft={post.draft}
-                index={index}
-                wordCount={post.wordCount}
-              />
-            ))}
-
-            <!-- Mobile footer -->
-            <div class="mt-6 pt-4 border-t border-[var(--border-color)] text-[var(--text-tertiary)] text-sm font-mono text-center posts-total-mobile">
-              {posts.length} {posts.length === 1 ? 'post' : 'posts'}
-            </div>
           </div>
         </div>
       )}
@@ -290,10 +267,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   .ls-output.animate-in {
     animation: instantShow 0.1s ease-out forwards;
   }
-
-  .mobile-cards.animate-in {
-    animation: fadeIn 0.6s ease-out forwards;
-  }
 </style>
 
 <script>
@@ -302,7 +275,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
     const commandElement = document.querySelector('.terminal-command') as HTMLElement | null;
     const cursorElement = document.querySelector('.terminal-cursor') as HTMLElement | null;
     const lsOutput = document.querySelector('.ls-output') as HTMLElement | null;
-    const mobileCards = document.querySelector('.mobile-cards') as HTMLElement | null;
     const command = 'ls -la';
     let charIndex = 0;
 
@@ -323,32 +295,17 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           if (lsOutput) {
             lsOutput.classList.add('animate-in');
           }
-
-          // Show mobile cards with fade-in animation
-          if (mobileCards) {
-            mobileCards.classList.add('animate-in');
-          }
         }, 200);
       }
     }
 
     // Start typing animation
-    if (commandElement) {
-      setTimeout(typeCommand, 500); // Start after 500ms delay
-    } else {
-      // If no command element (mobile), just fade in the cards
-      if (mobileCards) {
-        setTimeout(() => {
-          mobileCards.classList.add('animate-in');
-        }, 300);
-      }
-    }
+    setTimeout(typeCommand, 500); // Start after 500ms delay
 
     // Tag filtering functionality
     const filterButtons = document.querySelectorAll('.tag-filter-btn');
     const blogPosts = document.querySelectorAll('.blog-post-item');
     const totalElement = document.querySelector('.posts-total') as HTMLElement | null;
-    const totalMobileElement = document.querySelector('.posts-total-mobile') as HTMLElement | null;
     const pipeElement = document.querySelector('.terminal-pipe') as HTMLElement | null;
 
     filterButtons.forEach(button => {
@@ -369,32 +326,23 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           }
         }
 
-        // Filter posts - count only unique posts (desktop version only)
+        // Filter posts
         let visibleCount = 0;
-        
-        blogPosts.forEach((post, index) => {
+        blogPosts.forEach((post) => {
           const postTags = JSON.parse(post.getAttribute('data-tags') || '[]');
           const postElement = post as HTMLElement;
           
           if (selectedTag === 'all' || postTags.includes(selectedTag)) {
             postElement.classList.remove('hidden');
-            // Only count desktop posts (first half of the array, since posts are duplicated for mobile)
-            if (index < blogPosts.length / 2) {
-              visibleCount++;
-            }
+            visibleCount++;
           } else {
             postElement.classList.add('hidden');
           }
         });
 
-        // Update total count for desktop
+        // Update total count
         if (totalElement) {
           totalElement.textContent = `total ${visibleCount}`;
-        }
-
-        // Update total count for mobile
-        if (totalMobileElement) {
-          totalMobileElement.textContent = `${visibleCount} ${visibleCount === 1 ? 'post' : 'posts'}`;
         }
       });
     });
