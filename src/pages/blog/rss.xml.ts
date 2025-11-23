@@ -6,8 +6,18 @@ export async function GET(context: APIContext) {
   // Get all blog posts
   const allPosts = import.meta.glob('./**/index.md', { eager: true });
   
-  // Get the site URL (remove trailing slash if present)
-  const siteUrl = (context.site?.toString() || 'https://milind.dev').replace(/\/$/, '');
+  // Check if we're in development mode
+  const isDev = import.meta.env.DEV;
+  
+  // Get the site URL (use localhost in dev, production URL otherwise)
+  let siteUrl: string;
+  if (isDev) {
+    // In development, use localhost with the current port
+    siteUrl = context.url.origin;
+  } else {
+    // In production, use the configured site or fallback
+    siteUrl = (context.site?.toString() || 'https://milind.dev').replace(/\/$/, '');
+  }
   
   // Convert glob result to array format
   const blogPosts: any[] = Object.entries(allPosts).map(([path, module]: [string, any]) => {
@@ -19,6 +29,7 @@ export async function GET(context: APIContext) {
       ...module,
       url: `/blog/${slug}/`,
       slug,
+      compiledContent: module.compiledContent,
     };
   });
   
@@ -31,8 +42,8 @@ export async function GET(context: APIContext) {
       return false;
     }
     
-    // Exclude drafts in production
-    if (post.frontmatter?.draft === true) {
+    // Exclude drafts only in production (allow in development)
+    if (!isDev && post.frontmatter?.draft === true) {
       return false;
     }
     
@@ -40,16 +51,32 @@ export async function GET(context: APIContext) {
   });
   
   // Process and sort posts by date
-  const posts = publishedPosts.map((post) => {
-    const frontmatter = post.frontmatter || {};
-    
-    return {
-      title: frontmatter.title || 'Untitled',
-      description: frontmatter.description || '',
-      pubDate: frontmatter.date ? new Date(frontmatter.date) : new Date(),
-      link: `${siteUrl}${post.url}`,
-    };
-  });
+  const posts = await Promise.all(
+    publishedPosts.map(async (post) => {
+      const frontmatter = post.frontmatter || {};
+      
+      // Get the compiled HTML content
+      let content = '';
+      if (post.compiledContent) {
+        content = await post.compiledContent();
+        
+        // Convert relative URLs to absolute URLs for images and links
+        // Replace src="/_astro/..." with src="https://milind.dev/_astro/..."
+        content = content.replace(/src="(\/[^"]+)"/g, `src="${siteUrl}$1"`);
+        
+        // Replace href="/" with href="https://milind.dev/"
+        content = content.replace(/href="(\/[^"]+)"/g, `href="${siteUrl}$1"`);
+      }
+      
+      return {
+        title: frontmatter.title || 'Untitled',
+        description: frontmatter.description || '',
+        pubDate: frontmatter.date ? new Date(frontmatter.date) : new Date(),
+        link: `${siteUrl}${post.url}`,
+        content,
+      };
+    })
+  );
   
   // Sort by date (newest first)
   posts.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime());
