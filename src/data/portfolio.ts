@@ -13,7 +13,7 @@ export const personalInfo = {
   name: "Milind Madhukar",
   birthDate: "2004-04-15",
   email: "hey@milind.dev",
-  location: "Vellore, India",
+  location: "Mumbai, India",
   
   getAge() {
     return calculateAge(this.birthDate);
@@ -192,52 +192,50 @@ export const education = [
 
 export const skills = {
   "Programming Languages": [
-    { name: "TypeScript", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "JavaScript", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "Python", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Go", icon: "PLACEHOLDER", proficiency: 80 },
-    { name: "Rust", icon: "PLACEHOLDER", proficiency: 70 },
-    { name: "Java", icon: "PLACEHOLDER", proficiency: 75 }
+    { name: "TypeScript", icon: "typescript", proficiency: 95 },
+    { name: "JavaScript", icon: "javascript", proficiency: 95 },
+    { name: "Python", icon: "python", proficiency: 85 },
+    { name: "Go", icon: "go", proficiency: 80 },
+    { name: "Rust", icon: "rust", proficiency: 70 },
+    { name: "Java", icon: "openjdk", proficiency: 75 }
   ],
   "Frontend Development": [
-    { name: "Next.js", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "React", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "TanStack Query", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "TailwindCSS", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "ShadCN/UI", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Radix UI", icon: "PLACEHOLDER", proficiency: 80 }
+    { name: "Next.js", icon: "nextdotjs", proficiency: 90 },
+    { name: "React", icon: "react", proficiency: 90 },
+    { name: "TanStack Query", icon: "reactquery", proficiency: 85 },
+    { name: "TailwindCSS", icon: "tailwindcss", proficiency: 95 },
+    { name: "ShadCN/UI", icon: "shadcnui", proficiency: 85 },
+    { name: "Radix UI", icon: "radixui", proficiency: 80 }
   ],
   "Backend Development": [
-    { name: "Node.js", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "FastAPI", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "tRPC", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "GraphQL", icon: "PLACEHOLDER", proficiency: 80 },
-    { name: "gRPC", icon: "PLACEHOLDER", proficiency: 75 },
-    { name: "Protocol Buffers", icon: "PLACEHOLDER", proficiency: 75 }
+    { name: "Node.js", icon: "nodedotjs", proficiency: 90 },
+    { name: "FastAPI", icon: "fastapi", proficiency: 85 },
+    { name: "tRPC", icon: "trpc", proficiency: 85 },
+    { name: "GraphQL", icon: "graphql", proficiency: 80 },
   ],
   "Databases": [
-    { name: "PostgreSQL", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "MongoDB", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "SQLite", icon: "PLACEHOLDER", proficiency: 80 },
-    { name: "Redis", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Drizzle ORM", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Prisma", icon: "PLACEHOLDER", proficiency: 90 }
+    { name: "PostgreSQL", icon: "postgresql", proficiency: 90 },
+    { name: "MongoDB", icon: "mongodb", proficiency: 85 },
+    { name: "SQLite", icon: "sqlite", proficiency: 80 },
+    { name: "Redis", icon: "redis", proficiency: 85 },
+    { name: "Drizzle ORM", icon: "drizzle", proficiency: 85 },
+    { name: "Prisma", icon: "prisma", proficiency: 90 }
   ],
   "DevOps & Infrastructure": [
-    { name: "Docker", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "Kubernetes", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Linux", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "GCP", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Terraform", icon: "PLACEHOLDER", proficiency: 80 },
-    { name: "CI/CD Pipelines", icon: "PLACEHOLDER", proficiency: 90 }
+    { name: "Docker", icon: "docker", proficiency: 95 },
+    { name: "Kubernetes", icon: "kubernetes", proficiency: 85 },
+    { name: "Linux", icon: "linux", proficiency: 95 },
+    { name: "GCP", icon: "googlecloud", proficiency: 85 },
+    { name: "Terraform", icon: "terraform", proficiency: 80 },
+    { name: "CI/CD Pipelines", icon: "githubactions", proficiency: 90 }
   ],
   "Tools & Platforms": [
-    { name: "Git", icon: "PLACEHOLDER", proficiency: 95 },
-    { name: "Turborepo", icon: "PLACEHOLDER", proficiency: 85 },
-    { name: "Bun", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "N8N", icon: "PLACEHOLDER", proficiency: 75 },
-    { name: "Cloudflare Workers", icon: "PLACEHOLDER", proficiency: 80 },
-    { name: "Vercel", icon: "PLACEHOLDER", proficiency: 90 },
-    { name: "Railway", icon: "PLACEHOLDER", proficiency: 85 }
+    { name: "Git", icon: "git", proficiency: 95 },
+    { name: "Turborepo", icon: "turborepo", proficiency: 85 },
+    { name: "Bun", icon: "bun", proficiency: 90 },
+    { name: "N8N", icon: "n8n", proficiency: 75 },
+    { name: "Cloudflare Workers", icon: "cloudflare", proficiency: 80 },
+    { name: "Vercel", icon: "vercel", proficiency: 90 },
+    { name: "Railway", icon: "railway", proficiency: 85 }
   ]
 };

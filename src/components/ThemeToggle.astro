@@ -50,10 +50,8 @@
           return stored;
         }
       }
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-      return 'light';
+      // Default to dark mode
+      return 'dark';
     }
 
     function setTheme(theme) {
