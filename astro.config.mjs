@@ -7,6 +7,7 @@ import { remarkObsidianLinks } from './src/plugins/remark-obsidian-links.js';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://milind.dev',
   server: {
     host: true
   },
