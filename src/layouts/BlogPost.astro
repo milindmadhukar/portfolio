@@ -48,61 +48,6 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
 
 <Layout>
   <div class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-y-auto">
-    <!-- Mobile TOC Toggle Button (fixed at top) -->
-    {tocHeadings.length > 0 && (
-      <button 
-        id="mobile-toc-toggle"
-        class="lg:hidden fixed top-4 right-4 z-50 p-3 bg-[var(--bg-elevated)] backdrop-blur-sm rounded-lg border border-[var(--border-color)] shadow-lg hover:bg-[var(--bg-secondary)] transition-colors"
-        aria-label="Toggle table of contents"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    )}
-
-    <!-- Mobile TOC Overlay -->
-    {tocHeadings.length > 0 && (
-      <div 
-        id="mobile-toc-overlay"
-        class="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-40 hidden"
-      >
-        <div class="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[var(--bg-elevated)] border-l border-[var(--border-color)] shadow-2xl overflow-y-auto">
-          <div class="p-6">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-xl font-bold cyber-text">
-                Table of Contents
-              </h2>
-              <button 
-                id="mobile-toc-close"
-                class="p-2 hover:bg-[var(--bg-secondary)] rounded-lg transition-colors"
-                aria-label="Close table of contents"
-              >
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <nav class="toc-nav">
-              <ul class="space-y-1">
-                {tocHeadings.map((heading: any) => (
-                  <li style={`margin-left: ${(heading.depth - 2) * 1}rem`}>
-                    <a 
-                      href={`#${heading.slug}`}
-                      class="toc-link block py-2 px-3 text-[var(--text-secondary)] hover:text-cyber-purple hover:bg-cyber-purple/10 rounded transition-all text-sm border-l-2 border-transparent hover:border-cyber-purple"
-                      data-heading-id={heading.slug}
-                    >
-                      {heading.text}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        </div>
-      </div>
-    )}
-
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-8 lg:items-start">
       <!-- Main content -->
       <div class="flex-1 max-w-4xl lg:max-w-3xl">
@@ -117,6 +62,38 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
             <span class="font-medium">Back to Blog</span>
           </a>
         </div>
+
+        <!-- Mobile TOC - Collapsible inline section -->
+        {tocHeadings.length > 0 && (
+          <details class="lg:hidden mb-8 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl overflow-hidden">
+            <summary class="cursor-pointer px-6 py-4 font-bold text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors flex items-center justify-between group">
+              <span class="cyber-text flex items-center gap-2">
+                <svg class="w-5 h-5 text-cyber-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+                </svg>
+                Table of Contents
+              </span>
+              <svg class="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <nav class="px-6 py-4 border-t border-[var(--border-color)]">
+              <ul class="space-y-1">
+                {tocHeadings.map((heading: any) => (
+                  <li style={`margin-left: ${(heading.depth - 2) * 1}rem`}>
+                    <a 
+                      href={`#${heading.slug}`}
+                      class="mobile-toc-link block py-2 px-3 text-[var(--text-secondary)] hover:text-cyber-purple hover:bg-cyber-purple/10 rounded transition-all text-sm border-l-2 border-transparent hover:border-cyber-purple"
+                      data-heading-id={heading.slug}
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </details>
+        )}
         
         <!-- Article header with gradient -->
         <article class="prose prose-invert prose-lg max-w-none">
@@ -197,25 +174,38 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
                     <span class="text-terminal-green">$</span> Connect with me:
                   </h3>
                   <div class="flex flex-wrap gap-3">
-                    {personalInfo.social.map((link) => (
-                      <a
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="group flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg hover:border-cyber-cyan transition-all hover-glow"
-                        aria-label={link.name}
-                      >
-                        <img 
-                          src={`https://cdn.simpleicons.org/${link.icon}`}
-                          alt={link.name}
-                          class="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity"
-                          style="filter: brightness(0) saturate(100%) invert(64%) sepia(85%) saturate(2076%) hue-rotate(159deg) brightness(101%) contrast(101%);"
-                        />
-                        <span class="text-sm font-medium text-[var(--text-secondary)] group-hover:text-cyber-cyan transition-colors">
-                          {link.name}
-                        </span>
-                      </a>
-                    ))}
+                    {personalInfo.social.map((link) => {
+                      // Map icon names to Simple Icons slugs
+                      const iconMap = {
+                        'github': 'github',
+                        'linkedin': 'linkedin',
+                        'mail': 'gmail',
+                        'twitter': 'x',
+                        'instagram': 'instagram',
+                        'spotify': 'spotify'
+                      };
+                      const simpleIconSlug = iconMap[link.icon as keyof typeof iconMap] || link.icon;
+                      
+                      return (
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="group flex items-center gap-2 px-4 py-2 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg hover:border-cyber-cyan transition-all hover-glow"
+                          aria-label={link.name}
+                        >
+                          <img 
+                            src={`https://cdn.simpleicons.org/${simpleIconSlug}`}
+                            alt={link.name}
+                            class="w-4 h-4 opacity-70 group-hover:opacity-100 transition-opacity"
+                            style="filter: brightness(0) saturate(100%) invert(64%) sepia(85%) saturate(2076%) hue-rotate(159deg) brightness(101%) contrast(101%);"
+                          />
+                          <span class="text-sm font-medium text-[var(--text-secondary)] group-hover:text-cyber-cyan transition-colors">
+                            {link.name}
+                          </span>
+                        </a>
+                      );
+                    })}
                     <!-- RSS Feed -->
                     <a
                       href="/blog/rss.xml"
@@ -281,6 +271,19 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   html, body {
     overflow: visible !important;
     height: auto !important;
+  }
+  
+  /* Mobile TOC Details Styling */
+  details summary {
+    list-style: none;
+  }
+  
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  details[open] summary svg:last-child {
+    transform: rotate(180deg);
   }
   
   /* Blog content styles with enhanced typography */
@@ -474,31 +477,13 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
 </style>
 
 <script>
-  // Mobile TOC toggle functionality
-  const mobileToggle = document.getElementById('mobile-toc-toggle');
-  const mobileOverlay = document.getElementById('mobile-toc-overlay');
-  const mobileClose = document.getElementById('mobile-toc-close');
-
-  if (mobileToggle && mobileOverlay && mobileClose) {
-    mobileToggle.addEventListener('click', () => {
-      mobileOverlay.classList.remove('hidden');
-    });
-
-    mobileClose.addEventListener('click', () => {
-      mobileOverlay.classList.add('hidden');
-    });
-
-    mobileOverlay.addEventListener('click', (e) => {
-      if (e.target === mobileOverlay) {
-        mobileOverlay.classList.add('hidden');
-      }
-    });
-
-    // Close mobile TOC when clicking a link
-    const mobileTocLinks = mobileOverlay.querySelectorAll('.toc-link');
+  // Auto-close mobile TOC details when clicking a link
+  const mobileTocDetails = document.querySelector('details.lg\\:hidden');
+  if (mobileTocDetails) {
+    const mobileTocLinks = mobileTocDetails.querySelectorAll('.mobile-toc-link');
     mobileTocLinks.forEach(link => {
       link.addEventListener('click', () => {
-        mobileOverlay.classList.add('hidden');
+        mobileTocDetails.removeAttribute('open');
       });
     });
   }
@@ -510,7 +495,7 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   };
 
   const headingElements = document.querySelectorAll('.blog-content h2, .blog-content h3');
-  const tocLinks = document.querySelectorAll('.toc-link');
+  const tocLinks = document.querySelectorAll('.toc-link, .mobile-toc-link');
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -518,10 +503,14 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
         const id = entry.target.id;
         // Remove active class from all links
         tocLinks.forEach(link => link.classList.remove('active'));
-        // Add active class to current link
-        const activeLink = document.querySelector(`.toc-link[data-heading-id="${id}"]`);
-        if (activeLink) {
-          activeLink.classList.add('active');
+        // Add active class to current link (both desktop and mobile)
+        const activeLinkDesktop = document.querySelector(`.toc-link[data-heading-id="${id}"]`);
+        const activeLinkMobile = document.querySelector(`.mobile-toc-link[data-heading-id="${id}"]`);
+        if (activeLinkDesktop) {
+          activeLinkDesktop.classList.add('active');
+        }
+        if (activeLinkMobile) {
+          activeLinkMobile.classList.add('active');
         }
       }
     });

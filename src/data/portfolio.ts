@@ -51,20 +51,19 @@ Oh, and I run a 100k+ EDM community on Instagram called @plusxhub where I share 
       name: "Twitter",
       url: "https://x.com/milind_1504",
       icon: "twitter",
-      color: "cyber-pink"
+      color: "cyber-white"
     },
     {
       name: "Instagram",
       url: "https://www.instagram.com/milind_1504/",
       icon: "instagram",
-      color: "neon-orange"
+      color: "cyber-pink"
     },
     {
-      name: "@plusxhub",
-      url: "https://www.instagram.com/plusxhub/",
-      icon: "music",
-      color: "neon-green",
-      description: "100k+ EDM Community"
+      name: "Spotify",
+      url: "https://open.spotify.com/user/6zg8mjgm1xq8za6ye5uv4eyz3",
+      icon: "spotify",
+      color: "neon-green"
     }
   ]
 };
