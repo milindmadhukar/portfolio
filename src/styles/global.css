@@ -45,7 +45,7 @@
   /* Custom animations using Tailwind v4 syntax */
   --animate-gradient-shift: gradient-shift 3s ease infinite;
   --animate-cursor-blink: cursor-blink 1s step-end infinite;
-  --animate-vim-blink: vim-blink 1.2s step-end infinite;
+  --animate-vim-blink: vim-blink 1.2s ease-in-out infinite;
   --animate-scan: scan 8s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-up: slide-up 0.5s ease-out;
@@ -64,8 +64,8 @@
   }
   
   @keyframes vim-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+    0%, 40% { opacity: 1; }
+    70%, 100% { opacity: 0; }
   }
   
   @keyframes scan {
