@@ -4,6 +4,7 @@ import '../styles/global.css';
 import { Image } from 'astro:assets';
 import { personalInfo } from '../data/portfolio';
 import SocialButton from '../components/SocialButton.astro';
+import VimCursor from '../components/VimCursor.astro';
 import { formatDateLong, parseCustomDate, getWordCount, formatWordCount, calculateReadingTime, formatReadingTime } from '../utils/date';
 
 const { frontmatter, headings, rawContent } = Astro.props;
@@ -66,12 +67,18 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
   description={blogDescription}
   image={socialImage}
 >
-  <div class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-y-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-8 lg:items-start">
+  <div class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-y-auto cyber-grid relative">
+    <!-- Scanline effect -->
+    <div class="scanlines absolute inset-0 pointer-events-none opacity-20"></div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-8 lg:items-start relative z-10">
       <!-- Main content -->
       <div class="flex-1 max-w-4xl lg:max-w-3xl">
-        <!-- Back to blog link with home icon -->
-        <div class="mb-8 sm:mb-12 flex items-center gap-4">
+        <!-- Terminal-style breadcrumb navigation -->
+        <div class="mb-8 sm:mb-12">
+          <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
+            <span class="text-terminal-green">milind@blog</span>:<span class="text-terminal-blue">~/posts</span>$ cat {title.toLowerCase().replace(/\s+/g, '-')}.md
+          </p>
           <a href="/blog" class="group inline-flex items-center gap-2 text-[var(--text-secondary)] hover:text-cyber-purple transition-colors">
             <div class="p-2 rounded-lg bg-[var(--bg-elevated)] group-hover:bg-cyber-purple/10 transition-colors border border-[var(--border-color)]">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,8 +124,8 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
         <!-- Article header with gradient -->
         <article class="prose prose-invert prose-lg max-w-none">
           <header class="mb-8 sm:mb-12 pb-8 border-b border-[var(--border-color)]">
-            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              <span class="cyber-text">{title}</span>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight flex items-baseline flex-wrap">
+              <span class="cyber-text">{title}</span><VimCursor />
             </h1>
             
             {description && (
@@ -196,12 +203,17 @@ const tocHeadings = headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) |
           
           <!-- Back to blog footer -->
           <footer class="mt-16 pt-8 border-t border-[var(--border-color)]">
-            <a href="/blog" class="group inline-flex items-center gap-2 text-cyber-purple hover:text-cyber-cyan transition-colors font-medium mb-8">
-              <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              View all posts
-            </a>
+            <div class="mb-8">
+              <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
+                <span class="text-terminal-green">milind@blog</span>:<span class="text-terminal-blue">~/posts</span>$ cd ..
+              </p>
+              <a href="/blog" class="group inline-flex items-center gap-2 text-cyber-purple hover:text-cyber-cyan transition-colors font-medium">
+                <svg class="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                View all posts
+              </a>
+            </div>
 
             <!-- Social Links & RSS -->
             <div class="mt-8 pt-8 border-t border-[var(--border-color)]">

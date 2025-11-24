@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import BlogPostItem from '../../components/BlogPostItem.astro';
+import VimCursor from '../../components/VimCursor.astro';
 import { parseCustomDate, getWordCount } from '../../utils/date';
 import type { ImageMetadata } from 'astro';
 
@@ -93,11 +94,14 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   title="Blog - Milind Madhukar"
   description="📚 Where bugs become features and features become blog posts. Dive into chaos-driven development, DevOps disasters (and triumphs), and tech rants you didn't know you needed. Grab your coffee and prepare for a wild ride!"
 >
-  <div class="min-h-screen py-20 px-6">
-    <div class="max-w-6xl mx-auto">
+  <div class="min-h-screen py-8 sm:py-20 px-6 cyber-grid relative">
+    <!-- Scanline effect -->
+    <div class="scanlines absolute inset-0 pointer-events-none opacity-20"></div>
+    
+    <div class="max-w-6xl mx-auto relative z-10">
       <!-- Terminal Header -->
-      <div class="mt-8 mb-4">
-        <div class="flex items-center gap-3 mb-8">
+      <div class="mt-2 sm:mt-8 mb-4">
+        <div class="mb-4 sm:mb-8">
           <a
             href="/"
             class="group flex items-center gap-2 text-[var(--text-tertiary)] hover:text-cyber-cyan transition-colors"
@@ -111,7 +115,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
 
 
         <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 pb-2 flex items-baseline whitespace-nowrap">
-          <span class="text-[var(--text-primary)] inline-block">My Thoughts</span><span class="vim-cursor ml-1 sm:ml-2 inline-block"></span>
+          <span class="text-[var(--text-primary)] inline-block">My Thoughts</span><VimCursor />
         </h1>
 
         <!-- RSS Feed Link -->
@@ -406,10 +410,13 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
 
         if (!hoverCard || !hoverCardDescription || !hoverCardTags) return;
 
+        let hasContent = false;
+
         // Populate hover card
         if (cover && cover !== '' && hoverCardCover && hoverCardImage) {
           hoverCardImage.src = cover;
           hoverCardCover.classList.remove('hidden');
+          hasContent = true;
         } else if (hoverCardCover) {
           hoverCardCover.classList.add('hidden');
         }
@@ -417,6 +424,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
         if (description && hoverCardDescription) {
           hoverCardDescription.textContent = description;
           hoverCardDescription.classList.remove('hidden');
+          hasContent = true;
         } else if (hoverCardDescription) {
           hoverCardDescription.classList.add('hidden');
         }
@@ -429,14 +437,17 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
               `<span class="text-xs px-2 py-0.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded text-[var(--text-tertiary)]">#${tag}</span>`
             ).join('');
             hoverCardTags.classList.remove('hidden');
+            hasContent = true;
           } else {
             hoverCardTags.classList.add('hidden');
           }
         }
 
-        // Show hover card
-        hoverCard.classList.remove('opacity-0', 'invisible');
-        hoverCard.classList.add('opacity-100', 'visible');
+        // Only show hover card if there's content
+        if (hasContent) {
+          hoverCard.classList.remove('opacity-0', 'invisible');
+          hoverCard.classList.add('opacity-100', 'visible');
+        }
       });
 
       link.addEventListener('mouseleave', () => {
