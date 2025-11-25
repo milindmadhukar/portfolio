@@ -15,7 +15,7 @@ const BLOG_DEST = join(process.cwd(), 'src/pages/blog');
 const BLOG_REPO_URL = process.env.BLOG_REPO_URL || '';
 
 // Files/folders to exclude from sync
-const EXCLUDE_ITEMS = ['index.astro', '.DS_Store', 'node_modules', '.git', 'README.md', '.obsidian'];
+const EXCLUDE_ITEMS = ['index.astro', '.DS_Store', 'node_modules', '.git', 'README.md', '.obsidian', 'Excalidraw', '_templates', '_scripts'];
 
 // Files to keep in blog destination (won't be deleted during cleanup)
 const KEEP_FILES = ['index.astro', 'rss.xml.ts'];
