@@ -224,7 +224,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           </div>
 
           <!-- Cursor-following hover card (desktop only) -->
-          <div id="hover-card" class="fixed w-96 p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg shadow-2xl opacity-0 invisible transition-opacity duration-200 z-50 pointer-events-none hidden md:block" style="left: 0; top: 0;">
+          <div id="hover-card" class="fixed w-96 p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg shadow-lg opacity-0 invisible transition-opacity duration-200 z-50 pointer-events-none hidden md:block" style="left: 0; top: 0;">
             <div id="hover-card-banner" class="mb-3 rounded-lg overflow-hidden border border-[var(--border-color)] hidden">
               <img id="hover-card-image-light" src="" alt="" class="w-full object-contain hover-card-light" />
               <img id="hover-card-image-dark" src="" alt="" class="w-full object-contain hover-card-dark" />
