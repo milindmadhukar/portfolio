@@ -1,5 +1,6 @@
 ---
-
+import "../styles/global.css";
+import ThemeToggle from "../components/ThemeToggle.jsx";
 ---
 
 <html lang="en">
@@ -10,7 +11,14 @@
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro</title>
 	</head>
-	<body>
-		<h1>Astro</h1>
+	<body class="bg-bg text-text transition-colors duration-300">
+		<ThemeToggle client:load />
+		<div class="p-8">
+			<h1 class="text-3xl font-bold underline text-primary">Astro</h1>
+			<p class="mt-4 text-lg">
+				This is a demo of the Catppuccin theme with TailwindCSS v4. Try
+				toggling the theme!
+			</p>
+		</div>
 	</body>
 </html>
