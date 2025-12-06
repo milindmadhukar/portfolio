@@ -185,7 +185,7 @@
     color: var(--bg-primary);
     width: 0.6em;
     height: 1em;
-    vertical-align: baseline;
+    vertical-align: -0.15em;
     margin-left: 0.05em;
   }
 
