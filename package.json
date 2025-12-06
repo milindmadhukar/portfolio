@@ -1,21 +1,14 @@
 {
-  "name": "",
+  "name": "portfolio",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "bun run clean && bun run sync-blog && astro dev",
-    "dev:watch": "bun run clean && bun scripts/watch-blog.ts",
+    "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "clean": "bun scripts/clean.ts",
-    "sync-blog": "bun scripts/sync-blog.ts",
-    "prebuild": "bun run sync-blog"
+    "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/rss": "^4.0.14",
-    "@tailwindcss/vite": "^4.1.14",
-    "astro": "5.16.0",
-    "tailwindcss": "^4.1.14"
+    "astro": "^5.16.4"
   }
 }
