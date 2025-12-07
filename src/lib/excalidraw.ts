@@ -37,7 +37,7 @@ export function processExcalidrawImage(
   // Matches: filename.excalidraw, filename.excalidraw.light, filename.excalidraw.dark, 
   //          filename.excalidraw.light.png, filename.excalidraw.dark.png
   const excalidrawMatch = cleanFilename.match(/^(.+\.excalidraw)(?:\.(light|dark))?(?:\.png)?$/);
-  
+
   if (!excalidrawMatch) {
     return {
       isExcalidraw: false,
@@ -49,23 +49,28 @@ export function processExcalidrawImage(
   }
 
   const baseName = excalidrawMatch[1]; // e.g., "banner.excalidraw"
-  
+
   // Try to load both light and dark variants from excalidraw folder
   // The glob pattern can return either relative paths (./slug/...) or absolute paths (/src/pages/blog/slug/...)
   // Detect which format is being used by checking the first key
   const sampleKey = Object.keys(images)[0] || '';
   const isAbsolutePath = sampleKey.startsWith('/src/pages/blog/');
-  
+  const isRelativeLibPath = sampleKey.startsWith('../pages/blog/');
+
   const lightPath = isAbsolutePath
     ? `/src/pages/blog/${slug}/_assets/excalidraw/${baseName}.light.png`
-    : `./${slug}/_assets/excalidraw/${baseName}.light.png`;
+    : isRelativeLibPath
+      ? `../pages/blog/${slug}/_assets/excalidraw/${baseName}.light.png`
+      : `./${slug}/_assets/excalidraw/${baseName}.light.png`;
   const darkPath = isAbsolutePath
     ? `/src/pages/blog/${slug}/_assets/excalidraw/${baseName}.dark.png`
-    : `./${slug}/_assets/excalidraw/${baseName}.dark.png`;
-  
+    : isRelativeLibPath
+      ? `../pages/blog/${slug}/_assets/excalidraw/${baseName}.dark.png`
+      : `./${slug}/_assets/excalidraw/${baseName}.dark.png`;
+
   const lightImageModule = images[lightPath];
   const darkImageModule = images[darkPath];
-  
+
   return {
     isExcalidraw: true,
     lightImage: lightImageModule?.default || null,

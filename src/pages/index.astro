@@ -7,8 +7,11 @@ import DiscordStatus from "../components/DiscordStatus";
 import { personalInfo, experience, education } from "../data/portfolio";
 
 import { SOCIAL_CONFIG, TERMINAL_CONFIG, BIRTH_DATE } from "../lib/constants";
+import { getBlogPosts } from "../lib/blog";
 
 const githubStats = await fetchGithubStats();
+const posts = getBlogPosts();
+const latestPost = posts.length > 0 ? posts[0] : null;
 ---
 
 <Layout title="portfolio@milind.dev" includePadding={true}>
@@ -102,16 +105,46 @@ const githubStats = await fetchGithubStats();
 					</div>
 					<div>
 						<span class="text-ctp-blue"
-							><i class="nf nf-md-file_document"></i> Articles</span
-						>
-						<span> : 2</span>
-					</div>
-					<div>
-						<span class="text-ctp-blue"
 							><i class="nf nf-md-clock"></i> Uptime</span
 						>
 						<span> : </span><span id="uptime">Loading...</span>
 					</div>
+					<div>
+						<a
+							href="/blog"
+							class="group flex items-center gap-2 hover:bg-ctp-surface0 -ml-2 px-2 rounded transition-all w-fit"
+						>
+							<span
+								class="text-ctp-yellow font-bold group-hover:text-ctp-teal transition-colors"
+								><i class="nf nf-md-file_document"></i> Blog</span
+							>
+							<span class="text-ctp-overlay2">::</span>
+							<span
+								class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4"
+								>{posts.length} articles</span
+							>
+							<span
+								class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity"
+								>[READ]</span
+							>
+						</a>
+					</div>
+					{
+						latestPost && (
+							<div>
+								<span class="text-ctp-mauve">
+									<i class="nf nf-fa-pen_nib" /> Latest Post
+								</span>
+								<span> : </span>
+								<a
+									href={latestPost.url}
+									class="text-ctp-text hover:underline hover:text-ctp-teal transition-colors"
+								>
+									{latestPost.title}
+								</a>
+							</div>
+						)
+					}
 
 					<div class="text-ctp-overlay1">
 						--------------------------
