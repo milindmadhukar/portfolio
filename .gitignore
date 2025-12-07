@@ -23,3 +23,8 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+src/pages/blog/*/
+
+# Blog sync temporary directory
+blog-content-temp/
