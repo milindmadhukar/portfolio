@@ -1,0 +1,22 @@
+---
+interface Props {
+    user: string;
+    host: string;
+    directory?: string;
+    command?: string;
+}
+
+const { user = "portfolio", host = "milind.dev", directory = "~", command = "" } = Astro.props;
+---
+
+<div class="flex">
+    <span class="text-ctp-red">{user}</span><span class="text-ctp-overlay2"
+        >@</span
+    ><span class="text-ctp-teal">{host}</span><span class="text-ctp-text"
+                                                    >:</span
+    ><span class="text-ctp-blue">{directory}&nbsp;</span><span class="text-ctp-text"
+        >$&nbsp;</span
+    >
+    {command && <span class="text-ctp-text">{command}</span>}
+    <slot />
+</div>
