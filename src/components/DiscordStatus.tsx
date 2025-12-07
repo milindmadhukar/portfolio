@@ -99,11 +99,15 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
             case 0: // Event
               if (message.t === "INIT_STATE" || message.t === "PRESENCE_UPDATE") {
                 setStatus(message.d);
+                // Dispatch event when data is received for the first time
+                window.dispatchEvent(new CustomEvent('lanyard-ready'));
               }
               break;
           }
         } catch (e) {
           console.error("Lanyard parse error:", e);
+          // Dispatch ready even on error so we don't block
+          window.dispatchEvent(new CustomEvent('lanyard-ready'));
         }
       };
 
@@ -118,6 +122,8 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
 
       ws.onerror = (error) => {
         ws.close();
+        // Dispatch ready on error so we don't block
+        window.dispatchEvent(new CustomEvent('lanyard-ready'));
       };
     };
 
@@ -146,20 +152,45 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
   );
 
   return (
-    <>
+    <div className="flex flex-col gap-[2px]">
+      <div>
+        <span className="text-ctp-blue">
+          <i className="nf nf-md-discord"></i> Status
+        </span>
+        <span> : </span>
+        <span className={
+          status.discord_status === 'online' ? 'text-ctp-green' :
+            status.discord_status === 'idle' ? 'text-ctp-yellow' :
+              status.discord_status === 'dnd' ? 'text-ctp-red' :
+                'text-ctp-overlay1'
+        }>
+          {status.discord_status}
+        </span>
+      </div>
+
       {status.listening_to_spotify && spotify && (
         <div>
           <span className="text-ctp-green">
             <i className="nf nf-fa-spotify"></i> Listening to
           </span>
-          <span> : {spotify.song} by {(() => {
-            const artists = spotify.artist;
-            const semiColonIndex = artists.indexOf(';');
-            if (semiColonIndex !== -1) {
-              return artists.slice(0, semiColonIndex);
-            }
-            return artists;
-          })()}</span>        </div>
+          <span> : </span>
+          <a
+            href={`https://open.spotify.com/track/${spotify.track_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline hover:text-ctp-green transition-colors"
+          >
+            {spotify.song}
+            <span> by {(() => {
+              const artists = spotify.artist;
+              const semiColonIndex = artists.indexOf(';');
+              if (semiColonIndex !== -1) {
+                return artists.slice(0, semiColonIndex);
+              }
+              return artists;
+            })()}</span>
+          </a>
+        </div>
       )}
 
       {otherActivities.map((activity, index) => (
@@ -170,6 +201,6 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
           <span> : {activity.name} {activity.state ? `(${activity.state})` : ''}</span>
         </div>
       ))}
-    </>
+    </div>
   );
 }

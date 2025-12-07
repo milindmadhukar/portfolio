@@ -1,11 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { getGithubUpdatedAt } from "../lib/utils";
+import { fetchGithubStats } from "../lib/github";
+import { formatTimeAgo } from "../lib/date";
 import TerminalPrompt from "../components/TerminalPrompt.astro";
 import DiscordStatus from "../components/DiscordStatus";
 import { personalInfo, experience, education } from "../data/portfolio";
 
-const githubUpdatedAt = await getGithubUpdatedAt();
+import { SOCIAL_CONFIG, TERMINAL_CONFIG, BIRTH_DATE } from "../lib/constants";
+
+const githubStats = await fetchGithubStats();
 ---
 
 <Layout title="portfolio@milind.dev" includePadding={true}>
@@ -14,7 +17,10 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 		class="font-mono text-xs sm:text-sm md:text-base leading-tight z-10 min-h-[100vh]"
 	>
 		<div class="mb-4">
-			<TerminalPrompt user="portfolio" host="milind.dev">
+			<TerminalPrompt
+				user={TERMINAL_CONFIG.user}
+				host={TERMINAL_CONFIG.host}
+			>
 				<span id="typewriter" class="text-ctp-text"></span><span
 					id="cursor"
 					class="text-ctp-text animate-pulse">█</span
@@ -27,25 +33,37 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 				class="flex flex-col lg:flex-row gap-10 items-center lg:items-start w-fit"
 			>
 				<div class="select-none text-ctp-blue font-bold">
-					<pre>                   -`
-                  .o+`
-                 `ooo/
-                `+oooo:
-               `+oooooo:
-               -+oooooo+:
-             `/:-:++oooo+:
-            `/++++/+++++++:
-           `/++++++++++++++:
-          `/+++ooooooooooooo/`
-         ./ooosssso++osssssso+`
-        .oossssso-````/ossssss+`
-       -osssssso.      :ssssssso.
-      :osssssss/        osssso+++.
-     /ossssssss/        +ssssooo/-
-   `/ossssso+/:-        -:/+osssso+-
-  `+sso+:-`                 `.-/+oso:
- `++:.                           `-/+/
- .`                                 `/
+          <pre>
+  ,=====================.
+  |MILIND'S  LAB  /6000/|
+  |.-------------------.|
+  ||[ _ o     . .  _ ]_||
+  |`-------------------'|
+  ||                   ||
+  |`-------------------'|
+  ||                   ||
+  |`-------------------'|
+  ||                   ||
+  |`-----------------_-'|
+  ||[=========]| o  (@) |
+  |`---------=='/u\ --- |
+  |------_--------------|
+  | (/) (_)           []|
+  |---==--==----------==|
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  ||||||||||||||||||+×|||
+  |||||||||||||||||||||||
+  |=====================|
+ .'                     `.
+"""""""""""""""""""""""""""
           </pre>
 				</div>
 
@@ -94,6 +112,79 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 						>
 						<span> : </span><span id="uptime">Loading...</span>
 					</div>
+
+					<div class="text-ctp-overlay1">
+						--------------------------
+					</div>
+
+					{
+						personalInfo.social.map((social) => {
+							if (social.name === "Github") return null;
+
+							const config = SOCIAL_CONFIG[social.icon] || {
+								icon: "nf-fa-link",
+								color: "#cdd6f4", // text-ctp-text fallback
+							};
+
+							return (
+								<div>
+									<a
+										href={social.url}
+										target="_blank"
+										class="hover:underline"
+										style={{ color: config.color }}
+									>
+										<i class={`nf ${config.icon}`} />{" "}
+										{social.name}
+									</a>
+								</div>
+							);
+						})
+					}
+
+					{
+						githubStats && (
+							<>
+								<div class="text-ctp-overlay1">
+									--------------------------
+								</div>
+								<div>
+									<i class="nf nf-fa-github" /> Github Stats
+									<span> : </span>
+									<span>
+										Repos: {githubStats.repos} | Followers:{" "}
+										{githubStats.followers} | Following:{" "}
+										{githubStats.following}
+									</span>
+								</div>
+								{githubStats.lastPush && (
+									<div>
+										<span class="text-ctp-mauve">
+											<i class="nf nf-oct-git_commit" />{" "}
+											Last Commit
+										</span>
+										<span> : </span>
+										<a
+											href={
+												"https://github.com/" +
+												githubStats.lastPush.repo
+											}
+											target="_blank"
+											class="text-ctp-text hover:underline"
+										>
+											<span>
+												{githubStats.lastPush.repo} -{" "}
+												{formatTimeAgo(
+													githubStats.lastPush.at,
+												)}
+											</span>
+										</a>
+									</div>
+								)}
+							</>
+						)
+					}
+
 					<div>
 						<DiscordStatus
 							client:load
@@ -121,7 +212,7 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 		</div>
 	</div>
 
-	<script>
+	<script define:vars={{ BIRTH_DATE }}>
 		// Typewriter animation
 		const text = "fastfetch";
 		const typewriter = document.getElementById("typewriter");
@@ -131,14 +222,35 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 
 		function type() {
 			if (i < text.length) {
-				typewriter.textContent += text.charAt(i);
+				if (typewriter) typewriter.textContent += text.charAt(i);
 				i++;
 				setTimeout(type, 50 + Math.random() * 50);
 			} else {
-				setTimeout(() => {
+				// Determine if we should wait for Lanyard
+				let isReady = false;
+				const showOutput = () => {
 					if (fetchOutput) fetchOutput.classList.remove("hidden");
-					if (cursor) cursor.style.display = "none"; // Hide cursor after typing
-				}, 500);
+					if (cursor) cursor.style.display = "none";
+				};
+
+				const onReady = () => {
+					if (!isReady) {
+						isReady = true;
+						showOutput();
+					}
+				};
+
+				window.addEventListener("lanyard-ready", onReady);
+
+				// Fallback timeout in case Lanyard fails or is slow (2s max wait after typing)
+				setTimeout(() => {
+					if (!isReady) {
+						isReady = true;
+						showOutput();
+						// Remove listener if we timed out to avoid double call (though flag handles it)
+						window.removeEventListener("lanyard-ready", onReady);
+					}
+				}, 2000);
 			}
 		}
 
@@ -147,7 +259,7 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 
 		// Uptime Logic
 		function updateUptime() {
-			const birthDate = new Date("2004-04-15T05:30:00");
+			const birthDate = new Date(BIRTH_DATE);
 			const now = new Date();
 
 			let years = now.getFullYear() - birthDate.getFullYear();

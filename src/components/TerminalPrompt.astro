@@ -6,16 +6,23 @@ interface Props {
     command?: string;
 }
 
-const { user = "portfolio", host = "milind.dev", directory = "~", command = "" } = Astro.props;
+import { TERMINAL_CONFIG } from "../lib/constants";
+
+const {
+    user = TERMINAL_CONFIG.user,
+    host = TERMINAL_CONFIG.host,
+    directory = "~",
+    command = "",
+} = Astro.props;
 ---
 
 <div class="flex">
     <span class="text-ctp-red">{user}</span><span class="text-ctp-overlay2"
         >@</span
     ><span class="text-ctp-teal">{host}</span><span class="text-ctp-text"
-                                                    >:</span
-    ><span class="text-ctp-blue">{directory}&nbsp;</span><span class="text-ctp-text"
-        >$&nbsp;</span
+        >:</span
+    ><span class="text-ctp-blue">{directory}&nbsp;</span><span
+        class="text-ctp-text">$&nbsp;</span
     >
     {command && <span class="text-ctp-text">{command}</span>}
     <slot />

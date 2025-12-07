@@ -5,4 +5,8 @@ For the fastfetch page
 - last tweet
 - last song being played etc?
 
+placeholder for image
+date separator on index
+at the end of blog links to similar / prev next blog/ latest blog
+highlighted text / hover over things inage preview
 

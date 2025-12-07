@@ -36,7 +36,7 @@ export function parseCustomDate(dateString: string | Date): Date {
   }
 
   const [, day, month, year, hour, minute, period] = match;
-  
+
   // Convert to 24-hour format
   let hours = parseInt(hour, 10);
   if (period.toUpperCase() === 'PM' && hours !== 12) {
@@ -51,7 +51,7 @@ export function parseCustomDate(dateString: string | Date): Date {
   const paddedDay = day.padStart(2, '0');
   const paddedHours = hours.toString().padStart(2, '0');
   const paddedMinutes = minute.padStart(2, '0');
-  
+
   // IST is UTC+5:30, so we use +05:30 offset
   const isoString = `${year}-${paddedMonth}-${paddedDay}T${paddedHours}:${paddedMinutes}:00+05:30`;
   return new Date(isoString);
@@ -65,12 +65,12 @@ export function parseCustomDate(dateString: string | Date): Date {
 export function formatDateOnly(date: Date): string {
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  
+
   const dayName = days[date.getDay()];
   const day = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
-  
+
   return `${dayName}, ${day} ${month} ${year}`;
 }
 
@@ -106,7 +106,7 @@ export function formatDateCompact(date: Date): string {
   const day = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
-  
+
   return `${day} ${month} ${year}`;
 }
 
@@ -117,36 +117,36 @@ export function formatDateCompact(date: Date): string {
  */
 export function getWordCount(content: string): number {
   if (!content) return 0;
-  
+
   // Remove frontmatter
   const withoutFrontmatter = content.replace(/^---[\s\S]*?---\n/, '');
-  
+
   // Remove code blocks
   const withoutCodeBlocks = withoutFrontmatter.replace(/```[\s\S]*?```/g, '');
-  
+
   // Remove inline code
   const withoutInlineCode = withoutCodeBlocks.replace(/`[^`]+`/g, '');
-  
+
   // Remove markdown links but keep the text
   const withoutLinks = withoutInlineCode.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
-  
+
   // Remove images
   const withoutImages = withoutLinks.replace(/!\[([^\]]*)\]\([^\)]+\)/g, '');
-  
+
   // Remove HTML tags
   const withoutHtml = withoutImages.replace(/<[^>]+>/g, '');
-  
+
   // Remove markdown formatting characters
   const withoutFormatting = withoutHtml
     .replace(/[#*_~`]/g, '')
     .replace(/^\s*[-+*]\s+/gm, '') // list markers
     .replace(/^\s*\d+\.\s+/gm, ''); // numbered list markers
-  
+
   // Split by whitespace and filter out empty strings
   const words = withoutFormatting
     .split(/\s+/)
     .filter(word => word.length > 0);
-  
+
   return words.length;
 }
 
@@ -176,4 +176,41 @@ export function calculateReadingTime(wordCount: number, wordsPerMinute: number =
  */
 export function formatReadingTime(minutes: number): string {
   return `${minutes} min read`;
+}
+
+/**
+ * Calculate age from birth date
+ * @param birthDate - Birth date string in YYYY-MM-DD format
+ * @returns Current age in years
+ */
+export function calculateAge(birthDate: string): number {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const monthDiff = today.getMonth() - birth.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+export function formatTimeAgo(date: Date): string {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hours ago";
+
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " minutes ago";
+
+  return Math.floor(seconds) + " seconds ago";
 }
