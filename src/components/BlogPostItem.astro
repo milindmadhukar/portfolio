@@ -53,6 +53,34 @@ function getWordCountColor(count: number): string {
   return "text-ctp-red";
 }
 
+// Helper function to generate Unix permissions based on index
+function getPermissions(
+  idx: number,
+  isDraft: boolean,
+): { type: string; owner: string; group: string; other: string } {
+  if (isDraft) {
+    // File permissions for drafts
+    const filePerms = [
+      { type: "-", owner: "rw-", group: "r--", other: "r--" }, // 644
+      { type: "-", owner: "rw-", group: "---", other: "---" }, // 600
+      { type: "-", owner: "rw-", group: "rw-", other: "r--" }, // 664
+      { type: "-", owner: "rw-", group: "r--", other: "---" }, // 640
+      { type: "-", owner: "rwx", group: "r-x", other: "r-x" }, // 755
+    ];
+    return filePerms[idx % filePerms.length];
+  } else {
+    // Directory permissions for published posts
+    const dirPerms = [
+      { type: "d", owner: "rwx", group: "r-x", other: "r-x" }, // 755
+      { type: "d", owner: "rwx", group: "rwx", other: "r-x" }, // 775
+      { type: "d", owner: "rwx", group: "r-x", other: "---" }, // 750
+      { type: "d", owner: "rwx", group: "---", other: "---" }, // 700
+      { type: "d", owner: "rwx", group: "rw-", other: "r--" }, // 764
+    ];
+    return dirPerms[idx % dirPerms.length];
+  }
+}
+
 const colorClass = getTerminalColor(index);
 
 // Map color classes to hex values for Simple Icons
@@ -66,6 +94,7 @@ const colorHexMap: Record<string, string> = {
 const iconColor = colorHexMap[colorClass] || "94e2d5"; // default to teal
 
 const isDraft = draft;
+const permissions = getPermissions(index, isDraft);
 const formattedDate = formatDateCompact(date);
 const wordCountFormatted = formatWordCount(wordCount);
 const wordCountColor = getWordCountColor(wordCount);
@@ -110,29 +139,15 @@ if (coverDark) {
       class="hidden md:grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center font-jetbrains"
     >
       <!-- Permissions (colored by section) -->
-      <span class="text-base">
-        {
-          isDraft ? (
-            <>
-              <>
-                <span class="text-ctp-overlay1">.</span>
-                <span class="text-ctp-yellow">rw-</span>
-                <span class="text-ctp-green">r--</span>
-                <span class="text-ctp-teal">r--</span>
-              </>
-            </>
-          ) : (
-            <>
-              <>
-                <span class="text-ctp-blue">d</span>
-                <span class="text-ctp-yellow">rwx</span>
-                <span class="text-ctp-green">r-x</span>
-                <span class="text-ctp-teal">r-x</span>
-              </>
-            </>
-          )
-        }
-      </span>
+      <span class="text-base" style="letter-spacing: 0;"
+        ><span
+          class={permissions.type === "d"
+            ? "text-ctp-blue"
+            : "text-ctp-overlay1"}>{permissions.type}</span
+        ><span class="text-ctp-yellow">{permissions.owner}</span><span
+          class="text-ctp-green">{permissions.group}</span
+        ><span class="text-ctp-teal">{permissions.other}</span></span
+      >
 
       <!-- Owner -->
       <span class="text-ctp-yellow text-base"> milind </span>
