@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Image } from "astro:assets";
 
 interface Props {
   src: any;
@@ -9,7 +9,13 @@ interface Props {
   class?: string;
 }
 
-const { src, alt, width = 1200, height = 675, class: className = '' } = Astro.props;
+const {
+  src,
+  alt,
+  width = 1200,
+  height = 675,
+  class: className = "",
+} = Astro.props;
 const imageId = `obsidian-img-${Math.random().toString(36).substr(2, 9)}`;
 ---
 
@@ -33,15 +39,22 @@ const imageId = `obsidian-img-${Math.random().toString(36).substr(2, 9)}`;
       <div class="instruction-badge" data-desktop-hint>
         Click & hold to activate magnifying glass
       </div>
-      <div class="instruction-badge hidden" data-mobile-hint>
-        Pinch to zoom
-      </div>
+      <div class="instruction-badge hidden" data-mobile-hint>Pinch to zoom</div>
       <div class="instruction-badge hidden" data-magnify-hint>
         Scroll to zoom in/out
       </div>
     </div>
     <button class="modal-close" aria-label="Close">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
@@ -61,7 +74,7 @@ const imageId = `obsidian-img-${Math.random().toString(36).substr(2, 9)}`;
   </div>
 </div>
 
-<style>
+<style is:global>
   .obsidian-image-wrapper {
     position: relative;
     margin: 2.5rem 0;
@@ -165,7 +178,9 @@ const imageId = `obsidian-img-${Math.random().toString(36).substr(2, 9)}`;
     pointer-events: none;
     display: none;
     background-repeat: no-repeat;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.2);
+    box-shadow:
+      0 0 20px rgba(0, 0, 0, 0.5),
+      inset 0 0 20px rgba(255, 255, 255, 0.2);
     z-index: 100;
     overflow: hidden;
   }
@@ -233,181 +248,194 @@ const imageId = `obsidian-img-${Math.random().toString(36).substr(2, 9)}`;
 
 <script>
   function initializeObsidianImage() {
-    const images = document.querySelectorAll('.obsidian-image');
-    
+    const images = document.querySelectorAll(".obsidian-image");
+
     images.forEach((img) => {
-      const imageId = img.getAttribute('data-image-id');
+      const imageId = img.getAttribute("data-image-id");
       const modal = document.getElementById(`modal-${imageId}`);
-      
+
       if (!modal) return;
-      
+
       // Detect touch device
-      const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-      
-      const modalBackdrop = modal.querySelector('.modal-backdrop');
-      const modalClose = modal.querySelector('.modal-close');
-      const modalImage = modal.querySelector('[data-full-image]') as HTMLImageElement;
-      const lens = modal.querySelector('[data-lens]') as HTMLElement;
-      const magnifyHint = modal.querySelector('[data-magnify-hint]') as HTMLElement;
-      const desktopHint = modal.querySelector('[data-desktop-hint]') as HTMLElement;
-      const mobileHint = modal.querySelector('[data-mobile-hint]') as HTMLElement;
-      
+      const isTouchDevice =
+        "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+      const modalBackdrop = modal.querySelector(".modal-backdrop");
+      const modalClose = modal.querySelector(".modal-close");
+      const modalImage = modal.querySelector(
+        "[data-full-image]",
+      ) as HTMLImageElement;
+      const lens = modal.querySelector("[data-lens]") as HTMLElement;
+      const magnifyHint = modal.querySelector(
+        "[data-magnify-hint]",
+      ) as HTMLElement;
+      const desktopHint = modal.querySelector(
+        "[data-desktop-hint]",
+      ) as HTMLElement;
+      const mobileHint = modal.querySelector(
+        "[data-mobile-hint]",
+      ) as HTMLElement;
+
       let magnifyActive = false;
       let zoomLevel = 1.5;
       const minZoom = 1.5;
       const maxZoom = 5;
       let lensSize = 0;
-      
+
       // Open modal
-      img.addEventListener('click', () => {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
+      img.addEventListener("click", () => {
+        modal.classList.add("active");
+        document.body.style.overflow = "hidden";
+
         // Show appropriate hint based on device type
         if (isTouchDevice) {
-          if (mobileHint) mobileHint.classList.remove('hidden');
-          if (desktopHint) desktopHint.classList.add('hidden');
+          if (mobileHint) mobileHint.classList.remove("hidden");
+          if (desktopHint) desktopHint.classList.add("hidden");
         } else {
-          if (desktopHint) desktopHint.classList.remove('hidden');
-          if (mobileHint) mobileHint.classList.add('hidden');
-          
+          if (desktopHint) desktopHint.classList.remove("hidden");
+          if (mobileHint) mobileHint.classList.add("hidden");
+
           // Calculate and set lens size to 80% of viewport height
           lensSize = window.innerHeight * 0.8;
           lens.style.width = `${lensSize}px`;
           lens.style.height = `${lensSize}px`;
         }
       });
-      
+
       // Close modal
       const closeModal = () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = '';
+        modal.classList.remove("active");
+        document.body.style.overflow = "";
         magnifyActive = false;
-        lens.classList.remove('active');
-        lens.style.display = 'none';
-        modalImage.classList.remove('magnifying');
+        lens.classList.remove("active");
+        lens.style.display = "none";
+        modalImage.classList.remove("magnifying");
         zoomLevel = 3;
-        if (magnifyHint) magnifyHint.classList.add('hidden');
-        if (desktopHint) desktopHint.classList.remove('hidden');
-        if (mobileHint) mobileHint.classList.add('hidden');
+        if (magnifyHint) magnifyHint.classList.add("hidden");
+        if (desktopHint) desktopHint.classList.remove("hidden");
+        if (mobileHint) mobileHint.classList.add("hidden");
       };
-      
-      modalBackdrop?.addEventListener('click', closeModal);
-      modalClose?.addEventListener('click', closeModal);
-      
+
+      modalBackdrop?.addEventListener("click", closeModal);
+      modalClose?.addEventListener("click", closeModal);
+
       // ESC key to close
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && modal.classList.contains('active')) {
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && modal.classList.contains("active")) {
           closeModal();
         }
       });
-      
+
       // Only add magnifying glass functionality on non-touch devices
       if (!isTouchDevice) {
         // Activate magnifying glass on mousedown
-        modalImage?.addEventListener('mousedown', (e) => {
+        modalImage?.addEventListener("mousedown", (e) => {
           e.preventDefault();
           magnifyActive = true;
-          
+
           // Show lens at cursor position immediately
           const rect = modalImage.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          
+
           lens.style.left = `${x - lensSize / 2}px`;
           lens.style.top = `${y - lensSize / 2}px`;
-          lens.style.display = 'block';
-          lens.classList.add('active');
-          
+          lens.style.display = "block";
+          lens.classList.add("active");
+
           // Calculate and set initial background
           const bgX = -(x * zoomLevel - lensSize / 2);
           const bgY = -(y * zoomLevel - lensSize / 2);
           lens.style.backgroundImage = `url('${modalImage.src}')`;
           lens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
           lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-          
-          modalImage.classList.add('magnifying');
-          if (magnifyHint) magnifyHint.classList.remove('hidden');
-          if (desktopHint) desktopHint.classList.add('hidden');
+
+          modalImage.classList.add("magnifying");
+          if (magnifyHint) magnifyHint.classList.remove("hidden");
+          if (desktopHint) desktopHint.classList.add("hidden");
         });
-        
+
         // Deactivate magnifying glass on mouseup
         const deactivateMagnify = () => {
           magnifyActive = false;
-          lens.classList.remove('active');
-          lens.style.display = 'none';
-          modalImage.classList.remove('magnifying');
-          if (magnifyHint) magnifyHint.classList.add('hidden');
-          if (desktopHint) desktopHint.classList.remove('hidden');
+          lens.classList.remove("active");
+          lens.style.display = "none";
+          modalImage.classList.remove("magnifying");
+          if (magnifyHint) magnifyHint.classList.add("hidden");
+          if (desktopHint) desktopHint.classList.remove("hidden");
         };
-        
-        modalImage?.addEventListener('mouseup', deactivateMagnify);
-        modalImage?.addEventListener('mouseleave', deactivateMagnify);
-        document.addEventListener('mouseup', () => {
-          if (magnifyActive && modal.classList.contains('active')) {
+
+        modalImage?.addEventListener("mouseup", deactivateMagnify);
+        modalImage?.addEventListener("mouseleave", deactivateMagnify);
+        document.addEventListener("mouseup", () => {
+          if (magnifyActive && modal.classList.contains("active")) {
             deactivateMagnify();
           }
         });
-        
+
         // Magnifying glass movement
-        modalImage?.addEventListener('mousemove', (e) => {
+        modalImage?.addEventListener("mousemove", (e) => {
           if (!magnifyActive) return;
-          
+
           const rect = modalImage.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const y = e.clientY - rect.top;
-          
+
           // Position the lens
           lens.style.left = `${x - lensSize / 2}px`;
           lens.style.top = `${y - lensSize / 2}px`;
-          
+
           // Calculate background position for zoom effect
           const bgX = -(x * zoomLevel - lensSize / 2);
           const bgY = -(y * zoomLevel - lensSize / 2);
-          
+
           lens.style.backgroundImage = `url('${modalImage.src}')`;
           lens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
           lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
         });
-        
+
         // Scroll to zoom - zooms from center of lens
-        modalImage?.addEventListener('wheel', (e) => {
-          if (!magnifyActive) return;
-          
-          e.preventDefault();
-          
-          const rect = modalImage.getBoundingClientRect();
-          
-          // Get current lens position
-          const lensLeft = parseFloat(lens.style.left) || 0;
-          const lensTop = parseFloat(lens.style.top) || 0;
-          
-          // Calculate center of lens relative to image
-          const lensCenterX = lensLeft + lensSize / 2;
-          const lensCenterY = lensTop + lensSize / 2;
-          
-          // Update zoom level
-          const delta = e.deltaY > 0 ? -0.2 : 0.2;
-          zoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel + delta));
-          
-          // Calculate new background position to keep center point stable
-          const bgX = -(lensCenterX * zoomLevel - lensSize / 2);
-          const bgY = -(lensCenterY * zoomLevel - lensSize / 2);
-          
-          lens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
-          lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
-        }, { passive: false });
+        modalImage?.addEventListener(
+          "wheel",
+          (e) => {
+            if (!magnifyActive) return;
+
+            e.preventDefault();
+
+            const rect = modalImage.getBoundingClientRect();
+
+            // Get current lens position
+            const lensLeft = parseFloat(lens.style.left) || 0;
+            const lensTop = parseFloat(lens.style.top) || 0;
+
+            // Calculate center of lens relative to image
+            const lensCenterX = lensLeft + lensSize / 2;
+            const lensCenterY = lensTop + lensSize / 2;
+
+            // Update zoom level
+            const delta = e.deltaY > 0 ? -0.2 : 0.2;
+            zoomLevel = Math.max(minZoom, Math.min(maxZoom, zoomLevel + delta));
+
+            // Calculate new background position to keep center point stable
+            const bgX = -(lensCenterX * zoomLevel - lensSize / 2);
+            const bgY = -(lensCenterY * zoomLevel - lensSize / 2);
+
+            lens.style.backgroundSize = `${rect.width * zoomLevel}px ${rect.height * zoomLevel}px`;
+            lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+          },
+          { passive: false },
+        );
       }
     });
   }
-  
+
   // Initialize on page load
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeObsidianImage);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeObsidianImage);
   } else {
     initializeObsidianImage();
   }
-  
+
   // Re-initialize when navigating (for SPA-like behavior)
-  document.addEventListener('astro:page-load', initializeObsidianImage);
+  document.addEventListener("astro:page-load", initializeObsidianImage);
 </script>

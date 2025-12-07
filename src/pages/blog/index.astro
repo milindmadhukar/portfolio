@@ -1,0 +1,513 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import BlogPostItem from '../../components/BlogPostItem.astro';
+import VimCursor from '../../components/VimCursor.astro';
+import { parseCustomDate, getWordCount } from '../../lib/date';
+import type { ImageMetadata } from 'astro';
+import { processExcalidrawImage, extractBannerFilename } from '../../lib/excalidraw';
+
+// Get all blog posts from the file system using import.meta.glob
+const allPosts = import.meta.glob('./**/index.md', { eager: true });
+
+// Convert glob result to array format
+const blogPosts: any[] = Object.entries(allPosts).map(([path, module]: [string, any]) => {
+  // Extract slug from path
+  const pathParts = path.split('/');
+  const slug = pathParts[pathParts.length - 2];
+  
+  return {
+    ...module,
+    url: `/blog/${slug}/`,
+    slug,
+  };
+});
+
+// Filter out template folders and drafts based on frontmatter
+const isDevelopment = import.meta.env.DEV;
+const publishedPosts = blogPosts.filter((post) => {
+  const { slug } = post;
+  
+  // Exclude template folders (starting with _) and hidden folders (starting with .)
+  if (slug && (slug.startsWith('_') || slug.startsWith('.'))) {
+    return false;
+  }
+  
+  // In development, show drafts; in production, exclude them
+  if (!isDevelopment && post.frontmatter?.draft === true) {
+    return false;
+  }
+  
+  return true;
+});
+
+// Process and sort posts by date
+const images = import.meta.glob<{ default: ImageMetadata }>('./**/_assets/**/*.{png,jpg,jpeg,gif,webp,svg}', { eager: true });
+
+const posts = publishedPosts.map((post) => {
+  const frontmatter = post.frontmatter || {};
+  const { slug } = post;
+  
+  // Calculate word count from the raw markdown content
+  const rawContent = post.rawContent ? post.rawContent() : '';
+  const wordCount = getWordCount(rawContent);
+  
+  // Handle banner image if it exists (supports both local Obsidian paths and URLs)
+  let bannerImage: any = null;
+  let bannerLightImage: any = null;
+  let bannerDarkImage: any = null;
+  let isExcalidrawBanner = false;
+  
+  if (frontmatter.banner) {
+    const bannerFilename = extractBannerFilename(frontmatter.banner);
+
+    // Check if it's a URL (starts with http:// or https://)
+    if (bannerFilename.startsWith('http://') || bannerFilename.startsWith('https://')) {
+      bannerImage = bannerFilename;
+    } else {
+      // Check if this is an Excalidraw image
+      const excalidrawResult = processExcalidrawImage(bannerFilename, images, slug);
+      
+      if (excalidrawResult.isExcalidraw) {
+        isExcalidrawBanner = true;
+        bannerLightImage = excalidrawResult.lightImage;
+        bannerDarkImage = excalidrawResult.darkImage;
+        bannerImage = excalidrawResult.fallbackImage;
+      } else {
+        // Handle local Obsidian path (e.g., ./garrix.png or _assets/garrix.png)
+        const bannerPath = bannerFilename.startsWith('./') 
+          ? `./${slug}/_assets/${bannerFilename.slice(2)}`
+          : `./${slug}/_assets/${bannerFilename}`;
+        const localImage = images[bannerPath];
+        if (localImage) {
+          bannerImage = localImage.default;
+        }
+      }
+    }
+  }
+  
+  return {
+    url: post.url,
+    slug,
+    title: frontmatter.title || 'Untitled',
+    description: frontmatter.description || '',
+    date: frontmatter.date ? parseCustomDate(frontmatter.date) : new Date(),
+    tags: (frontmatter.tags || []) as string[],
+    cover: bannerImage,
+    coverLight: bannerLightImage,
+    coverDark: bannerDarkImage,
+    isExcalidrawCover: isExcalidrawBanner,
+    draft: frontmatter.draft || false,
+    wordCount,
+  };
+});
+
+// Sort by date (newest first)
+posts.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+// Get all unique tags from all posts
+const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
+---
+
+<Layout 
+  title="Blog - Milind Madhukar"
+  description="📚 Where bugs become features and features become blog posts. Dive into chaos-driven development, DevOps disasters (and triumphs), and tech rants you didn't know you needed. Grab your coffee and prepare for a wild ride!"
+>
+  <div class="min-h-screen py-8 sm:py-20 px-6 bg-ctp-crust relative">
+    <!-- Scanline effect -->
+    <div class="scanlines absolute inset-0 pointer-events-none opacity-20"></div>
+    
+    <div class="max-w-6xl mx-auto relative z-10">
+      <!-- Terminal Header -->
+      <div class="mt-2 sm:mt-8 mb-4">
+        <div class="mb-4 sm:mb-8">
+          <a
+            href="/"
+            class="group flex items-center gap-2 text-ctp-overlay2 hover:text-ctp-teal transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="text-sm font-medium">Back to Home</span>
+          </a>
+        </div>
+
+
+        <h1 class="text-4xl sm:text-5xl md:text-7xl font-black mb-4 pb-2 flex items-baseline whitespace-nowrap">
+          <span class="text-ctp-text inline-block">My Thoughts</span><VimCursor />
+        </h1>
+
+        <!-- RSS Feed Link -->
+        <div class="mb-6">
+          <a
+            href="/blog/rss.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-ctp-peach/10 border border-ctp-peach/30 rounded-lg text-ctp-peach hover:bg-ctp-peach/20 transition-all"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+            </svg>
+            <span class="font-medium text-sm">Subscribe via RSS</span>
+          </a>
+        </div>
+
+
+        <!-- Tags Filter (above terminal) -->
+        {allTags.length > 0 && (
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-sm font-mono text-ctp-overlay2">
+                <span class="text-ctp-green hidden md:inline">$</span> <span class="hidden md:inline">filter:</span><span class="md:hidden">Filter by tag:</span>
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                class="tag-filter-btn px-3 py-1 text-sm font-mono bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all active"
+                data-tag="all"
+              >
+                all
+              </button>
+              {allTags.map((tag: string) => (
+                <button
+                  class="tag-filter-btn px-3 py-1 text-sm font-mono bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all"
+                  data-tag={tag}
+                >
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div class="mb-1">
+          <p class="text-lg font-mono text-ctp-text mb-1.5">
+            <span class="text-ctp-red">portfolio</span><span class="text-ctp-overlay2">@</span><span class="text-ctp-teal">milind.dev</span>:<span class="text-ctp-blue">~/blog</span>$ <span class="terminal-command"></span><span class="terminal-pipe"></span><span class="terminal-cursor">█</span>
+          </p>
+        </div>
+
+      </div>
+
+      {posts.length === 0 ? (
+        <div class="font-mono text-sm text-ctp-overlay2">
+          <p>total 0</p>
+          <p class="mt-2">$ echo "No posts yet... Coming soon!"</p>
+        </div>
+      ) : (
+        <div>
+          <!-- Unified ls -la style (responsive) -->
+          <div class="font-mono mb-2 ls-output" style="opacity: 0;">
+            <!-- Total line -->
+            <div class="text-ctp-overlay1 posts-total text-base md:text-base md:mb-0 mb-2">
+              total {posts.length}
+            </div>
+
+            <!-- Blog posts as ls -la entries (responsive) -->
+            <div class="md:space-y-0.5 space-y-1">
+              {posts.map((post, index) => (
+                <BlogPostItem
+                  title={post.title}
+                  description={post.description}
+                  date={post.date}
+                  tags={post.tags}
+                  url={post.url}
+                  cover={post.cover}
+                  coverLight={post.coverLight}
+                  coverDark={post.coverDark}
+                  isExcalidrawCover={post.isExcalidrawCover}
+                  draft={post.draft}
+                  index={index}
+                  wordCount={post.wordCount}
+                />
+              ))}
+            </div>
+          </div>
+
+          <!-- Cursor-following hover card (desktop only) -->
+          <div id="hover-card" class="fixed w-96 p-4 bg-ctp-surface0 border border-ctp-surface2 rounded-lg shadow-lg opacity-0 invisible transition-opacity duration-200 z-50 pointer-events-none hidden md:block" style="left: 0; top: 0;">
+            <div id="hover-card-banner" class="mb-3 rounded-lg overflow-hidden border border-ctp-surface2 hidden">
+              <img id="hover-card-image-light" src="" alt="" class="w-full object-contain hover-card-light" />
+              <img id="hover-card-image-dark" src="" alt="" class="w-full object-contain hover-card-dark" />
+            </div>
+            <p id="hover-card-description" class="text-sm text-ctp-subtext0 leading-relaxed"></p>
+            <div id="hover-card-tags" class="flex flex-wrap gap-1 mt-3 pt-3 border-t border-ctp-surface2"></div>
+          </div>
+        </div>
+      )}
+    </div>
+  </div>
+</Layout>
+
+<style is:global>
+  /* Terminal listing styles */
+  a:hover .text-ctp-blue,
+  a:hover .text-ctp-green,
+  a:hover .text-ctp-teal,
+  a:hover .text-ctp-mauve {
+    filter: brightness(1.3);
+  }
+
+  /* Hover card theme-aware images */
+  .hover-card-light {
+    display: block;
+  }
+  
+  .hover-card-dark {
+    display: none;
+  }
+  
+  .dark .hover-card-light {
+    display: none;
+  }
+  
+  .dark .hover-card-dark {
+    display: block;
+  }
+
+  /* Tag filter active state */
+  .tag-filter-btn.active {
+    background: rgb(137 180 250 / 0.15);
+    border-color: var(--ctp-teal);
+    color: var(--ctp-teal);
+  }
+
+  /* Hidden posts */
+  .blog-post-item.hidden {
+    display: none;
+  }
+
+  /* Terminal cursor blink */
+  .terminal-cursor {
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 50% {
+      opacity: 1;
+    }
+    50.1%, 100% {
+      opacity: 0;
+    }
+  }
+
+  .ls-output.animate-in {
+    animation: instantShow 0.1s ease-out forwards;
+  }
+
+  @keyframes instantShow {
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Scanlines effect */
+  .scanlines {
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  }
+</style>
+
+<script>
+  // Typing animation for ls -la command
+  document.addEventListener('DOMContentLoaded', () => {
+    const commandElement = document.querySelector('.terminal-command') as HTMLElement | null;
+    const cursorElement = document.querySelector('.terminal-cursor') as HTMLElement | null;
+    const lsOutput = document.querySelector('.ls-output') as HTMLElement | null;
+    const command = 'ls -la';
+    let charIndex = 0;
+
+    // Type out the command character by character
+    function typeCommand() {
+      if (commandElement && charIndex < command.length) {
+        commandElement.textContent = command.slice(0, charIndex + 1);
+        charIndex++;
+        setTimeout(typeCommand, 100); // 100ms per character
+      } else {
+        // Command typing complete, hide cursor and show output
+        setTimeout(() => {
+          if (cursorElement) {
+            cursorElement.style.display = 'none';
+          }
+          
+          // Show ls output with instant animation
+          if (lsOutput) {
+            lsOutput.classList.add('animate-in');
+          }
+        }, 200);
+      }
+    }
+
+    // Start typing animation
+    setTimeout(typeCommand, 500); // Start after 500ms delay
+
+    // Tag filtering functionality
+    const filterButtons = document.querySelectorAll('.tag-filter-btn');
+    const blogPosts = document.querySelectorAll('.blog-post-item');
+    const totalElement = document.querySelector('.posts-total') as HTMLElement | null;
+    const pipeElement = document.querySelector('.terminal-pipe') as HTMLElement | null;
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const selectedTag = button.getAttribute('data-tag');
+
+        // Update active button state
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        // Update the command to show grep pipe
+        if (pipeElement) {
+          if (selectedTag === 'all') {
+            pipeElement.textContent = '';
+          } else {
+            pipeElement.textContent = ` | grep "tag=${selectedTag}"`;
+            pipeElement.style.color = 'var(--ctp-yellow)';
+          }
+        }
+
+        // Filter posts
+        let visibleCount = 0;
+        blogPosts.forEach((post) => {
+          const postTags = JSON.parse(post.getAttribute('data-tags') || '[]');
+          const postElement = post as HTMLElement;
+          
+          if (selectedTag === 'all' || postTags.includes(selectedTag)) {
+            postElement.classList.remove('hidden');
+            visibleCount++;
+          } else {
+            postElement.classList.add('hidden');
+          }
+        });
+
+        // Update total count
+        if (totalElement) {
+          totalElement.textContent = `total ${visibleCount}`;
+        }
+      });
+    });
+
+    // Cursor-following hover card functionality
+    const hoverCard = document.getElementById('hover-card') as HTMLElement | null;
+    const hoverCardBanner = document.getElementById('hover-card-banner') as HTMLElement | null;
+    const hoverCardImageLight = document.getElementById('hover-card-image-light') as HTMLImageElement | null;
+    const hoverCardImageDark = document.getElementById('hover-card-image-dark') as HTMLImageElement | null;
+    const hoverCardDescription = document.getElementById('hover-card-description') as HTMLElement | null;
+    const hoverCardTags = document.getElementById('hover-card-tags') as HTMLElement | null;
+    const postLinks = document.querySelectorAll('.post-link');
+
+    let currentMouseX = 0;
+    let currentMouseY = 0;
+
+    // Track mouse position
+    document.addEventListener('mousemove', (e) => {
+      currentMouseX = e.clientX;
+      currentMouseY = e.clientY;
+
+      if (hoverCard && hoverCard.classList.contains('opacity-100')) {
+        // Position card near cursor with offset
+        const cardWidth = 384; // w-96 = 384px
+        const cardHeight = hoverCard.offsetHeight;
+        const offset = 20;
+
+        let left = currentMouseX + offset;
+        let top = currentMouseY + offset;
+
+        // Check if card goes off right edge
+        if (left + cardWidth > window.innerWidth) {
+          left = currentMouseX - cardWidth - offset;
+        }
+
+        // Check if card goes off bottom edge
+        if (top + cardHeight > window.innerHeight) {
+          top = currentMouseY - cardHeight - offset;
+        }
+
+        // Check if card goes off top edge
+        if (top < 0) {
+          top = offset;
+        }
+
+        // Check if card goes off left edge
+        if (left < 0) {
+          left = offset;
+        }
+
+        hoverCard.style.left = `${left}px`;
+        hoverCard.style.top = `${top}px`;
+      }
+    });
+
+    postLinks.forEach(link => {
+      link.addEventListener('mouseenter', (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const banner = target.getAttribute('data-post-cover');
+        const bannerLight = target.getAttribute('data-post-cover-light');
+        const bannerDark = target.getAttribute('data-post-cover-dark');
+        const isExcalidraw = target.getAttribute('data-post-is-excalidraw') === 'true';
+        const description = target.getAttribute('data-post-description');
+        const tagsStr = target.getAttribute('data-post-tags');
+
+        if (!hoverCard || !hoverCardDescription || !hoverCardTags) return;
+
+        let hasContent = false;
+
+        // Populate hover card banner
+        if (isExcalidraw && bannerLight && bannerDark && hoverCardBanner && hoverCardImageLight && hoverCardImageDark) {
+          // Excalidraw image - show both light and dark variants
+          hoverCardImageLight.src = bannerLight;
+          hoverCardImageDark.src = bannerDark;
+          hoverCardBanner.classList.remove('hidden');
+          hasContent = true;
+        } else if (banner && banner !== '' && hoverCardBanner && hoverCardImageLight) {
+          // Regular image - show only in light slot
+          hoverCardImageLight.src = banner;
+          if (hoverCardImageDark) {
+            hoverCardImageDark.src = '';
+          }
+          hoverCardBanner.classList.remove('hidden');
+          hasContent = true;
+        } else if (hoverCardBanner) {
+          hoverCardBanner.classList.add('hidden');
+        }
+
+        if (description && hoverCardDescription) {
+          hoverCardDescription.textContent = description;
+          hoverCardDescription.classList.remove('hidden');
+          hasContent = true;
+        } else if (hoverCardDescription) {
+          hoverCardDescription.classList.add('hidden');
+        }
+
+        // Populate tags
+        if (tagsStr && hoverCardTags) {
+          const tags = JSON.parse(tagsStr);
+          if (tags.length > 0) {
+            hoverCardTags.innerHTML = tags.map((tag: string) => 
+              `<span class="text-xs px-2 py-0.5 bg-ctp-base border border-ctp-surface2 rounded text-ctp-overlay2">#${tag}</span>`
+            ).join('');
+            hoverCardTags.classList.remove('hidden');
+            hasContent = true;
+          } else {
+            hoverCardTags.classList.add('hidden');
+          }
+        }
+
+        // Only show hover card if there's content
+        if (hasContent) {
+          hoverCard.classList.remove('opacity-0', 'invisible');
+          hoverCard.classList.add('opacity-100', 'visible');
+        }
+      });
+
+      link.addEventListener('mouseleave', () => {
+        if (hoverCard) {
+          hoverCard.classList.remove('opacity-100', 'visible');
+          hoverCard.classList.add('opacity-0', 'invisible');
+        }
+      });
+    });
+  });
+</script>
