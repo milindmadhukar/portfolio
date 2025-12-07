@@ -2,7 +2,7 @@
 import Layout from "./Layout.astro";
 import "../styles/global.css";
 import { Image } from "astro:assets";
-import SocialButton from "../components/SocialButton.astro";
+
 import {
   formatDateLong,
   parseCustomDate,
@@ -15,6 +15,8 @@ import {
   processExcalidrawImage,
   extractBannerFilename,
 } from "../lib/excalidraw";
+import { getBlogPosts } from "../lib/blog";
+import { SOCIAL_CONFIG } from "../lib/constants";
 
 const { frontmatter, headings, rawContent } = Astro.props;
 const { title, description, date, tags, banner } = frontmatter;
@@ -74,7 +76,8 @@ if (banner) {
         // Use fallback for social media (prefers light variant)
         bannerImage = excalidrawResult.fallbackImage;
         if (bannerImage && excalidrawResult.baseName) {
-          const variant = bannerLightImage ? "light" : "dark";
+          // Force use dark variant for social media preview
+          const variant = "dark";
           bannerImageUrl = new URL(
             `/blog/${slug}/_assets/excalidraw/${excalidrawResult.baseName}.${variant}.png`,
             Astro.site,
@@ -112,21 +115,32 @@ const blogDescription =
 // Filter headings to only include h2 and h3 for TOC
 const tocHeadings =
   headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) || [];
+
+// Get previous and next posts
+const posts = getBlogPosts();
+const currentPath = Astro.url.pathname.replace(/\/$/, "");
+const currentPostIndex = posts.findIndex(
+  (p) => p.url.replace(/\/$/, "") === currentPath,
+);
+
+const nextPost = currentPostIndex > 0 ? posts[currentPostIndex - 1] : null; // Newer post
+const prevPost =
+  currentPostIndex < posts.length - 1 ? posts[currentPostIndex + 1] : null; // Older post
 ---
 
 <Layout title={title} description={blogDescription} image={socialImage}>
   <div
-    class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] overflow-y-auto cyber-grid relative"
+    class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] relative"
   >
     <!-- Scanline effect -->
     <div class="scanlines absolute inset-0 pointer-events-none opacity-20">
     </div>
 
     <div
-      class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-8 lg:items-start relative z-10"
+      class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 lg:items-start relative z-10"
     >
       <!-- Main content -->
-      <div class="flex-1 max-w-4xl lg:max-w-3xl">
+      <div class="flex-1 w-full min-w-0 max-w-none lg:max-w-[calc(100%-20rem)]">
         <!-- Terminal-style breadcrumb navigation -->
         <div class="mb-8 sm:mb-12">
           <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
@@ -291,20 +305,11 @@ const tocHeadings =
               {
                 formattedDate && (
                   <div class="flex items-center gap-2 text-[var(--text-secondary)]">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    <i class="nf nf-fa-calendar_alt w-5 h-5" />
+                    <time
+                      datetime={date}
+                      class="font-bold text-[var(--text-primary)] text-base"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <time datetime={date} class="font-medium">
                       {formattedDate}
                     </time>
                   </div>
@@ -314,20 +319,10 @@ const tocHeadings =
               {
                 wordCount > 0 && (
                   <div class="flex items-center gap-2 text-[var(--text-secondary)]">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                    <span class="font-medium">{wordCount} words</span>
+                    <i class="nf nf-fa-file_alt w-5 h-5" />
+                    <span class="font-bold text-[var(--text-primary)] text-base">
+                      {wordCount} words
+                    </span>
                   </div>
                 )
               }
@@ -335,20 +330,10 @@ const tocHeadings =
               {
                 readingTime > 0 && (
                   <div class="flex items-center gap-2 text-[var(--text-secondary)]">
-                    <svg
-                      class="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span class="font-medium">{readingTimeFormatted}</span>
+                    <i class="nf nf-fa-clock w-5 h-5" />
+                    <span class="font-bold text-[var(--text-primary)] text-base">
+                      {readingTimeFormatted}
+                    </span>
                   </div>
                 )
               }
@@ -374,7 +359,7 @@ const tocHeadings =
 
           <!-- Back to blog footer -->
           <footer class="mt-16 pt-8 border-t border-[var(--border-color)]">
-            <div class="mb-8">
+            <div class="mb-12">
               <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
                 <span class="text-terminal-green">milind@blog</span>:<span
                   class="text-terminal-blue">~/posts</span
@@ -405,11 +390,44 @@ const tocHeadings =
               <div class="flex flex-col gap-6">
                 <div>
                   <h3
-                    class="text-sm font-mono text-[var(--text-tertiary)] mb-3"
+                    class="text-sm font-mono text-[var(--text-tertiary)] mb-4"
                   >
                     <span class="text-terminal-green">$</span> Connect with me:
                   </h3>
                   <div class="flex flex-wrap gap-3">
+                    {
+                      Object.entries(SOCIAL_CONFIG).map(
+                        ([key, { icon, color }]) => (
+                          <a
+                            href={
+                              key === "mail"
+                                ? "mailto:milind@milind.dev"
+                                : key === "linkedin"
+                                  ? "https://linkedin.com/in/milindmadhukar"
+                                  : key === "github"
+                                    ? "https://github.com/milindmadhukar"
+                                    : key === "twitter"
+                                      ? "https://twitter.com/milind_1504"
+                                      : key === "instagram"
+                                        ? "https://instagram.com/milind_1504"
+                                        : key === "discord"
+                                          ? "https://discord.com/users/772355615783518228"
+                                          : "#"
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group flex items-center justify-center w-10 h-10 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-lg hover:border-[var(--hover-color)] transition-all"
+                            aria-label={key}
+                            style={`--hover-color: ${color}`}
+                          >
+                            <i
+                              class={`nf ${icon} text-lg text-[var(--text-secondary)] group-hover:text-[var(--hover-color)] transition-colors`}
+                              style={`color: ${color}; opacity: 0.8;`}
+                            />
+                          </a>
+                        ),
+                      )
+                    }
                     <!-- RSS Feed -->
                     <a
                       href="/blog/rss.xml"
@@ -436,7 +454,45 @@ const tocHeadings =
                   </div>
                 </div>
 
-                <div class="pt-4 border-t border-[var(--border-color)]">
+                {
+                  (nextPost || prevPost) && (
+                    <div class="mt-8 pt-8 border-t border-[var(--border-color)] grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {prevPost ? (
+                        <a
+                          href={prevPost.url}
+                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all"
+                        >
+                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
+                            ← Previous Post
+                          </span>
+                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                            {prevPost.title}
+                          </span>
+                        </a>
+                      ) : (
+                        <div />
+                      )}
+
+                      {nextPost ? (
+                        <a
+                          href={nextPost.url}
+                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all text-right items-end"
+                        >
+                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
+                            Next Post →
+                          </span>
+                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                            {nextPost.title}
+                          </span>
+                        </a>
+                      ) : (
+                        <div />
+                      )}
+                    </div>
+                  )
+                }
+
+                <div class="mt-8 pt-4 border-t border-[var(--border-color)]">
                   <p class="text-xs font-mono text-[var(--text-tertiary)]">
                     <span class="text-terminal-blue">©</span>
                     {new Date().getFullYear()} Milind Madhukar
@@ -451,7 +507,7 @@ const tocHeadings =
       <!-- Desktop TOC Sidebar -->
       {
         tocHeadings.length > 0 && (
-          <aside class="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
+          <aside class="hidden lg:block lg:w-72 xl:w-80 flex-shrink-0">
             <div class="sticky top-8">
               <div class="bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-color)] rounded-2xl p-6 shadow-xl">
                 <h2 class="text-lg font-bold mb-4 text-[var(--text-primary)]">
