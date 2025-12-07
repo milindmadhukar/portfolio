@@ -1,37 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
-@plugin "@catppuccin/tailwindcss";
-
-@custom-variant dark (&:where(.dark, .dark *));
-
-:root {
-    /* Catppuccin Latte (Light) */
-    --color-bg: #eff1f5;
-    --color-text: #4c4f69;
-    --color-primary: #8839ef;
-}
-
-.dark {
-    /* Catppuccin Mocha (Dark) */
-    --color-bg: #1e1e2e;
-    --color-text: #cdd6f4;
-    --color-primary: #cba6f7;
-}
+@import "@catppuccin/tailwindcss/mocha.css";
+@import "./nerdfonts.css";
 
 @theme {
-    --color-*: initial;
-    --color-gray-50: #f9fafb;
-    --color-gray-100: #f3f4f6;
-    --color-gray-200: #e5e7eb;
-    --color-gray-300: #d1d5db;
-    --color-gray-400: #9ca3af;
-    --color-gray-500: #6b7280;
-    --color-gray-600: #4b5563;
-    --color-gray-700: #374151;
-    --color-gray-800: #1f2937;
-    --color-gray-900: #111827;
-    --color-gray-950: #030712;
-
-    --color-bg: var(--color-bg);
-    --color-text: var(--color-text);
-    --color-primary: var(--color-primary);
+    --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }

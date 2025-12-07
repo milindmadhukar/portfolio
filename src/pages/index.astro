@@ -1,6 +1,22 @@
 ---
 import "../styles/global.css";
-import ThemeToggle from "../components/ThemeToggle.jsx";
+import asciiArt from "../../ascii.txt?raw";
+import { getUptime } from "../lib/utils";
+
+const coloredAscii = asciiArt
+	.split("")
+	.map((char) => {
+		if (["@"].includes(char))
+			return `<span class="text-ctp-subtext0">${char}</span>`;
+		if (["*", "+", "="].includes(char))
+			return `<span class="text-ctp-teal">${char}</span>`;
+		if (["#", "%"].includes(char))
+			return `<span class="text-ctp-overlay0">${char}</span>`;
+		if (["-", ":", "."].includes(char))
+			return `<span class="text-ctp-overlay2">${char}</span>`;
+		return char;
+	})
+	.join("");
 ---
 
 <html lang="en">
@@ -9,16 +25,97 @@ import ThemeToggle from "../components/ThemeToggle.jsx";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
+		<title>milind@spaceship</title>
 	</head>
-	<body class="bg-bg text-text transition-colors duration-300">
-		<ThemeToggle client:load />
-		<div class="p-8">
-			<h1 class="text-3xl font-bold underline text-primary">Astro</h1>
-			<p class="mt-4 text-lg">
-				This is a demo of the Catppuccin theme with TailwindCSS v4. Try
-				toggling the theme!
-			</p>
+	<body class="bg-ctp-crust text-ctp-text transition-colors duration-300 p-8">
+		<div class="flex gap-10">
+			<div>
+				<pre
+					class="font-mono text-[6px] leading-none overflow-hidden whitespace-pre mb-8 select-none"
+					set:html={coloredAscii}
+				/>
+			</div>
+			<div>
+				<h1 class="text-3xl">
+					<span class="text-ctp-red">portfolio</span><span
+						class="text-ctp-overlay2">@</span
+					><span class="text-ctp-teal">milind.dev</span>
+				</h1>
+				<div class="mt-4 flex flex-col gap-2">
+					<div class="text-lg">
+						<i class="nf nf-md-server text-ctp-peach"></i>
+						<span class="text-ctp-green"
+							>DevOps & Backend engineer</span
+						>
+					</div>
+					<div class="text-lg">
+						<i class="nf nf-fa-wrench text-ctp-peach"></i>
+						<span class="text-ctp-green"
+							>Grass Labs Pte Ltd / Vellore Institue of Technology</span
+						>
+					</div>
+					<div class="text-lg">
+						<i class="nf nf-md-package_down text-ctp-peach"></i>
+						<span class="text-ctp-green"
+							>5(years of experience), 4(clients), 8(projects)</span
+						>
+					</div>
+					<div class="text-lg">
+						<i class="nf nf-md-cursor_text text-ctp-peach"></i>
+						<span class="text-ctp-green">2 articles</span>
+					</div>
+					<div class="text-lg">
+						<i class="nf nf-fa-coffee text-ctp-peach"></i>
+						<span class="text-ctp-green"
+							>{getUptime(new Date(2004, 4, 15))}</span
+						>
+					</div>
+					<div class="text-lg">
+						<i class="nf nf-fa-palette text-ctp-peach"></i>
+						<div class="inline-flex">
+							<span class="bg-ctp-red">&nbsp;&nbsp;&nbsp;</span>
+							<span class="bg-ctp-green">&nbsp;&nbsp;&nbsp;</span>
+							<span class="bg-ctp-yellow">&nbsp;&nbsp;&nbsp;</span
+							>
+							<span class="bg-ctp-blue">&nbsp;&nbsp;&nbsp;</span>
+							<span class="bg-ctp-pink">&nbsp;&nbsp;&nbsp;</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="flex flex-col">
+			<div>
+				<span class="text-ctp-red">portfolio</span><span
+					class="text-ctp-overlay2">@</span
+				><span class="text-ctp-teal">milind.dev</span><span
+					class="text-ctp-text">:</span
+				><span class="text-ctp-blue">~</span><span class="text-ctp-text"
+					>$</span
+				><span class="text-ctp-text">&nbsp;ls -la</span>
+			</div>
+			<div>
+				<span class="text-ctp-overlay1">total 5</span>
+			</div>
+			<div class="grid grid-cols-[auto_auto_auto_auto_1fr] gap-x-4 w-fit">
+				<div class="underline">Permissions</div>
+				<div class="underline">Size</div>
+				<div class="underline">Owner</div>
+				<div class="underline">Date Modified</div>
+				<div class="underline">Name</div>
+				<div>
+					<span>d</span><span>r</span><span>w</span><span>x</span
+					><span>r</span><span>-</span><span>x</span><span>r</span
+					><span>-</span><span>x</span><span>@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{new Date().toLocaleDateString()}
+				</div>
+				<div class="text-ctp-green">.projects</div>
+				<!-- </div> -->
+			</div>
 		</div>
 	</body>
 </html>
