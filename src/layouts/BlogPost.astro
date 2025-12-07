@@ -76,12 +76,15 @@ if (banner) {
         // Use fallback for social media (prefers light variant)
         bannerImage = excalidrawResult.fallbackImage;
         if (bannerImage && excalidrawResult.baseName) {
-          // Force use dark variant for social media preview
-          const variant = "dark";
-          bannerImageUrl = new URL(
-            `/blog/${slug}/_assets/excalidraw/${excalidrawResult.baseName}.${variant}.png`,
-            Astro.site,
-          ).toString();
+          // Force use dark variant for social media preview if available
+          if (excalidrawResult.darkImage) {
+            bannerImageUrl = new URL(
+              excalidrawResult.darkImage.src,
+              Astro.site,
+            ).toString();
+          } else {
+            bannerImageUrl = new URL(bannerImage.src, Astro.site).toString();
+          }
         }
       } else {
         // Regular image handling
@@ -92,10 +95,7 @@ if (banner) {
         if (localImage) {
           bannerImage = localImage.default;
           // Create full URL for social media
-          bannerImageUrl = new URL(
-            `/blog/${slug}/_assets/${bannerFilename.replace("./", "")}`,
-            Astro.site,
-          ).toString();
+          bannerImageUrl = new URL(bannerImage.src, Astro.site).toString();
         }
       }
     } catch (e) {
