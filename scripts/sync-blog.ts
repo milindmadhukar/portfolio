@@ -15,7 +15,7 @@ const BLOG_DEST = join(process.cwd(), 'src/pages/blog');
 const BLOG_REPO_URL = process.env.BLOG_REPO_URL || '';
 
 // Files/folders to exclude from sync
-const EXCLUDE_ITEMS = ['index.astro', '.DS_Store', 'node_modules', '.git', 'README.md', '.obsidian', 'Excalidraw', '_templates', '_scripts'];
+const EXCLUDE_ITEMS = ['index.astro', '.DS_Store', 'node_modules', '.git', 'README.md', '.obsidian', 'Excalidraw', '_templates', '_scripts', "AGENTS.md"];
 
 // Files to keep in blog destination (won't be deleted during cleanup)
 const KEEP_FILES = ['index.astro', 'rss.xml.ts'];
@@ -38,7 +38,6 @@ async function cleanupBlogFolder() {
 
       const itemPath = join(BLOG_DEST, item.name);
       
-      // Remove everything else (blog posts, old content)
       await rm(itemPath, { recursive: true, force: true });
     }
     
@@ -59,7 +58,6 @@ async function syncFromLocal(sourcePath: string) {
     const items = await readdir(sourcePath, { withFileTypes: true });
     
     for (const item of items) {
-      // Skip hidden files/folders and excluded items
       if (item.name.startsWith('.') || EXCLUDE_ITEMS.includes(item.name)) {
         continue;
       }
@@ -68,7 +66,6 @@ async function syncFromLocal(sourcePath: string) {
       const destPath = join(BLOG_DEST, item.name);
 
       if (item.isDirectory() || item.name.endsWith('.md')) {
-        // Remove existing and copy fresh
         if (existsSync(destPath)) {
           await rm(destPath, { recursive: true, force: true });
         }
@@ -86,12 +83,10 @@ async function syncFromGitHub(token: string) {
   const tempDir = join(process.cwd(), 'blog-content-temp');
   
   try {
-    // Clean up temp directory if it exists
     if (existsSync(tempDir)) {
       await rm(tempDir, { recursive: true, force: true });
     }
 
-    // Clone the repo with authentication
     const repoUrlWithAuth = BLOG_REPO_URL.replace(
       'https://',
       `https://${token}@`

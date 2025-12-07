@@ -6,7 +6,7 @@ tags:
   - productivity
 banner:
 layout: ../../../layouts/BlogPost.astro
-draft: true
+draft: false
 ---
 
 > *"I think, therefore I am... probably overthinking everything and should write it down."*  

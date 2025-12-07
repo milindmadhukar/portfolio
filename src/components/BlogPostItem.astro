@@ -54,6 +54,17 @@ function getWordCountColor(count: number): string {
 }
 
 const colorClass = getTerminalColor(index);
+
+// Map color classes to hex values for Simple Icons
+const colorHexMap: Record<string, string> = {
+  "ctp-teal": "94e2d5",
+  "ctp-mauve": "cba6f7",
+  "ctp-pink": "f5c2e7",
+  "ctp-green": "a6e3a1",
+};
+
+const iconColor = colorHexMap[colorClass] || "94e2d5"; // default to teal
+
 const isDraft = draft;
 const formattedDate = formatDateCompact(date);
 const wordCountFormatted = formatWordCount(wordCount);
@@ -141,7 +152,7 @@ if (coverDark) {
       <!-- File name with icon and badges -->
       <div class="flex items-center gap-3 min-w-0">
         <img
-          src={`https://cdn.simpleicons.org/${getPostIcon(index)}`}
+          src={`https://cdn.simpleicons.org/${getPostIcon(index)}/${iconColor}`}
           alt=""
           class="w-5 h-5 flex-shrink-0 opacity-80 blog-icon"
         />
@@ -171,7 +182,7 @@ if (coverDark) {
 
       <!-- Icon -->
       <img
-        src={`https://cdn.simpleicons.org/${getPostIcon(index)}`}
+        src={`https://cdn.simpleicons.org/${getPostIcon(index)}/${iconColor}`}
         alt=""
         class="w-4 h-4 flex-shrink-0 opacity-80 mt-0.5 blog-icon"
       />

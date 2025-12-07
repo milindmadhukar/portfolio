@@ -6,12 +6,9 @@ import { parseCustomDate, getWordCount } from '../../lib/date';
 import type { ImageMetadata } from 'astro';
 import { processExcalidrawImage, extractBannerFilename } from '../../lib/excalidraw';
 
-// Get all blog posts from the file system using import.meta.glob
 const allPosts = import.meta.glob('./**/index.md', { eager: true });
 
-// Convert glob result to array format
 const blogPosts: any[] = Object.entries(allPosts).map(([path, module]: [string, any]) => {
-  // Extract slug from path
   const pathParts = path.split('/');
   const slug = pathParts[pathParts.length - 2];
   
@@ -22,17 +19,14 @@ const blogPosts: any[] = Object.entries(allPosts).map(([path, module]: [string, 
   };
 });
 
-// Filter out template folders and drafts based on frontmatter
 const isDevelopment = import.meta.env.DEV;
 const publishedPosts = blogPosts.filter((post) => {
   const { slug } = post;
   
-  // Exclude template folders (starting with _) and hidden folders (starting with .)
   if (slug && (slug.startsWith('_') || slug.startsWith('.'))) {
     return false;
   }
   
-  // In development, show drafts; in production, exclude them
   if (!isDevelopment && post.frontmatter?.draft === true) {
     return false;
   }
@@ -40,18 +34,15 @@ const publishedPosts = blogPosts.filter((post) => {
   return true;
 });
 
-// Process and sort posts by date
 const images = import.meta.glob<{ default: ImageMetadata }>('./**/_assets/**/*.{png,jpg,jpeg,gif,webp,svg}', { eager: true });
 
 const posts = publishedPosts.map((post) => {
   const frontmatter = post.frontmatter || {};
   const { slug } = post;
   
-  // Calculate word count from the raw markdown content
   const rawContent = post.rawContent ? post.rawContent() : '';
   const wordCount = getWordCount(rawContent);
   
-  // Handle banner image if it exists (supports both local Obsidian paths and URLs)
   let bannerImage: any = null;
   let bannerLightImage: any = null;
   let bannerDarkImage: any = null;
@@ -60,11 +51,9 @@ const posts = publishedPosts.map((post) => {
   if (frontmatter.banner) {
     const bannerFilename = extractBannerFilename(frontmatter.banner);
 
-    // Check if it's a URL (starts with http:// or https://)
     if (bannerFilename.startsWith('http://') || bannerFilename.startsWith('https://')) {
       bannerImage = bannerFilename;
     } else {
-      // Check if this is an Excalidraw image
       const excalidrawResult = processExcalidrawImage(bannerFilename, images, slug);
       
       if (excalidrawResult.isExcalidraw) {
@@ -73,7 +62,6 @@ const posts = publishedPosts.map((post) => {
         bannerDarkImage = excalidrawResult.darkImage;
         bannerImage = excalidrawResult.fallbackImage;
       } else {
-        // Handle local Obsidian path (e.g., ./garrix.png or _assets/garrix.png)
         const bannerPath = bannerFilename.startsWith('./') 
           ? `./${slug}/_assets/${bannerFilename.slice(2)}`
           : `./${slug}/_assets/${bannerFilename}`;
@@ -101,10 +89,8 @@ const posts = publishedPosts.map((post) => {
   };
 });
 
-// Sort by date (newest first)
 posts.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-// Get all unique tags from all posts
 const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
 ---
 
