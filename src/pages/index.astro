@@ -1,7 +1,9 @@
 ---
 import "../styles/global.css";
 import asciiArt from "../../ascii.txt?raw";
-import { getUptime } from "../lib/utils";
+import { getUptime, getGithubUpdatedAt } from "../lib/utils";
+
+const githubUpdatedAt = await getGithubUpdatedAt();
 
 const coloredAscii = asciiArt
 	.split("")
@@ -25,7 +27,7 @@ const coloredAscii = asciiArt
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>milind@spaceship</title>
+		<title>portfolio@milind.dev</title>
 	</head>
 	<body class="bg-ctp-crust text-ctp-text transition-colors duration-300 p-8">
 		<div class="flex gap-10">
@@ -104,17 +106,289 @@ const coloredAscii = asciiArt
 				<div class="underline">Date Modified</div>
 				<div class="underline">Name</div>
 				<div>
-					<span>d</span><span>r</span><span>w</span><span>x</span
-					><span>r</span><span>-</span><span>x</span><span>r</span
-					><span>-</span><span>x</span><span>@</span>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
 				</div>
 				<div class="text-ctp-overlay1">-</div>
 				<div class="text-ctp-yellow">milindmadhukar</div>
 				<div class="text-ctp-blue">
-					{new Date().toLocaleDateString()}
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
 				</div>
-				<div class="text-ctp-green">.projects</div>
-				<!-- </div> -->
+				<a href="/" class="text-ctp-green">.</a>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date(1987, 6, 27).toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a
+					href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+					class="text-ctp-green">..</a
+				>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						githubUpdatedAt.toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a
+					href="https://github.com/milindmadhukar"
+					class="text-ctp-green">.github</a
+				>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a href="mailto:hi@milind.dev" class="text-ctp-green">.email</a>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a
+					href="https://www.linkedin.com/in/milind-madhukar-0726b0211"
+					class="text-ctp-green">.linkedin</a
+				>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a href="https://twitter.com/milind_1504" class="text-ctp-green"
+					>.twitter</a
+				>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a
+					href="https://www.instagram.com/milind_1504"
+					class="text-ctp-green">.instagram</a
+				>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a href="/projects" class="text-ctp-green">projects</a>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a href="/work" class="text-ctp-green">work</a>
+				<div>
+					<span class="text-ctp-teal">d</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-red">w</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-peach">r</span><span
+						class="text-ctp-overlay1">-</span
+					><span class="text-ctp-green">x</span><span
+						class="text-ctp-yellow">r</span
+					><span class="text-ctp-overlay1">-</span><span
+						class="text-ctp-green">x</span
+					><span class="text-ctp-text">@</span>
+				</div>
+				<div class="text-ctp-overlay1">-</div>
+				<div class="text-ctp-yellow">milindmadhukar</div>
+				<div class="text-ctp-blue">
+					{
+						new Date().toLocaleDateString("en-US", {
+							month: "short",
+							day: "numeric",
+							hour: "numeric",
+							minute: "numeric",
+							hour12: false,
+						})
+					}
+				</div>
+				<a href="/blog" class="text-ctp-green">blog</a>
 			</div>
 		</div>
 	</body>
