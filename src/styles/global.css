@@ -1,7 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
+
+/* 
+ * Import Catppuccin mocha (dark theme as default).
+ * Latte (light theme) is automatically included with any dark theme import.
+ * We use @custom-variant to enable theme switching via the .latte class.
+ */
 @import "@catppuccin/tailwindcss/mocha.css";
+
 @import "./nerdfonts.css";
+
+/* 
+ * Tailwind v4 custom variant for latte theme.
+ * This enables the use of latte: prefix in classes (e.g., latte:bg-ctp-base).
+ * Default theme is mocha (when .latte class is NOT present on html element).
+ */
+@custom-variant latte (&:where(.latte, .latte *));
 
 @theme {
     --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;

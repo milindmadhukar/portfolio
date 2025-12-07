@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { personalInfo } from "../data/portfolio";
+import ThemeSwitcher from "../components/ThemeSwitcher.tsx";
 
 interface Props {
     title?: string;
@@ -62,10 +63,32 @@ const {
             href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap"
             rel="stylesheet"
         />
+
+        <!-- Theme initialization script to prevent FOUC -->
+        <script is:inline>
+            // Run immediately to prevent flash of unstyled content
+            (function () {
+                const theme = localStorage.getItem("theme");
+                if (theme === "latte") {
+                    document.documentElement.classList.add("latte");
+                } else if (theme === "mocha") {
+                    document.documentElement.classList.remove("latte");
+                } else {
+                    // No stored preference, check system preference
+                    const prefersDark = window.matchMedia(
+                        "(prefers-color-scheme: dark)",
+                    ).matches;
+                    if (!prefersDark) {
+                        document.documentElement.classList.add("latte");
+                    }
+                }
+            })();
+        </script>
     </head>
     <body
         class="antialiased min-h-screen bg-ctp-crust text-ctp-text transition-colors duration-300 overflow-x-hidden"
     >
+        <ThemeSwitcher client:load />
         <div class={includePadding ? "p-8" : "p-0"}>
             <slot />
         </div>

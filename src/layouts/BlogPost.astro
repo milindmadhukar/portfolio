@@ -689,20 +689,22 @@ const tocHeadings =
     box-shadow: none !important;
   }
 
+  /* Default theme is mocha (dark) - show dark images */
   .excalidraw-container .excalidraw-light {
-    display: block !important;
+    display: none !important;
   }
 
   .excalidraw-container .excalidraw-dark {
-    display: none !important;
-  }
-
-  .dark .excalidraw-container .excalidraw-light {
-    display: none !important;
-  }
-
-  .dark .excalidraw-container .excalidraw-dark {
     display: block !important;
+  }
+
+  /* When latte theme is active - show light images */
+  .latte .excalidraw-container .excalidraw-light {
+    display: block !important;
+  }
+
+  .latte .excalidraw-container .excalidraw-dark {
+    display: none !important;
   }
 
   /* TOC Active Link Styles */

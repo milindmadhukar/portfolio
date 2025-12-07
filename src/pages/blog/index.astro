@@ -100,9 +100,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   description="📚 Where bugs become features and features become blog posts. Dive into chaos-driven development, DevOps disasters (and triumphs), and tech rants you didn't know you needed. Grab your coffee and prepare for a wild ride!"
 >
   <div class="min-h-screen py-8 sm:py-20 px-6 bg-ctp-crust relative">
-    <!-- Scanline effect -->
-    <div class="scanlines absolute inset-0 pointer-events-none opacity-20"></div>
-    
     <div class="max-w-6xl mx-auto relative z-10">
       <!-- Terminal Header -->
       <div class="mt-2 sm:mt-8 mb-4">
@@ -234,20 +231,22 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   }
 
   /* Hover card theme-aware images */
+  /* Default theme is mocha (dark) - show dark images */
   .hover-card-light {
-    display: block;
+    display: none;
   }
   
   .hover-card-dark {
-    display: none;
-  }
-  
-  .dark .hover-card-light {
-    display: none;
-  }
-  
-  .dark .hover-card-dark {
     display: block;
+  }
+  
+  /* When latte theme is active - show light images */
+  .latte .hover-card-light {
+    display: block;
+  }
+  
+  .latte .hover-card-dark {
+    display: none;
   }
 
   /* Tag filter active state */
@@ -286,16 +285,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
     }
   }
 
-  /* Scanlines effect */
-  .scanlines {
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.15),
-      rgba(0, 0, 0, 0.15) 1px,
-      transparent 1px,
-      transparent 2px
-    );
-  }
+
 </style>
 
 <script>
