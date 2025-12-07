@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { getGithubUpdatedAt } from "../lib/utils";
 import TerminalPrompt from "../components/TerminalPrompt.astro";
+import DiscordStatus from "../components/DiscordStatus";
 import { personalInfo, experience, education } from "../data/portfolio";
 
 const githubUpdatedAt = await getGithubUpdatedAt();
@@ -44,7 +45,8 @@ const githubUpdatedAt = await getGithubUpdatedAt();
    `/ossssso+/:-        -:/+osssso+-
   `+sso+:-`                 `.-/+oso:
  `++:.                           `-/+/
- .`                                 `/</pre>
+ .`                                 `/
+          </pre>
 				</div>
 
 				<div class="flex flex-col gap-[2px]">
@@ -91,6 +93,13 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 							><i class="nf nf-md-clock"></i> Uptime</span
 						>
 						<span> : </span><span id="uptime">Loading...</span>
+					</div>
+					<div>
+						<DiscordStatus
+							client:load
+							userId={import.meta.env.DISCORD_USER_ID}
+							socketUrl={import.meta.env.LANYARD_SOCKET_URL}
+						/>
 					</div>
 					<div class="text-ctp-overlay1">
 						--------------------------
@@ -161,321 +170,13 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 				months += 12;
 			}
 
-			// Calculate time difference for the "moving" feel
-			// We can just show the time component as well
-			const hours = now.getHours();
-			const minutes = now.getMinutes();
-			const seconds = now.getSeconds();
-
 			const uptimeElement = document.getElementById("uptime");
 			if (uptimeElement) {
 				uptimeElement.textContent = `${years} years, ${months} months, ${days} days`;
 			}
 		}
 
-		setInterval(updateUptime, 1000);
+		setInterval(updateUptime, 86400000);
 		updateUptime();
 	</script>
-	<div class="flex flex-col min-h-[100vh]">
-		<TerminalPrompt user="portfolio" host="milind.dev" command="ls -la" />
-		<div>
-			<span class="text-ctp-overlay1">total 5</span>
-		</div>
-		<div class="grid grid-cols-[auto_auto_auto_auto_1fr] gap-x-4 w-fit">
-			<div class="underline">Permissions</div>
-			<div class="underline">Size</div>
-			<div class="underline">Owner</div>
-			<div class="underline">Date Modified</div>
-			<div class="underline">Name</div>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href="/" class="text-ctp-green">.</a>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date(1987, 6, 27).toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a
-				href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-				class="text-ctp-green">..</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					githubUpdatedAt.toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href="https://github.com/milindmadhukar" class="text-ctp-green"
-				>.github</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href={`mailto:${personalInfo.email}`} class="text-ctp-green"
-				>.email</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a
-				href={personalInfo.social.find((s) => s.name === "LinkedIn")
-					?.url}
-				class="text-ctp-green">.linkedin</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a
-				href={personalInfo.social.find((s) => s.name === "Twitter")
-					?.url}
-				class="text-ctp-green">.twitter</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a
-				href={personalInfo.social.find((s) => s.name === "Instagram")
-					?.url}
-				class="text-ctp-green">.instagram</a
-			>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href="/projects" class="text-ctp-green">projects</a>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href="/work" class="text-ctp-green">work</a>
-			<div>
-				<span class="text-ctp-teal">d</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-red">w</span><span class="text-ctp-green"
-					>x</span
-				><span class="text-ctp-peach">r</span><span
-					class="text-ctp-overlay1">-</span
-				><span class="text-ctp-green">x</span><span
-					class="text-ctp-yellow">r</span
-				><span class="text-ctp-overlay1">-</span><span
-					class="text-ctp-green">x</span
-				><span class="text-ctp-text">@</span>
-			</div>
-			<div class="text-ctp-overlay1">-</div>
-			<div class="text-ctp-yellow">milindmadhukar</div>
-			<div class="text-ctp-blue">
-				{
-					new Date().toLocaleDateString("en-US", {
-						month: "short",
-						day: "numeric",
-						hour: "numeric",
-						minute: "numeric",
-						hour12: false,
-					})
-				}
-			</div>
-			<a href="/blog" class="text-ctp-green">blog</a>
-		</div>
-	</div>
 </Layout>
