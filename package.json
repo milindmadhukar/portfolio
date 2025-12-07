@@ -3,10 +3,14 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "bun run clean && bun run sync-blog && astro dev",
+    "dev:watch": "bun run clean && bun scripts/watch-blog.ts",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "clean": "bun scripts/clean.ts",
+    "sync-blog": "bun scripts/sync-blog.ts",
+    "prebuild": "bun run sync-blog"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

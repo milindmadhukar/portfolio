@@ -34,3 +34,4 @@ export const getGithubUpdatedAt = async () => {
 
     return new Date(); // Fallback to current date
 };
+

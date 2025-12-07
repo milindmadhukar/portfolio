@@ -17,7 +17,7 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 	<body class="bg-ctp-crust text-ctp-text transition-colors duration-300 p-8">
 		<div
 			id="terminal-container"
-			class="font-mono text-xs sm:text-sm md:text-base leading-tight z-10 min-h-[50vh]"
+			class="font-mono text-xs sm:text-sm md:text-base leading-tight z-10 min-h-[100vh]"
 		>
 			<div class="mb-4">
 				<TerminalPrompt user="portfolio" host="milind.dev">
@@ -192,7 +192,7 @@ const githubUpdatedAt = await getGithubUpdatedAt();
 			setInterval(updateUptime, 1000);
 			updateUptime();
 		</script>
-		<div class="flex flex-col">
+		<div class="flex flex-col min-h-[100vh]">
 			<TerminalPrompt
 				user="portfolio"
 				host="milind.dev"
