@@ -1,0 +1,80 @@
+---
+import { personalInfo } from '../lib/constants';
+import { SOCIAL_CONFIG } from '../lib/constants';
+
+interface Props {
+  size?: string;
+  iconSize?: string;
+  gap?: string;
+  className?: string;
+  showRss?: boolean;
+}
+
+const { 
+  size = "w-10 h-10", 
+  iconSize = "text-lg", 
+  gap = "gap-3",
+  className = "",
+  showRss = true
+} = Astro.props;
+
+// Catppuccin color format (e.g. bg-ctp-mauve)
+const socialColors: Record<string, string> = {
+  "GitHub": "bg-ctp-mauve",
+  "LinkedIn": "bg-ctp-blue",
+  "Email": "bg-ctp-red",
+  "Twitter": "bg-ctp-sapphire",
+  "Instagram": "bg-ctp-pink",
+  "Spotify": "bg-ctp-green",
+  "Discord": "bg-ctp-lavender",
+};
+---
+
+<div class={`flex flex-wrap items-center ${gap} ${className}`}>
+  {personalInfo.social.map(social => {
+    // Explicitly skip GitHub if it's already clear the user wants it skipped in lists, 
+    // but originally I included it in the blog main page. 
+    // However, the layouts/BlogPost.astro handles it by key ("github" vs "GitHub").
+    // Let's check personalInfo.social names.
+    // In data/portfolio.ts, it is "GitHub".
+    // In layouts/BlogPost.astro, it maps Object.entries(SOCIAL_CONFIG) which has lowercase keys.
+    // Here we map personalInfo.social which is an array.
+    if (social.name === "GitHub") return null; 
+    
+    return (
+      <a
+        href={social.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class={`group relative flex items-center justify-center ${size} rounded-full ${socialColors[social.name] || 'bg-ctp-overlay0'} text-ctp-crust hover:scale-110 transition-transform`}
+        aria-label={social.name}
+      >
+        <i class={`nf ${SOCIAL_CONFIG[social.icon].icon} ${iconSize}`}></i>
+        
+        <!-- Tooltip -->
+        <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-ctp-surface0 text-ctp-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-ctp-surface2 z-20 pointer-events-none">
+          {social.name}
+        </span>
+      </a>
+    );
+  })}
+  
+  <!-- RSS Feed Circle -->
+  {showRss && (
+    <a
+      href="/blog/rss.xml"
+      target="_blank"
+      rel="noopener noreferrer"
+      class={`group relative flex items-center justify-center ${size} rounded-full bg-ctp-peach text-ctp-crust hover:scale-110 transition-transform`}
+      aria-label="RSS Feed"
+    >
+      <svg class={`${iconSize.replace('text-', 'w-').replace('text-', 'h-')} w-5 h-5`} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+      </svg>
+      <!-- Tooltip -->
+      <span class="absolute top-full mt-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-ctp-surface0 text-ctp-text text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-ctp-surface2 z-20 pointer-events-none">
+        RSS
+      </span>
+    </a>
+  )}
+</div>

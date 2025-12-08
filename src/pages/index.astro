@@ -4,7 +4,8 @@ import { fetchGithubStats } from "../lib/github";
 import { formatTimeAgo } from "../lib/date";
 import TerminalPrompt from "../components/TerminalPrompt.astro";
 import DiscordStatus from "../components/DiscordStatus";
-import { personalInfo, experience, education } from "../data/portfolio";
+import SocialIcons from "../components/SocialIcons.astro";
+import { personalInfo, experience, education } from "../lib/constants";
 
 import { SOCIAL_CONFIG, TERMINAL_CONFIG, BIRTH_DATE } from "../lib/constants";
 import { getBlogPosts } from "../lib/blog";
@@ -17,7 +18,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 <Layout title="portfolio@milind.dev" includePadding={true}>
 	<div
 		id="terminal-container"
-		class="font-mono text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl 2xl:text-2xl leading-tight z-10 min-h-[100vh] lg:min-h-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden"
+		class="font-mono text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl leading-tight z-10 min-h-[100vh] lg:min-h-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden"
 	>
 		<div class="mb-4">
 			<TerminalPrompt
@@ -36,7 +37,8 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 				class="flex flex-col lg:flex-row gap-10 items-center lg:items-start w-fit"
 			>
 				<div class="select-none text-ctp-blue font-bold">
-					<pre>
+					<pre
+						class="hidden lg:block">
   ,=====================.
   |MILIND'S  LAB  /6000/|
   |.-------------------.|
@@ -67,6 +69,22 @@ const latestPost = posts.length > 0 ? posts[0] : null;
   |=====================|
  .'                     `.
 """""""""""""""""""""""""""
+          </pre>
+					<pre
+						class="block lg:hidden">
+   +--------------+
+   |.------------.|
+   ||            ||
+   ||   HELLO    ||
+   ||    WORLD   ||
+   ||            ||
+   |+------------+|
+   +-..--------..-+
+   .--------------.
+  / /============\ \
+ / /==============\ \
+/____________________\
+\____________________/
           </pre>
 				</div>
 
@@ -146,35 +164,6 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 						)
 					}
 
-					<div class="text-ctp-overlay1">
-						--------------------------
-					</div>
-
-					{
-						personalInfo.social.map((social) => {
-							if (social.name === "Github") return null;
-
-							const config = SOCIAL_CONFIG[social.icon] || {
-								icon: "nf-fa-link",
-								color: "#cdd6f4", // text-ctp-text fallback
-							};
-
-							return (
-								<div>
-									<a
-										href={social.url}
-										target="_blank"
-										class="hover:underline"
-										style={{ color: config.color }}
-									>
-										<i class={`nf ${config.icon}`} />{" "}
-										{social.name}
-									</a>
-								</div>
-							);
-						})
-					}
-
 					{
 						githubStats && (
 							<>
@@ -228,15 +217,13 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 					<div class="text-ctp-overlay1">
 						--------------------------
 					</div>
-					<div class="mt-2 flex gap-3 select-none">
-						<i class="nf nf-fa-circle text-ctp-black"></i>
-						<i class="nf nf-fa-circle text-ctp-red"></i>
-						<i class="nf nf-fa-circle text-ctp-green"></i>
-						<i class="nf nf-fa-circle text-ctp-yellow"></i>
-						<i class="nf nf-fa-circle text-ctp-blue"></i>
-						<i class="nf nf-fa-circle text-ctp-mauve"></i>
-						<i class="nf nf-fa-circle text-ctp-teal"></i>
-						<i class="nf nf-fa-circle text-ctp-text"></i>
+					<div class="mt-4 mb-2">
+						<SocialIcons
+							size="w-10 h-10 lg:w-12 lg:h-12"
+							iconSize="text-lg lg:text-xl"
+							gap="gap-3"
+							showRss={false}
+						/>
 					</div>
 				</div>
 			</div>

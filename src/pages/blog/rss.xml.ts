@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss';
 import type { APIContext } from 'astro';
-import { personalInfo } from '../../data/portfolio';
+import { personalInfo } from '../../lib/constants';
 import { getImage } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import { parseCustomDate } from '../../lib/date';
