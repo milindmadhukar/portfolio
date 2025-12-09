@@ -1,0 +1,22 @@
+---
+import { personalInfo } from "../../lib/constants";
+---
+
+<div class="fade-in max-w-2xl text-ctp-text">
+    <div class="mb-4">
+        <span class="text-ctp-green font-bold text-xl">{personalInfo.name}</span
+        >
+        <span class="text-ctp-overlay1 block mt-1">{personalInfo.tagline}</span>
+    </div>
+
+    <div class="mb-6 whitespace-pre-wrap leading-relaxed">
+        {personalInfo.bio.short}
+    </div>
+
+    <div class="text-ctp-blue mb-2 font-bold">
+        <i class="nf nf-fa-address_card"></i> Bio
+    </div>
+    <div class="whitespace-pre-wrap leading-relaxed text-ctp-subtext0">
+        {personalInfo.bio.long}
+    </div>
+</div>

@@ -4,6 +4,8 @@ import { fetchGithubStats } from "../lib/github";
 import { formatTimeAgo } from "../lib/date";
 import TerminalPrompt from "../components/TerminalPrompt.astro";
 import TerminalCommand from "../components/TerminalCommand.astro";
+import DesktopTerminal from "../components/DesktopTerminal.astro";
+import MobileTerminal from "../components/MobileTerminal.astro";
 import DiscordStatus from "../components/DiscordStatus";
 import SocialIcons from "../components/SocialIcons.astro";
 import { personalInfo, experience, education } from "../lib/constants";
@@ -24,272 +26,17 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 ---
 
 <Layout title="portfolio@milind.dev" includePadding={true}>
-	<div
-		id="terminal-container"
-		class="font-mono text-base md:text-base lg:text-lg xl:text-xl leading-tight z-10 min-h-[100vh] lg:min-h-0 lg:h-[calc(100vh-4rem)] lg:overflow-hidden pt-12 lg:pt-0"
-	>
-		<div class="mb-4">
-			<TerminalPrompt
-				user={TERMINAL_CONFIG.user}
-				host={TERMINAL_CONFIG.host}
-			>
-				<TerminalCommand
-					command="fastfetch"
-					id="main-terminal-command"
-					onCompleteEventName="main-typing-complete"
-				/>
-			</TerminalPrompt>
-		</div>
+	<!-- Mobile Terminal -->
+	<div class="block lg:hidden pt-12">
+		<MobileTerminal />
+	</div>
 
-		<div id="fetch-output" class="hidden">
-			<div
-				class="flex flex-col lg:flex-row gap-10 items-center lg:items-start w-fit"
-			>
-				<div class="select-none text-ctp-blue font-bold">
-					<pre
-						class="hidden lg:block">
-  ,=====================.
-  |MILIND'S  LAB  /6000/|
-  |.-------------------.|
-  ||[ _ o     . .  _ ]_||
-  |`-------------------'|
-  ||                   ||
-  |`-------------------'|
-  ||                   ||
-  |`-------------------'|
-  ||                   ||
-  |`-----------------_-'|
-  ||[=========]| o  (@) |
-  |`---------=='/u\ --- |
-  |------_--------------|
-  | (/) (_)           []|
-  |---==--==----------==|
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  |||||||||||||||||||||||
-  ||||||||||||||||||+×|||
-  |||||||||||||||||||||||
-  |=====================|
- .'                     `.
-"""""""""""""""""""""""""""
-          </pre>
-					<pre
-						class="block lg:hidden">
-   +--------------+
-   |.------------.|
-   ||            ||
-   ||   HELLO    ||
-   ||    WORLD   ||
-   ||            ||
-   |+------------+|
-   +-..--------..-+
-   .--------------.
-  / /============\ \
- / /==============\ \
-/____________________\
-\____________________/
-          </pre>
-				</div>
-
-				<div class="flex flex-col gap-[2px]">
-					<div class="mb-2">
-						<span class="text-ctp-red">portfolio</span><span
-							class="text-ctp-overlay2">@</span
-						><span class="text-ctp-teal">milind.dev</span>
-					</div>
-					<div class="text-ctp-overlay1">
-						--------------------------
-					</div>
-					<div>
-						<span class="text-ctp-blue"
-							><i class="nf nf-md-map_marker"></i> Role</span
-						>
-						<span> : DevOps & Backend Engineer</span>
-					</div>
-					<div>
-						<span class="text-ctp-blue"
-							><i class="nf nf-fa-building"></i> Work</span
-						>
-						<span> : {experience[0].company}</span>
-					</div>
-					<div>
-						<span class="text-ctp-blue"
-							><i class="nf nf-md-school"></i> Education</span
-						>
-						<span> : {education[0].institution}</span>
-					</div>
-					<div>
-						<span class="text-ctp-blue"
-							><i class="nf nf-md-briefcase"></i> Experience</span
-						>
-						<span> : 5 years, 4 clients, 8 projects</span>
-					</div>
-					<div>
-						<span class="text-ctp-blue"
-							><i class="nf nf-md-clock"></i> Uptime</span
-						>
-						<span> : </span><span id="uptime">Loading...</span>
-					</div>
-					<div>
-						<a
-							href="/blog"
-							class="group flex items-center gap-2 animate-gold-pulse -ml-2 px-2 rounded w-fit"
-						>
-							<span
-								class="text-ctp-yellow font-bold group-hover:text-ctp-teal transition-colors"
-								><i class="nf nf-md-file_document"></i> Blog</span
-							>
-							<span class="text-ctp-overlay2">::</span>
-							<span
-								class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4"
-								>{posts.length} articles</span
-							>
-							<span
-								class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity"
-								>[READ]</span
-							>
-						</a>
-					</div>
-					{
-						latestPost && (
-							<div>
-								<span class="text-ctp-mauve">
-									<i class="nf nf-fa-pen_nib" /> Latest Post
-								</span>
-								<span> : </span>
-								<a
-									href={latestPost.url}
-									class="text-ctp-text hover:underline hover:text-ctp-teal transition-colors"
-								>
-									{latestPost.title}
-								</a>
-							</div>
-						)
-					}
-
-					{
-						githubStats && (
-							<>
-								<div class="text-ctp-overlay1">
-									--------------------------
-								</div>
-								<div>
-									<i class="nf nf-fa-github" /> Github Stats
-									<span> : </span>
-									<span>
-										Repos: {githubStats.repos} | Followers:{" "}
-										{githubStats.followers} | Following:{" "}
-										{githubStats.following}
-									</span>
-								</div>
-								{githubStats.lastPush && (
-									<div>
-										<span class="text-ctp-mauve">
-											<i class="nf nf-oct-git_commit" />{" "}
-											Last Commit
-										</span>
-										<span> : </span>
-										<a
-											href={
-												"https://github.com/" +
-												githubStats.lastPush.repo
-											}
-											target="_blank"
-											class="text-ctp-text hover:underline"
-										>
-											<span>
-												{githubStats.lastPush.repo} -{" "}
-												{formatTimeAgo(
-													githubStats.lastPush.at,
-												)}
-											</span>
-										</a>
-									</div>
-								)}
-							</>
-						)
-					}
-
-					<div>
-						<DiscordStatus
-							client:load
-							userId={DISCORD_ID}
-							socketUrl={import.meta.env.LANYARD_SOCKET_URL}
-						/>
-					</div>
-					<div class="text-ctp-overlay1">
-						--------------------------
-					</div>
-					<div class="mt-4 mb-2">
-						<SocialIcons
-							size="w-10 h-10 lg:w-10 lg:h-10"
-							iconSize="text-lg lg:text-lg"
-							gap="gap-3"
-							showRss={false}
-						/>
-					</div>
-				</div>
-			</div>
-
-			<div class="mt-4"></div>
-		</div>
+	<!-- Desktop Terminal -->
+	<div class="hidden lg:block">
+		<DesktopTerminal />
 	</div>
 
 	<script define:vars={{ BIRTH_DATE }}>
-		// Typewriter logic replaced by TerminalCommand component
-		const fetchOutput = document.getElementById("fetch-output");
-		let typingCompleted = false;
-
-		function handleReady() {
-			const cursor = document.getElementById(
-				"main-terminal-command-cursor",
-			);
-			if (fetchOutput) fetchOutput.classList.remove("hidden");
-			// Optional: Hide cursor after command executes
-			// if (cursor) cursor.style.display = "none";
-			// User request: "move it as the command is typed".
-			// Usually shells keep cursor or move to next line.
-			// Given the layout, the output appears below. The command prompt stays.
-			// The original implementation hid the cursor. I will hide it to imply execution started.
-			if (cursor) cursor.style.display = "none";
-		}
-
-		// Lanyard Logic
-		let isLanyardReady = false;
-
-		const onLanyardReady = () => {
-			if (!isLanyardReady) {
-				isLanyardReady = true;
-				if (typingCompleted) {
-					handleReady();
-				}
-			}
-		};
-
-		window.addEventListener("lanyard-ready", onLanyardReady);
-
-		// Typing Completion Logic
-		window.addEventListener("main-typing-complete", () => {
-			typingCompleted = true;
-			if (isLanyardReady) {
-				handleReady();
-			} else {
-				// Fallback if Lanyard takes too long (2s)
-				setTimeout(() => {
-					if (!isLanyardReady) {
-						// Proceed regardless
-						handleReady();
-					}
-				}, 2000);
-			}
-		});
-
 		// Uptime Logic
 		function updateUptime() {
 			const birthDate = new Date(BIRTH_DATE);
@@ -315,10 +62,10 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 				months += 12;
 			}
 
-			const uptimeElement = document.getElementById("uptime");
-			if (uptimeElement) {
-				uptimeElement.textContent = `${years} years, ${months} months, ${days} days`;
-			}
+			const uptimeElements = document.querySelectorAll(".uptime");
+			uptimeElements.forEach((el) => {
+				el.textContent = `${years} years, ${months} months, ${days} days`;
+			});
 		}
 
 		setInterval(updateUptime, 86400000);
@@ -341,5 +88,11 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 
 	.animate-gold-pulse {
 		animation: gold-pulse 3s infinite ease-in-out;
+	}
+
+	@media (min-width: 1024px) {
+		body {
+			overflow: hidden; /* Let the DesktopTerminal container handle scrolling */
+		}
 	}
 </style>

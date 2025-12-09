@@ -5,6 +5,7 @@ interface Props {
     startDelay?: number;
     id?: string;
     onCompleteEventName?: string;
+    triggerEventName?: string;
     cursorWidth?: string;
     cursorHeight?: string;
 }
@@ -17,6 +18,7 @@ const {
     startDelay = 200,
     id = "terminal-command",
     onCompleteEventName = "terminal-typing-complete",
+    triggerEventName,
     cursorWidth = "10px",
     cursorHeight = "1.25em",
 } = Astro.props;
@@ -30,13 +32,27 @@ const {
 </span>
 
 <script
-    define:vars={{ command, typingSpeed, startDelay, id, onCompleteEventName }}
+    define:vars={{
+        command,
+        typingSpeed,
+        startDelay,
+        id,
+        onCompleteEventName,
+        triggerEventName,
+    }}
 >
     const textElement = document.getElementById(`${id}-text`);
     const cursorElement = document.getElementById(`${id}-cursor`);
     let i = 0;
+    let started = false;
 
     function type() {
+        if (!started) {
+            started = true;
+            // Ensure cursor is visible when typing starts
+            if (cursorElement) cursorElement.style.display = "inline-block";
+        }
+
         if (i < command.length) {
             if (textElement) textElement.textContent += command.charAt(i);
             i++;
@@ -50,5 +66,17 @@ const {
         }
     }
 
-    setTimeout(type, startDelay);
+    if (triggerEventName) {
+        window.addEventListener(triggerEventName, (e) => {
+            // Optional: verify target if multiple commands listen to same event type but different details?
+            // For now assume unique event names or broadcast.
+            // Reset if needed?
+            if (textElement) textElement.textContent = "";
+            i = 0;
+            started = false;
+            setTimeout(type, startDelay);
+        });
+    } else {
+        setTimeout(type, startDelay);
+    }
 </script>

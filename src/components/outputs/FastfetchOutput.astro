@@ -1,0 +1,200 @@
+---
+import { fetchGithubStats } from "../../lib/github";
+import { formatTimeAgo } from "../../lib/date";
+import DiscordStatus from "../DiscordStatus";
+import SocialIcons from "../SocialIcons.astro";
+import { experience, education, DISCORD_ID } from "../../lib/constants";
+import { getBlogPosts } from "../../lib/blog";
+
+const githubStats = await fetchGithubStats();
+const posts = getBlogPosts();
+const latestPost = posts.length > 0 ? posts[0] : null;
+---
+
+<div class="fade-in">
+    <div
+        class="flex flex-col lg:flex-row gap-10 items-center lg:items-start w-fit"
+    >
+        <div class="select-none text-ctp-blue font-bold">
+            <pre
+                class="hidden lg:block">
+  ,=====================.
+  |MILIND'S  LAB  /6000/|
+  |.-------------------.|
+  ||[ _ o     . .  _ ]_||
+  |`-------------------'|
+  ||                   ||
+  |`-------------------'|
+  ||                   ||
+  |`-------------------'|
+  ||                   ||
+  |`-----------------_-'|
+  ||[=========]| o  (@) |
+  |`---------=='/u\ --- |
+  |------_--------------|
+  | (/) (_)           []|
+  |---==--==----------==|
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  |||||||||||||||||||||||
+  ||||||||||||||||||+×|||
+  |||||||||||||||||||||||
+  |=====================|
+  .'                     `.
+ """""""""""""""""""""""""""
+          </pre>
+            <pre
+                class="block lg:hidden">
+   +--------------+
+   |.------------.|
+   ||            ||
+   ||   HELLO    ||
+   ||    WORLD   ||
+   ||            ||
+   |+------------+|
+   +-..--------..-+
+   .--------------.
+  / /============\ \
+ / /==============\ \
+/____________________\
+\____________________/
+          </pre>
+        </div>
+
+        <div class="flex flex-col gap-[2px]">
+            <div class="mb-2">
+                <span class="text-ctp-red">portfolio</span><span
+                    class="text-ctp-overlay2">@</span
+                ><span class="text-ctp-teal">milind.dev</span>
+            </div>
+            <div class="text-ctp-overlay1">--------------------------</div>
+            <div>
+                <span class="text-ctp-blue"
+                    ><i class="nf nf-md-map_marker"></i> Role</span
+                >
+                <span> : DevOps & Backend Engineer</span>
+            </div>
+            <div>
+                <span class="text-ctp-blue"
+                    ><i class="nf nf-fa-building"></i> Work</span
+                >
+                <span> : {experience[0].company}</span>
+            </div>
+            <div>
+                <span class="text-ctp-blue"
+                    ><i class="nf nf-md-school"></i> Education</span
+                >
+                <span> : {education[0].institution}</span>
+            </div>
+            <div>
+                <span class="text-ctp-blue"
+                    ><i class="nf nf-md-briefcase"></i> Experience</span
+                >
+                <span> : 5 years, 4 clients, 8 projects</span>
+            </div>
+            <div>
+                <span class="text-ctp-blue"
+                    ><i class="nf nf-md-clock"></i> Uptime</span
+                >
+                <span> : </span><span class="uptime">Loading...</span>
+            </div>
+            <div>
+                <a
+                    href="/blog"
+                    class="group flex items-center gap-2 animate-gold-pulse -ml-2 px-2 rounded w-fit"
+                >
+                    <span
+                        class="text-ctp-yellow font-bold group-hover:text-ctp-teal transition-colors"
+                        ><i class="nf nf-md-file_document"></i> Blog</span
+                    >
+                    <span class="text-ctp-overlay2">::</span>
+                    <span
+                        class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4"
+                        >{posts.length} articles</span
+                    >
+                    <span
+                        class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >[READ]</span
+                    >
+                </a>
+            </div>
+            {
+                latestPost && (
+                    <div>
+                        <span class="text-ctp-mauve">
+                            <i class="nf nf-fa-pen_nib" /> Latest Post
+                        </span>
+                        <span> : </span>
+                        <a
+                            href={latestPost.url}
+                            class="text-ctp-text hover:underline hover:text-ctp-teal transition-colors"
+                        >
+                            {latestPost.title}
+                        </a>
+                    </div>
+                )
+            }
+
+            {
+                githubStats && (
+                    <>
+                        <div class="text-ctp-overlay1">
+                            --------------------------
+                        </div>
+                        <div>
+                            <i class="nf nf-fa-github" /> Github Stats
+                            <span> : </span>
+                            <span>
+                                Repos: {githubStats.repos} | Followers:{" "}
+                                {githubStats.followers} | Following:{" "}
+                                {githubStats.following}
+                            </span>
+                        </div>
+                        {githubStats.lastPush && (
+                            <div>
+                                <span class="text-ctp-mauve">
+                                    <i class="nf nf-oct-git_commit" /> Last
+                                    Commit
+                                </span>
+                                <span> : </span>
+                                <a
+                                    href={
+                                        "https://github.com/" +
+                                        githubStats.lastPush.repo
+                                    }
+                                    target="_blank"
+                                    class="text-ctp-text hover:underline"
+                                >
+                                    <span>
+                                        {githubStats.lastPush.repo} -{" "}
+                                        {formatTimeAgo(githubStats.lastPush.at)}
+                                    </span>
+                                </a>
+                            </div>
+                        )}
+                    </>
+                )
+            }
+
+            <div>
+                <DiscordStatus
+                    client:load
+                    userId={DISCORD_ID}
+                    socketUrl={import.meta.env.LANYARD_SOCKET_URL}
+                />
+            </div>
+            <div class="text-ctp-overlay1">--------------------------</div>
+            <div class="mt-4 mb-2">
+                <SocialIcons
+                    size="w-10 h-10 lg:w-10 lg:h-10"
+                    iconSize="text-lg lg:text-lg"
+                    gap="gap-3"
+                    showRss={false}
+                />
+            </div>
+        </div>
+    </div>
+</div>

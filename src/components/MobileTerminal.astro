@@ -1,0 +1,100 @@
+---
+import TerminalPrompt from "./TerminalPrompt.astro";
+import TerminalCommand from "./TerminalCommand.astro";
+import FastfetchOutput from "./outputs/FastfetchOutput.astro";
+import WhoamiOutput from "./outputs/WhoamiOutput.astro";
+import { TERMINAL_CONFIG } from "../lib/constants";
+
+// Configuration for mobile commands
+const commands = [
+    {
+        id: "mobile-fastfetch",
+        command: "fastfetch",
+        output: FastfetchOutput,
+        triggerEvent: "trigger-mobile-fastfetch",
+    },
+    {
+        id: "mobile-whoami",
+        command: "whoami",
+        output: WhoamiOutput,
+        triggerEvent: "trigger-mobile-whoami",
+    },
+];
+---
+
+<div class="flex flex-col gap-16 pb-20">
+    {
+        commands.map((cmd) => (
+            <div
+                class="mobile-command-section opacity-0 transition-opacity duration-500"
+                data-trigger-event={cmd.triggerEvent}
+            >
+                <div class="mb-4">
+                    <TerminalPrompt
+                        user={TERMINAL_CONFIG.user}
+                        host={TERMINAL_CONFIG.host}
+                    >
+                        <TerminalCommand
+                            command={cmd.command}
+                            id={cmd.id}
+                            triggerEventName={cmd.triggerEvent}
+                            onCompleteEventName={`${cmd.id}-complete`}
+                        />
+                    </TerminalPrompt>
+                </div>
+                <div
+                    id={`${cmd.id}-output`}
+                    class="mobile-output hidden transition-all duration-500"
+                >
+                    <cmd.output />
+                </div>
+            </div>
+        ))
+    }
+</div>
+
+<script>
+    // Intersection Observer to trigger animations
+    const observerOptions = {
+        root: null,
+        rootMargin: "0px",
+        threshold: 0.3,
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const element = entry.target as HTMLElement;
+                const triggerEvent = element.dataset.triggerEvent;
+
+                if (triggerEvent && !element.classList.contains("triggered")) {
+                    // Reveal the section
+                    element.classList.remove("opacity-0");
+                    element.classList.add("triggered");
+
+                    // Trigger the typing animation
+                    window.dispatchEvent(new Event(triggerEvent));
+                }
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll(".mobile-command-section").forEach((section) => {
+        observer.observe(section);
+    });
+
+    // Listen for completion to show output
+    const commands = ["mobile-fastfetch", "mobile-whoami"];
+    commands.forEach((id) => {
+        window.addEventListener(`${id}-complete`, () => {
+            const output = document.getElementById(`${id}-output`);
+            if (output) {
+                output.classList.remove("hidden");
+                output.classList.add("animate-fade-in");
+            }
+            // Hide cursor
+            const cursor = document.getElementById(`${id}-cursor`);
+            if (cursor) cursor.style.display = "none";
+        });
+    });
+</script>

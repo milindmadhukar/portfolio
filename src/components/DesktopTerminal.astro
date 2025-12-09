@@ -1,0 +1,343 @@
+---
+import TerminalPrompt from "./TerminalPrompt.astro";
+import TerminalCommand from "./TerminalCommand.astro";
+import FastfetchOutput from "./outputs/FastfetchOutput.astro";
+import WhoamiOutput from "./outputs/WhoamiOutput.astro";
+import { TERMINAL_CONFIG } from "../lib/constants";
+---
+
+<!-- 
+    Snap Scroll Container 
+    - h-screen & overflow-y-scroll: Creates a scrollable area within the viewport.
+    - snap-y & snap-mandatory: Enforces snapping to child elements.
+-->
+<div
+    class="h-screen w-full overflow-y-scroll snap-y snap-mandatory relative scroll-smooth"
+    id="desktop-scroll-container"
+>
+    <!-- 
+        Sticky Visual Layer 
+        - pointer-events-none: Allows clicks to pass through to the scroll container (if needed), 
+          but usually we want interaction. 
+          Actually, if this is sticky inside the scroll container, it might move?
+          
+          CORRECTION: Sticky elements don't stick well if the container is the one scrolling 
+          AND the sticky element is a sibling of the tall content. 
+          The sticky element must be inside the scrolling container, and the container needs height.
+          
+          But here, we want the "Visuals" to NOT SCROLL.
+          The best way to achieve "Scrollytelling" with snap is:
+          1. Fixed Background (The Terminal)
+          2. Scrollable Foreground (The Ghost Sections)
+    -->
+
+    <!-- Fixed Terminal Background (Visuals) -->
+    <div class="fixed inset-0 z-0 flex flex-col pt-12 pointer-events-none p-8">
+        <div
+            id="terminal-content"
+            class="font-mono text-base md:text-base lg:text-lg xl:text-xl leading-tight w-fit pointer-events-auto"
+        >
+            <!-- STATE 1: FASTFETCH -->
+            <div
+                id="state-fastfetch"
+                class="terminal-state transition-opacity duration-300"
+            >
+                <div class="mb-4">
+                    <TerminalPrompt
+                        user={TERMINAL_CONFIG.user}
+                        host={TERMINAL_CONFIG.host}
+                    >
+                        <TerminalCommand
+                            command="fastfetch"
+                            id="cmd-fastfetch-init"
+                            triggerEventName="trigger-fastfetch-init"
+                            onCompleteEventName="complete-fastfetch-init"
+                            startDelay={800}
+                        />
+                    </TerminalPrompt>
+                </div>
+                <!-- Note: The FastfetchOutput component already has the flex/w-fit structure -->
+                <div id="output-fastfetch-init" class="output-container hidden">
+                    <FastfetchOutput />
+                </div>
+            </div>
+
+            <!-- INTERACTION LAYER (CLEAR COMMAND) -->
+            <div id="interaction-layer" class="mt-2 py-1 hidden">
+                <TerminalPrompt
+                    user={TERMINAL_CONFIG.user}
+                    host={TERMINAL_CONFIG.host}
+                >
+                    <TerminalCommand
+                        command="clear"
+                        id="cmd-clear"
+                        triggerEventName="trigger-clear"
+                        onCompleteEventName="complete-clear"
+                        typingSpeed={50}
+                    />
+                </TerminalPrompt>
+            </div>
+
+            <!-- STATE 2: WHOAMI -->
+            <div id="state-whoami" class="terminal-state hidden">
+                <div class="mb-4">
+                    <TerminalPrompt
+                        user={TERMINAL_CONFIG.user}
+                        host={TERMINAL_CONFIG.host}
+                    >
+                        <TerminalCommand
+                            command="whoami"
+                            id="cmd-whoami"
+                            triggerEventName="trigger-whoami"
+                            onCompleteEventName="complete-whoami"
+                            startDelay={500}
+                        />
+                    </TerminalPrompt>
+                </div>
+                <div id="output-whoami" class="output-container hidden fade-in">
+                    <WhoamiOutput />
+                </div>
+            </div>
+
+            <!-- REVERSE INTERACTION LAYER -->
+            <div id="interaction-layer-reverse" class="mt-2 py-1 hidden">
+                <TerminalPrompt
+                    user={TERMINAL_CONFIG.user}
+                    host={TERMINAL_CONFIG.host}
+                >
+                    <TerminalCommand
+                        command="clear"
+                        id="cmd-clear-reverse"
+                        triggerEventName="trigger-clear-reverse"
+                        onCompleteEventName="complete-clear-reverse"
+                        typingSpeed={50}
+                    />
+                </TerminalPrompt>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Track (Ghost Sections for Snapping) -->
+    <div class="relative z-10 w-full">
+        <!-- Section 1: Fastfetch View -->
+        <section class="h-screen w-full snap-start" data-state="fastfetch">
+        </section>
+
+        <!-- Section 2: Trigger for Clear/Whoami -->
+        <section class="h-screen w-full snap-start" data-state="whoami">
+        </section>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div
+        id="scroll-indicator"
+        class="fixed bottom-8 right-8 z-50 transition-opacity duration-300 pointer-events-none hidden"
+    >
+        <div
+            class="flex flex-col items-center gap-2 animate-bounce text-ctp-overlay1"
+        >
+            <span class="text-sm font-mono">SCROLL</span>
+            <i class="nf nf-fa-angle_down text-xl"></i>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Hide Scrollbar */
+    #desktop-scroll-container {
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+    }
+    #desktop-scroll-container::-webkit-scrollbar {
+        display: none; /* Chrome, Safari, Opera */
+    }
+</style>
+
+<script>
+    // State Elements
+    const stateFastfetch = document.getElementById("state-fastfetch");
+    const stateWhoami = document.getElementById("state-whoami");
+    const outputWhoami = document.getElementById("output-whoami");
+    const outputFastfetchInit = document.getElementById(
+        "output-fastfetch-init",
+    );
+    const interactionLayer = document.getElementById("interaction-layer");
+    const interactionLayerReverse = document.getElementById(
+        "interaction-layer-reverse",
+    );
+
+    // Logic Vars
+    let currentState = "fastfetch";
+    let isAnimating = false;
+
+    const scrollIndicator = document.getElementById("scroll-indicator");
+
+    // Trigger Initial Animation
+    setTimeout(() => {
+        window.dispatchEvent(new Event("trigger-fastfetch-init"));
+    }, 100);
+
+    // Initial Load & Re-Entry (Fastfetch Complete)
+    window.addEventListener("complete-fastfetch-init", () => {
+        if (outputFastfetchInit) {
+            outputFastfetchInit.classList.remove("hidden");
+            outputFastfetchInit.classList.add("fade-in");
+        }
+
+        // HIDE CURSOR for fastfetch
+        const ffCursor = document.getElementById("cmd-fastfetch-init-cursor");
+        if (ffCursor) ffCursor.style.display = "none";
+
+        // Show scroll indicator
+        if (scrollIndicator) {
+            scrollIndicator.classList.remove("hidden");
+        }
+
+        // Show the prompt for the next command immediately (waiting state)
+        if (interactionLayer) {
+            interactionLayer.classList.remove("hidden");
+            interactionLayer.classList.add("fade-in");
+            // Ensure text is clear (in case of re-entry)
+            const clearText = document.getElementById("cmd-clear-text");
+            if (clearText) clearText.textContent = "";
+            // Ensure cursor is visible for the prompt
+            const clearCursor = document.getElementById("cmd-clear-cursor");
+            if (clearCursor) clearCursor.style.display = "inline-block";
+        }
+    });
+
+    // Observer for Scroll Snapping
+    const observerOptions = {
+        root: document.getElementById("desktop-scroll-container"),
+        threshold: 0.5, // Trigger when 50% of the section is visible
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting && !isAnimating) {
+                const targetState = entry.target.dataset.state;
+
+                // Toggle Indicator based on state
+                if (targetState === "fastfetch") {
+                    if (scrollIndicator)
+                        scrollIndicator.classList.remove("opacity-0");
+                } else {
+                    if (scrollIndicator)
+                        scrollIndicator.classList.add("opacity-0");
+                }
+
+                if (targetState === "whoami" && currentState === "fastfetch") {
+                    transitionToWhoami();
+                } else if (
+                    targetState === "fastfetch" &&
+                    currentState === "whoami"
+                ) {
+                    transitionToFastfetch();
+                }
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll("section[data-state]").forEach((section) => {
+        observer.observe(section);
+    });
+
+    // TRANSITIONS
+    function transitionToWhoami() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        // Hide indicator explicitly if needed, but observer does it.
+
+        // 1. Show Prompt "clear" (Interaction Layer)
+        // interactionLayer is ALREADY visible (waiting state).
+        // We just trigger the typing.
+
+        if (interactionLayer) {
+            // Check if hidden (in case of weird state), ensure visible
+            interactionLayer.classList.remove("hidden");
+            // Trigger typing
+            window.dispatchEvent(new Event("trigger-clear"));
+        }
+    }
+
+    function transitionToFastfetch() {
+        if (isAnimating) return;
+        isAnimating = true;
+
+        // Make sure interactionLayer is hidden (so we don't see double prompts)
+        if (interactionLayer) interactionLayer.classList.add("hidden");
+
+        // 1. Show Prompt "clear" (Reverse Layer)
+        // Ensure it's visible here? Wait, logic for reverse flow:
+        // When whoami completes, we show the reverse prompt.
+        if (interactionLayerReverse) {
+            interactionLayerReverse.classList.remove("hidden");
+
+            // Reset text manually just in case
+            const revText = document.getElementById("cmd-clear-reverse-text");
+            if (revText) revText.textContent = "";
+
+            window.dispatchEvent(new Event("trigger-clear-reverse"));
+        }
+    }
+
+    // EVENT HANDLERS
+
+    // 1. Fastfetch -> Clear -> Whoami
+    window.addEventListener("complete-clear", () => {
+        // Hide Fastfetch & Clear Command
+        if (stateFastfetch) stateFastfetch.classList.add("hidden");
+        if (interactionLayer) interactionLayer.classList.add("hidden");
+
+        // Show Whoami Prompt & Trigger it
+        if (stateWhoami) stateWhoami.classList.remove("hidden");
+        window.dispatchEvent(new Event("trigger-whoami"));
+    });
+
+    window.addEventListener("complete-whoami", () => {
+        if (outputWhoami) outputWhoami.classList.remove("hidden");
+
+        // HIDE CURSOR for whoami
+        const whoamiCursor = document.getElementById("cmd-whoami-cursor");
+        if (whoamiCursor) whoamiCursor.style.display = "none";
+
+        // Show the prompt for the next command (reverse flow) immediately
+        if (interactionLayerReverse) {
+            interactionLayerReverse.classList.remove("hidden");
+            interactionLayerReverse.classList.add("fade-in");
+            // Ensure Clean
+            const revText = document.getElementById("cmd-clear-reverse-text");
+            if (revText) revText.textContent = "";
+            const revCursor = document.getElementById(
+                "cmd-clear-reverse-cursor",
+            );
+            if (revCursor) revCursor.style.display = "inline-block";
+        }
+
+        currentState = "whoami";
+        isAnimating = false;
+    });
+
+    // 2. Whoami -> Clear -> Fastfetch
+    window.addEventListener("complete-clear-reverse", () => {
+        // Hide Whoami & Reverse Command
+        if (stateWhoami) stateWhoami.classList.add("hidden");
+        if (outputWhoami) outputWhoami.classList.add("hidden");
+        if (interactionLayerReverse)
+            interactionLayerReverse.classList.add("hidden");
+
+        // Show Fastfetch Container
+        if (stateFastfetch) stateFastfetch.classList.remove("hidden");
+
+        // Prepare for Re-Animation
+        // Hide output
+        if (outputFastfetchInit) outputFastfetchInit.classList.add("hidden");
+
+        // Note: TerminalCommand listener for 'trigger-fastfetch-init' will reset text automatically.
+        window.dispatchEvent(new Event("trigger-fastfetch-init"));
+
+        currentState = "fastfetch";
+        isAnimating = false;
+    });
+</script>
