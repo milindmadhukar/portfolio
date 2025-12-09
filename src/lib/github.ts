@@ -6,7 +6,7 @@ import os from "os";
 import { GITHUB_USERNAME, GITHUB_API_URL } from "./constants";
 
 const CACHE_FILE = path.join(os.tmpdir(), "github-stats-cache.json");
-const CACHE_DURATION = 1000 * 60 * 2; // 2 minutes
+const CACHE_DURATION = 1000 * 60; // 1 minute
 
 interface GithubStats {
   repos: number;

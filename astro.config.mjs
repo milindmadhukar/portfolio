@@ -11,10 +11,11 @@ import { remarkObsidianExcalidraw } from './src/plugins/remark-obsidian-excalidr
 // https://astro.build/config
 export default defineConfig({
   site: 'https://milind.dev',
+  output: 'server',
   adapter: vercel({
     imageService: true,
     isr: {
-      expiration: 120,
+      expiration: 60,
     },
   }),
   integrations: [react()],

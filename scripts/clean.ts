@@ -11,6 +11,7 @@ const pathsToDelete = [
   'dist',
   '.astro',
   'node_modules/.astro',
+  '.vercel'
 ];
 
 async function clean() {
@@ -18,7 +19,7 @@ async function clean() {
 
   for (const path of pathsToDelete) {
     const fullPath = join(process.cwd(), path);
-    
+
     try {
       if (existsSync(fullPath)) {
         await rm(fullPath, { recursive: true, force: true });
