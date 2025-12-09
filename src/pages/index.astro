@@ -7,8 +7,10 @@ import DiscordStatus from "../components/DiscordStatus";
 import SocialIcons from "../components/SocialIcons.astro";
 import { personalInfo, experience, education } from "../lib/constants";
 
-import { SOCIAL_CONFIG, TERMINAL_CONFIG, BIRTH_DATE } from "../lib/constants";
+import { SOCIAL_CONFIG, TERMINAL_CONFIG, BIRTH_DATE, DISCORD_ID } from "../lib/constants";
 import { getBlogPosts } from "../lib/blog";
+
+export const prerender = false;
 
 const githubStats = await fetchGithubStats();
 const posts = getBlogPosts();
@@ -210,7 +212,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 					<div>
 						<DiscordStatus
 							client:load
-							userId={import.meta.env.DISCORD_USER_ID}
+							userId={DISCORD_ID}
 							socketUrl={import.meta.env.LANYARD_SOCKET_URL}
 						/>
 					</div>

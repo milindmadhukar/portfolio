@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import { personalInfo } from "../lib/constants";
 import ThemeSwitcher from "../components/ThemeSwitcher.tsx";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 interface Props {
     title?: string;
@@ -94,5 +96,7 @@ const {
         <div class={includePadding ? "p-8" : "p-0"}>
             <slot />
         </div>
+        <Analytics client:load />
+        <SpeedInsights client:load />
     </body>
 </html>

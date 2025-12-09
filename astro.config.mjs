@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@astrojs/react';
@@ -10,6 +11,12 @@ import { remarkObsidianExcalidraw } from './src/plugins/remark-obsidian-excalidr
 // https://astro.build/config
 export default defineConfig({
   site: 'https://milind.dev',
+  adapter: vercel({
+    imageService: true,
+    isr: {
+      expiration: 120,
+    },
+  }),
   integrations: [react()],
   server: {
     host: true
@@ -27,13 +34,6 @@ export default defineConfig({
     shikiConfig: {
       theme: 'dracula',
       wrap: true
-    }
-  },
-
-  image: {
-    // Enable image optimization for all images
-    service: {
-      entrypoint: 'astro/assets/services/sharp'
     }
   }
 });

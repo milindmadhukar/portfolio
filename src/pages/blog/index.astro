@@ -6,6 +6,8 @@ import TerminalPrompt from '../../components/TerminalPrompt.astro';
 import { getBlogPosts } from '../../lib/blog';
 import SocialIcons from '../../components/SocialIcons.astro';
 
+export const prerender = false;
+
 const posts = getBlogPosts();
 const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
 ---
