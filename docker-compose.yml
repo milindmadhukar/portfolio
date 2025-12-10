@@ -1,11 +1,11 @@
 services:
   portfolio:
+    build: ./website
     image: ghcr.io/milindmadhukar/portfolio:latest
     container_name: portfolio
     restart: always
     environment:
       - NODE_ENV=production
-
       - BLOG_REPO_URL=${BLOG_REPO_URL}
       - LANYARD_SOCKET_URL=${LANYARD_SOCKET_URL}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
@@ -15,6 +15,19 @@ services:
       - "traefik.http.routers.portfolio.entrypoints=web,websecure"
       - "traefik.http.routers.portfolio.tls.certresolver=milindsresolver"
       - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - reverse_proxy
+
+  ssh-portfolio:
+    image: ghcr.io/milindmadhukar/portfolio-ssh:latest
+    container_name: ssh-portfolio
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ssh.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.ssh.entrypoints=ssh"
+      - "traefik.tcp.services.ssh.loadbalancer.server.port=2222"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - reverse_proxy

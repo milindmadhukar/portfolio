@@ -20,6 +20,16 @@ jobs:
       contents: read
       packages: write
       id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: portfolio
+            context: ./website
+            image-name: ${{ github.repository }}
+          - name: ssh-portfolio
+            context: ./ssh-server
+            image-name: ${{ github.repository }}-ssh
 
     steps:
       - name: Checkout repository
@@ -49,7 +59,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ matrix.image-name }}
           tags: |
             type=raw,value=latest
             type=sha
@@ -58,13 +68,13 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ${{ matrix.context }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
           # build-args are not needed for secrets when using --mount
           secrets: |
             gh_token=${{ secrets.PAT_TOKEN }}
