@@ -20,6 +20,19 @@
 @theme {
     --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    --animate-gold-pulse: gold-pulse 3s infinite ease-in-out;
+
+    @keyframes gold-pulse {
+        0%, 100% {
+            background-color: transparent;
+            box-shadow: none;
+        }
+        50% {
+            background-color: rgba(249, 226, 175, 0.1);
+            box-shadow: 0 0 8px rgba(249, 226, 175, 0.4);
+        }
+    }
 }
 
 @layer components {
