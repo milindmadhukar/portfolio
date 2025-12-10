@@ -5,7 +5,7 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-      - BLOG_REPO_GH_TOKEN=${BLOG_REPO_GH_TOKEN}
+
       - BLOG_REPO_URL=${BLOG_REPO_URL}
       - LANYARD_SOCKET_URL=${LANYARD_SOCKET_URL}
       - GITHUB_TOKEN=${GITHUB_TOKEN}

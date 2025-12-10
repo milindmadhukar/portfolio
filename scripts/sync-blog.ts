@@ -22,14 +22,14 @@ const KEEP_FILES = ['index.astro', 'rss.xml.ts'];
 
 async function cleanupBlogFolder() {
   console.log('🧹 Cleaning up old blog posts...');
-  
+
   try {
     if (!existsSync(BLOG_DEST)) {
       return; // Nothing to clean
     }
 
     const items = await readdir(BLOG_DEST, { withFileTypes: true });
-    
+
     for (const item of items) {
       // Skip files/folders we want to keep
       if (KEEP_FILES.includes(item.name)) {
@@ -37,10 +37,10 @@ async function cleanupBlogFolder() {
       }
 
       const itemPath = join(BLOG_DEST, item.name);
-      
+
       await rm(itemPath, { recursive: true, force: true });
     }
-    
+
     console.log('✓ Cleanup complete');
   } catch (error) {
     console.error('Error cleaning up blog folder:', error);
@@ -56,7 +56,7 @@ async function syncFromLocal(sourcePath: string) {
 
   try {
     const items = await readdir(sourcePath, { withFileTypes: true });
-    
+
     for (const item of items) {
       if (item.name.startsWith('.') || EXCLUDE_ITEMS.includes(item.name)) {
         continue;
@@ -69,7 +69,7 @@ async function syncFromLocal(sourcePath: string) {
         if (existsSync(destPath)) {
           await rm(destPath, { recursive: true, force: true });
         }
-        
+
         await cp(itemSourcePath, destPath, { recursive: true });
       }
     }
@@ -81,7 +81,7 @@ async function syncFromLocal(sourcePath: string) {
 
 async function syncFromGitHub(token: string) {
   const tempDir = join(process.cwd(), 'blog-content-temp');
-  
+
   try {
     if (existsSync(tempDir)) {
       await rm(tempDir, { recursive: true, force: true });
@@ -91,7 +91,7 @@ async function syncFromGitHub(token: string) {
       'https://',
       `https://${token}@`
     );
-    
+
     try {
       execSync(`git clone --depth 1 ${repoUrlWithAuth} ${tempDir}`, {
         stdio: 'pipe'
@@ -102,7 +102,7 @@ async function syncFromGitHub(token: string) {
 
     // Copy content to blog folder
     const items = await readdir(tempDir, { withFileTypes: true });
-    
+
     for (const item of items) {
       if (item.name.startsWith('.') || EXCLUDE_ITEMS.includes(item.name)) {
         continue;
@@ -116,7 +116,7 @@ async function syncFromGitHub(token: string) {
         if (existsSync(destPath)) {
           await rm(destPath, { recursive: true, force: true });
         }
-        
+
         await cp(itemSourcePath, destPath, { recursive: true });
       }
     }
@@ -125,12 +125,12 @@ async function syncFromGitHub(token: string) {
     await rm(tempDir, { recursive: true, force: true });
   } catch (error) {
     console.error('Error syncing from GitHub:', error);
-    
+
     // Clean up on error
     if (existsSync(tempDir)) {
       await rm(tempDir, { recursive: true, force: true });
     }
-    
+
     process.exit(1);
   }
 }
@@ -138,10 +138,10 @@ async function syncFromGitHub(token: string) {
 async function main() {
   // Clean up old blog posts before syncing
   await cleanupBlogFolder();
-  
+
   // Check for local folder first (development)
   let localPath = process.env.BLOG_FOLDER_PATH;
-  const githubToken = process.env.BLOG_REPO_GH_TOKEN;
+  const githubToken = process.env.GITHUB_TOKEN;
 
   // Expand ~ to home directory
   if (localPath && localPath.startsWith('~')) {
