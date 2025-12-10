@@ -142,10 +142,15 @@ import { TERMINAL_CONFIG } from "../lib/constants";
         <div
             class="flex flex-col items-center gap-2 animate-bounce text-ctp-peach drop-shadow-md"
         >
-            <span class="text-sm font-bold font-mono tracking-widest"
-                >SCROLL</span
-            >
-            <i class="nf nf-fa-angle_down text-2xl"></i>
+            <div class="flex flex-col items-center">
+                <span class="text-xs font-bold font-mono tracking-widest mb-1"
+                    >SCROLL OR PRESS</span
+                >
+                <div class="flex gap-2 text-xl">
+                    <i class="nf nf-fa-angle_up"></i>
+                    <i class="nf nf-fa-angle_down"></i>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -303,6 +308,46 @@ import { TERMINAL_CONFIG } from "../lib/constants";
             window.dispatchEvent(new Event("trigger-clear-reverse"));
         }
     }
+
+    // KEYBOARD NAVIGATION
+    window.addEventListener("keydown", (e) => {
+        const container = document.getElementById("desktop-scroll-container");
+        // Check if container is visible (offsetParent is null if hidden)
+        if (!container || container.offsetParent === null) return;
+
+        // Only handle Up/Down keys
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+            e.preventDefault();
+
+            const height = container.clientHeight;
+            const currentScroll = container.scrollTop;
+            const totalSections = document.querySelectorAll(
+                "section[data-state]",
+            ).length;
+
+            // Calculate current index (0-based)
+            const currentIndex = Math.round(currentScroll / height);
+
+            let targetIndex = currentIndex;
+
+            if (e.key === "ArrowDown") {
+                targetIndex = currentIndex + 1;
+            } else if (e.key === "ArrowUp") {
+                targetIndex = currentIndex - 1;
+            }
+
+            // Clamp index
+            if (targetIndex < 0) targetIndex = 0;
+            if (targetIndex >= totalSections) targetIndex = totalSections - 1;
+
+            if (targetIndex !== currentIndex) {
+                container.scrollTo({
+                    top: targetIndex * height,
+                    behavior: "smooth",
+                });
+            }
+        }
+    });
 
     // EVENT HANDLERS
 
