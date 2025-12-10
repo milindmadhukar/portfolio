@@ -1,6 +1,9 @@
 FROM oven/bun:1 AS base
 WORKDIR /app
 
+# Install git for cloning blog repo
+RUN apt-get update && apt-get install -y git
+
 # Copy package files
 COPY package.json bun.lock ./
 
