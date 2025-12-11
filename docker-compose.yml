@@ -1,5 +1,6 @@
 services:
   portfolio:
+    build: ./website
     image: ghcr.io/milindmadhukar/portfolio:latest
     container_name: portfolio
     restart: always
@@ -28,6 +29,13 @@ services:
       - "traefik.tcp.routers.ssh.entrypoints=ssh"
       - "traefik.tcp.services.ssh.loadbalancer.server.port=2222"
       - "com.centurylinklabs.watchtower.enable=true"
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-priviseges:true
+    volumes:
+      - ./ssh_data:/data
     networks:
       - reverse_proxy
 
