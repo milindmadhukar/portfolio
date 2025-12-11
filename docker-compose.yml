@@ -1,6 +1,5 @@
 services:
   portfolio:
-    build: ./website
     image: ghcr.io/milindmadhukar/portfolio:latest
     container_name: portfolio
     restart: always
@@ -13,7 +12,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.portfolio.rule=Host(`milind.dev`)"
       - "traefik.http.routers.portfolio.entrypoints=web,websecure"
-      - "traefik.http.routers.portfolio.tls.certresolver=milindsresolver"
+      - "traefik.http.routers.portfolio.tls.certresolver=milindresolver"
       - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
