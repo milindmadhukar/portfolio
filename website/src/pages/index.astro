@@ -62,13 +62,19 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 				months += 12;
 			}
 
+			// Elapsed unix time: seconds since DOB (how much "unix time" has ticked by)
+			const unixSeconds = Math.floor(
+				(now.getTime() - birthDate.getTime()) / 1000,
+			);
+
 			const uptimeElements = document.querySelectorAll(".uptime");
 			uptimeElements.forEach((el) => {
-				el.textContent = `${years} years, ${months} months, ${days} days`;
+				el.textContent = `${years} years, ${months} months, ${days} days (${unixSeconds.toLocaleString()}s)`;
 			});
 		}
 
-		setInterval(updateUptime, 86400000);
+		// Tick every second so the elapsed-seconds counter stays live.
+		setInterval(updateUptime, 1000);
 		updateUptime();
 	</script>
 </Layout>

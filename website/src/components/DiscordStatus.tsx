@@ -47,6 +47,15 @@ interface DiscordStatusProps {
   socketUrl: string;
 }
 
+// Playful labels for each Discord presence state (Lanyard `discord_status`).
+// Possible values: "online" | "idle" | "dnd" | "offline".
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  online: { label: "online & vibing", color: "text-ctp-green" },
+  idle: { label: "afk (probably chai)", color: "text-ctp-yellow" },
+  dnd: { label: "locked in", color: "text-ctp-red" },
+  offline: { label: "touching grass", color: "text-ctp-overlay1" },
+};
+
 export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps) {
   const [status, setStatus] = useState<LanyardData | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -158,13 +167,11 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
           <i className="nf nf-md-discord"></i> Status
         </span>
         <span> : </span>
-        <span className={
-          status.discord_status === 'online' ? 'text-ctp-green' :
-            status.discord_status === 'idle' ? 'text-ctp-yellow' :
-              status.discord_status === 'dnd' ? 'text-ctp-red' :
-                'text-ctp-overlay1'
-        }>
-          {status.discord_status}
+        <span
+          className={(STATUS_MAP[status.discord_status] ?? STATUS_MAP.offline).color}
+          title={status.discord_status}
+        >
+          {(STATUS_MAP[status.discord_status] ?? STATUS_MAP.offline).label}
         </span>
       </div>
 

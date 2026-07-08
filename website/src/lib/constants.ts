@@ -157,9 +157,10 @@ export const projects = [
 
 export const experience = [
   {
-    id: "grass-labs",
-    title: "DevOps Lead",
-    company: "Grass Labs Pte Ltd",
+    id: "openfin",
+    title: "Lead - AI Initiatives",
+    company: "Openfin Technologies",
+    website: "https://openfinventures.com",
     location: "Remote",
     type: "Full-time",
     startDate: "2024-04-01",

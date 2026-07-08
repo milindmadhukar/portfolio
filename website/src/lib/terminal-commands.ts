@@ -66,7 +66,7 @@ export const getFastfetch = async () => {
     info.push(overlay("--------------------------"));
 
     // Role
-    info.push(`${blue(" Role")} : DevOps & Backend Engineer`);
+    info.push(`${blue(" Role")} : ${experience[0]?.title ?? "DevOps & Backend Engineer"}`);
 
     // Work
     if (experience[0]) {
@@ -88,7 +88,8 @@ export const getFastfetch = async () => {
 
     // Blog
     const blogCount = posts.length;
-    info.push(`${yellow(" Blog")} ${overlay("::")} ${text(`${blogCount} articles`)} ${subtext("[READ]")}`);
+    if (blogCount > 0)
+        info.push(`${yellow(" Blog")} ${overlay("::")} ${text(`${blogCount} articles`)} ${subtext("[READ]")}`);
 
     // Latest Post
     if (posts.length > 0) {

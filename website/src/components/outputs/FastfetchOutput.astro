@@ -75,13 +75,24 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-map_marker"></i> Role</span
                 >
-                <span> : DevOps & Backend Engineer</span>
+                <span> : {experience[0].title}</span>
             </div>
             <div>
-                <span class="text-ctp-blue"
-                    ><i class="nf nf-fa-building"></i> Work</span
+                <a
+                    href={experience[0].website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="group inline-flex items-center -ml-2 px-2 rounded w-fit"
                 >
-                <span> : {experience[0].company}</span>
+                    <span class="text-ctp-blue"
+                        ><i class="nf nf-fa-building"></i> Work</span
+                    >
+                    <span> : </span>
+                    <span
+                        class="text-ctp-text group-hover:underline decoration-ctp-teal underline-offset-4 group-hover:text-ctp-teal transition-colors"
+                        >{experience[0].company}</span
+                    >
+                </a>
             </div>
             <div>
                 <span class="text-ctp-blue"
@@ -101,26 +112,27 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                 >
                 <span> : </span><span class="uptime">Loading...</span>
             </div>
-            <div>
-                <a
-                    href="/blog"
-                    class="group flex items-center gap-2 animate-gold-pulse -ml-2 px-2 rounded w-fit"
-                >
-                    <span
-                        class="text-ctp-yellow font-bold group-hover:text-ctp-teal transition-colors"
-                        ><i class="nf nf-md-file_document"></i> Blog</span
-                    >
-                    <span class="text-ctp-overlay2">::</span>
-                    <span
-                        class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4"
-                        >{posts.length} articles</span
-                    >
-                    <span
-                        class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >[READ]</span
-                    >
-                </a>
-            </div>
+            {
+                posts.length > 0 && (
+                    <div>
+                        <a
+                            href="/blog"
+                            class="group flex items-center gap-2 animate-gold-pulse -ml-2 px-2 rounded w-fit"
+                        >
+                            <span class="text-ctp-yellow font-bold group-hover:text-ctp-teal transition-colors">
+                                <i class="nf nf-md-file_document" /> Blog
+                            </span>
+                            <span class="text-ctp-overlay2">::</span>
+                            <span class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4">
+                                {posts.length} articles
+                            </span>
+                            <span class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                [READ]
+                            </span>
+                        </a>
+                    </div>
+                )
+            }
             {
                 latestPost && (
                     <div>
