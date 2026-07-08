@@ -7,6 +7,7 @@ export const TERMINAL_CONFIG = {
 
 export const BIRTH_DATE = "2004-04-15";
 export const GARRIX_FAN_SINCE = "2016-01-01";
+export const EXPERIENCE_START_DATE = "2024-07-01";
 
 export const SOCIAL_CONFIG: Record<string, { icon: string; color: string }> = {
   github: { icon: "nf-fa-github", color: "#6e5494" },

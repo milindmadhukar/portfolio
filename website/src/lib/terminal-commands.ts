@@ -19,8 +19,10 @@ import {
     personalInfo,
     projects,
     DISCORD_ID,
+    EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
+import { calculateExperience } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
 
@@ -80,7 +82,7 @@ export const getFastfetch = async () => {
     }
 
     // Experience
-    info.push(`${blue(" Experience")} : 5 years, 4 clients, 8 projects`);
+    info.push(`${blue(" Experience")} : ${calculateExperience(new Date(EXPERIENCE_START_DATE))}`);
 
     // Uptime (Mock for static)
     // Note: Uptime is tricky since it's client-side JS. We'll put a placeholder or basic calcs.

@@ -3,10 +3,12 @@ import { fetchGithubStats } from "../../lib/github";
 import { formatTimeAgo } from "../../lib/date";
 import DiscordStatus from "../DiscordStatus";
 import SocialIcons from "../SocialIcons.astro";
-import { experience, education, DISCORD_ID } from "../../lib/constants";
+import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE } from "../../lib/constants";
 import { getBlogPosts } from "../../lib/blog";
+import { calculateExperience } from "../../lib/utils";
 
 const githubStats = await fetchGithubStats();
+const experienceLabel = calculateExperience(new Date(EXPERIENCE_START_DATE));
 const posts = getBlogPosts();
 const latestPost = posts.length > 0 ? posts[0] : null;
 ---
@@ -103,7 +105,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-briefcase"></i> Experience</span
                 >
-                <span> : 5 years, 4 clients, 8 projects</span>
+                <span> : {experienceLabel}</span>
             </div>
             <div>
                 <span class="text-ctp-blue"
