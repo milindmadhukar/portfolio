@@ -2,7 +2,7 @@
 import { personalInfo } from "../../lib/constants";
 ---
 
-<div class="fade-in max-w-2xl text-ctp-text">
+<div class="fade-in max-w-4xl text-ctp-text">
     <div class="mb-4">
         <span class="text-ctp-green font-bold text-xl">{personalInfo.name}</span
         >
@@ -18,5 +18,24 @@ import { personalInfo } from "../../lib/constants";
     </div>
     <div class="whitespace-pre-wrap leading-relaxed text-ctp-subtext0">
         {personalInfo.bio.long}
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-ctp-subtext0">
+        <a
+            href={personalInfo.links.plusxhub}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-ctp-blue hover:underline"
+        >
+            <i class="nf nf-fa-instagram"></i> Plusxhub — my MG community
+        </a>
+        <a
+            href={personalInfo.links.garrixPlaylist}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-ctp-blue hover:underline"
+        >
+            <i class="nf nf-fa-spotify"></i> My Martin Garrix playlist
+        </a>
     </div>
 </div>

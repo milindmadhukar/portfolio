@@ -1,4 +1,4 @@
-import { calculateAge } from "./date";
+import { calculateAge, yearsSince } from "./date";
 
 export const TERMINAL_CONFIG = {
   user: "portfolio",
@@ -6,6 +6,7 @@ export const TERMINAL_CONFIG = {
 };
 
 export const BIRTH_DATE = "2004-04-15";
+export const GARRIX_FAN_SINCE = "2016-01-01";
 
 export const SOCIAL_CONFIG: Record<string, { icon: string; color: string }> = {
   github: { icon: "nf-fa-github", color: "#6e5494" },
@@ -33,13 +34,18 @@ export const personalInfo = {
   },
 
   bio: {
-    short: "Building fast backend systems and tinkering with Linux",
-    long: `I'm a ${calculateAge(BIRTH_DATE)} year old developer who gets way too excited about Linux, DevOps magic, system admin wizardry, and everything open source. When I'm not neck-deep in Neovim configs or homelabbing the night away, I'm either building blazingly fast backend systems or self-hosting things just because I can.
+    short: "I build useful software and tinker with anything that has a chip in it.",
+    long: `I'm a ${calculateAge(BIRTH_DATE)} year old developer who's been obsessed with tech for as long as I can remember — gadgets, phones, computers, smart devices, servers, basically anything with a chip in it. I started programming when I was young, poking at things to see how they worked, and I never really stopped. These days I care most about building software that's genuinely useful.
 
-Currently orchestrating chaos at scale with containers, because who needs stability when you can have Docker networks that make sense only to you?`,
+Away from the screen I mess with electronics and solder together stupid little circuits for the fun of it. The rest of my free time goes to music — I DJ, and I've been a Martin Garrix fan since 2016 (${yearsSince(GARRIX_FAN_SINCE)} years and counting). I also run Plusxhub, a 100k+ Instagram community I grew from nothing for fans like me. Whatever I'm working on, I'm always trying to get a little better at it.`,
   },
 
-  tagline: "Linux Enthusiast • DevOps Nerd • Backend Builder • Homelab Wizard",
+  tagline: "Developer • Hardware tinkerer • Music obsessive",
+
+  links: {
+    plusxhub: "https://www.instagram.com/plusxhub/",
+    garrixPlaylist: "https://open.spotify.com/playlist/4lL415o4NDd2cOm2OSF6TS",
+  },
 
   social: [
     {

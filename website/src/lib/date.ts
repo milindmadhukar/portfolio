@@ -196,6 +196,15 @@ export function calculateAge(birthDate: string): number {
   return age;
 }
 
+/**
+ * Full years elapsed since a YYYY-MM-DD date (reuses calculateAge math).
+ * @param sinceDate - Start date string in YYYY-MM-DD format
+ * @returns Whole years elapsed since that date
+ */
+export function yearsSince(sinceDate: string): number {
+  return calculateAge(sinceDate);
+}
+
 export function formatTimeAgo(date: Date): string {
   const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
 
