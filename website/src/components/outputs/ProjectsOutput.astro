@@ -1,0 +1,55 @@
+---
+import { projects } from "../../lib/constants";
+
+// Directory names (project id + trailing slash). Width drives monospace column
+// alignment so the listing reads like real `ls -la` output.
+const names = projects.map((p) => `${p.id}/`);
+const nameWidth = Math.max(...names.map((n) => n.length)) + 1;
+---
+
+<div class="fade-in max-w-4xl text-ctp-text leading-snug font-mono">
+    <div class="text-ctp-subtext0 mb-2">total {projects.length}</div>
+
+    <div class="flex flex-col gap-3">
+        {
+            projects.map((p, i) => (
+                <div>
+                    {/* Listing row: permissions  owner  name/  description */}
+                    <div class="flex flex-wrap items-baseline gap-x-3">
+                        <span class="text-ctp-subtext0">drwxr-xr-x</span>
+                        <span class="text-ctp-overlay1">milind</span>
+                        <span
+                            class="text-ctp-blue font-bold inline-block"
+                            style={`min-width: ${nameWidth}ch`}
+                        >
+                            {names[i]}
+                        </span>
+                        <span class="text-ctp-text">{p.description}</span>
+                    </div>
+
+                    {/* Expanded details: tech tags, then GitHub link */}
+                    <div class="text-ctp-subtext0 pl-4">
+                        <span class="text-ctp-overlay1">├─</span>{" "}
+                        {p.technologies.join(" · ")}
+                    </div>
+                    <div class="pl-4">
+                        <span class="text-ctp-overlay1">└─</span>{" "}
+                        {p.links.github ? (
+                            <a
+                                href={p.links.github}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="text-ctp-teal hover:underline"
+                            >
+                                <i class="nf nf-fa-github" />{" "}
+                                {p.links.github.replace(/^https?:\/\//, "")}
+                            </a>
+                        ) : (
+                            <span class="text-ctp-subtext0">source private</span>
+                        )}
+                    </div>
+                </div>
+            ))
+        }
+    </div>
+</div>

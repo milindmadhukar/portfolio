@@ -3,6 +3,7 @@ import TerminalPrompt from "./TerminalPrompt.astro";
 import TerminalCommand from "./TerminalCommand.astro";
 import FastfetchOutput from "./outputs/FastfetchOutput.astro";
 import WhoamiOutput from "./outputs/WhoamiOutput.astro";
+import ProjectsOutput from "./outputs/ProjectsOutput.astro";
 import { TERMINAL_CONFIG } from "../lib/constants";
 
 // Configuration for mobile commands
@@ -18,6 +19,12 @@ const commands = [
         command: "whoami",
         output: WhoamiOutput,
         triggerEvent: "trigger-mobile-whoami",
+    },
+    {
+        id: "mobile-projects",
+        command: "ls projects/",
+        output: ProjectsOutput,
+        triggerEvent: "trigger-mobile-projects",
     },
 ];
 ---

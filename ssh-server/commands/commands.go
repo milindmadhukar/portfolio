@@ -13,6 +13,7 @@ var apiURL string
 type APIResponse struct {
 	Fastfetch string `json:"fastfetch"`
 	Whoami    string `json:"whoami"`
+	Projects  string `json:"projects"`
 	Help      string `json:"help"`
 }
 
@@ -42,6 +43,14 @@ func HandleCommand(input string, user string) string {
 		return data.Whoami + "\n"
 	case "fastfetch":
 		return data.Fastfetch + "\n"
+	case "projects":
+		return data.Projects + "\n"
+	case "ls":
+		// Only `ls projects` / `ls projects/` maps to the projects listing.
+		if len(args) > 1 && (args[1] == "projects" || args[1] == "projects/") {
+			return data.Projects + "\n"
+		}
+		return fmt.Sprintf("ls: cannot access '%s': No such file or directory\n", strings.Join(args[1:], " "))
 	case "help":
 		return data.Help + "\n"
 	case "exit":
