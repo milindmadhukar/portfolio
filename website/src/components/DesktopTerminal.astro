@@ -18,21 +18,18 @@ const states = [
 ---
 
 <!--
-    Snap Scroll Container
-    - h-screen & overflow-y-scroll: Creates a scrollable area within the viewport.
-    - snap-y & snap-mandatory: Enforces snapping to child elements.
+    Full-page section controller (see <script> below).
+    Native scrolling is disabled — each wheel / key / touch gesture advances the
+    terminal by exactly one section. `currentIndex` is the single source of truth,
+    so the visible state can never desync from a scroll position.
 -->
 <div
-    class="h-screen w-full overflow-y-scroll snap-y snap-mandatory relative scroll-smooth"
+    class="h-screen w-full overflow-hidden relative"
     id="desktop-scroll-container"
 >
-    <!--
-        Sticky Visual Layer
-        Using sticky + negative margin ensures scroll events bubble correctly within the container
-        instead of escaping to the body (which has overflow:hidden).
-    -->
+    <!-- Full-viewport visual layer: one section fills the whole screen. -->
     <div
-        class="sticky top-0 h-screen w-full z-20 flex flex-col pt-12 pointer-events-none p-8"
+        class="absolute inset-0 h-screen w-full z-20 flex flex-col pt-12 pointer-events-none p-8"
     >
         <div
             id="terminal-content"
@@ -92,19 +89,6 @@ const states = [
         </div>
     </div>
 
-    <!-- Scroll Track (Ghost Sections for Snapping) -->
-    <div class="relative z-10 w-full -mt-[100vh]">
-        {
-            states.map((state, index) => (
-                <section
-                    class="h-screen w-full snap-start"
-                    data-state={state.key}
-                    data-index={index}
-                />
-            ))
-        }
-    </div>
-
     <!-- Scroll Indicator -->
     <div
         id="scroll-indicator"
@@ -126,39 +110,20 @@ const states = [
     </div>
 </div>
 
-<style>
-    /* Catppuccin Scrollbar */
-    #desktop-scroll-container {
-        scrollbar-width: thin;
-        scrollbar-color: var(--color-ctp-surface0) transparent;
-    }
-
-    #desktop-scroll-container::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    #desktop-scroll-container::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    #desktop-scroll-container::-webkit-scrollbar-thumb {
-        background-color: var(--color-ctp-surface0);
-        border-radius: 9999px;
-    }
-
-    #desktop-scroll-container::-webkit-scrollbar-thumb:hover {
-        background-color: var(--color-ctp-surface1);
-    }
-</style>
-
 <script define:vars={{ stateKeys: states.map((s) => s.key) }}>
     const lastIndex = stateKeys.length - 1;
 
-    // Controller state
+    // Controller state — `currentIndex` is the single source of truth for which
+    // section is visible. There is no native scroll position to fall out of sync
+    // with it, so the old "stuck between sections" desync is impossible.
     let currentIndex = 0;
     let isAnimating = false;
     let pendingTarget = 0;
+    // A navigation intent (+1 / -1) requested while a transition is mid-flight.
+    // The latest one wins, so reversing direction mid-animation is honoured.
+    let queuedDir = 0;
 
+    const container = document.getElementById("desktop-scroll-container");
     const scrollIndicator = document.getElementById("scroll-indicator");
 
     // Element lookups
@@ -209,6 +174,13 @@ const states = [
             currentIndex = idx;
             isAnimating = false;
             updateIndicator();
+
+            // Apply any gesture that arrived while we were animating.
+            if (queuedDir !== 0) {
+                const dir = queuedDir;
+                queuedDir = 0;
+                navigate(dir);
+            }
         });
 
         // "clear" finished typing -> swap to the pending target and type its command.
@@ -246,57 +218,90 @@ const states = [
         }
     }
 
-    // Scroll snapping drives transitions.
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting && !isAnimating) {
-                    const targetIndex = Number(entry.target.dataset.index);
-                    if (targetIndex !== currentIndex) {
-                        startTransition(targetIndex);
-                    }
-                }
-            });
-        },
-        {
-            root: document.getElementById("desktop-scroll-container"),
-            threshold: 0.5,
-        },
-    );
+    // Central navigation entry point. `dir` is +1 (down) or -1 (up).
+    // While a transition is animating, the intent is queued (latest wins) so a
+    // reversal mid-flight is respected instead of dropped.
+    function navigate(dir) {
+        if (dir === 0) return;
+        if (isAnimating) {
+            queuedDir = dir;
+            return;
+        }
+        const target = Math.min(lastIndex, Math.max(0, currentIndex + dir));
+        if (target === currentIndex) return; // clamped at an edge — no-op
+        startTransition(target);
+    }
 
-    document.querySelectorAll("section[data-state]").forEach((section) => {
-        observer.observe(section);
-    });
+    // --- Wheel: one gesture = exactly one section ------------------------------
+    // A continuous scroll (and trackpad inertia) fires a burst of wheel events.
+    // We act on the first event of a burst, then stay locked until the wheel has
+    // been idle for a moment — so the length/speed of the scroll is irrelevant.
+    const WHEEL_IDLE_MS = 180;
+    const WHEEL_MIN_DELTA = 4;
+    let wheelLocked = false;
+    let wheelIdleTimer = null;
 
-    // Keyboard navigation (Up/Down steps between sections).
+    if (container) {
+        container.addEventListener(
+            "wheel",
+            (e) => {
+                // Nothing scrolls natively; block rubber-band / parent scroll.
+                e.preventDefault();
+
+                // Every event (including inertial ones) postpones the unlock,
+                // so one physical gesture stays collapsed into a single step.
+                clearTimeout(wheelIdleTimer);
+                wheelIdleTimer = setTimeout(() => {
+                    wheelLocked = false;
+                }, WHEEL_IDLE_MS);
+
+                if (wheelLocked) return;
+                if (Math.abs(e.deltaY) < WHEEL_MIN_DELTA) return;
+
+                wheelLocked = true;
+                navigate(e.deltaY > 0 ? 1 : -1);
+            },
+            { passive: false },
+        );
+    }
+
+    // --- Keyboard --------------------------------------------------------------
     window.addEventListener("keydown", (e) => {
-        const container = document.getElementById("desktop-scroll-container");
         if (!container || container.offsetParent === null) return;
 
-        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
             e.preventDefault();
-
-            const height = container.clientHeight;
-            const currentScroll = container.scrollTop;
-            const totalSections = document.querySelectorAll(
-                "section[data-state]",
-            ).length;
-
-            const scrollIndex = Math.round(currentScroll / height);
-            let targetIndex = scrollIndex;
-
-            if (e.key === "ArrowDown") targetIndex = scrollIndex + 1;
-            else if (e.key === "ArrowUp") targetIndex = scrollIndex - 1;
-
-            if (targetIndex < 0) targetIndex = 0;
-            if (targetIndex >= totalSections) targetIndex = totalSections - 1;
-
-            if (targetIndex !== scrollIndex) {
-                container.scrollTo({
-                    top: targetIndex * height,
-                    behavior: "smooth",
-                });
-            }
+            navigate(1);
+        } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+            e.preventDefault();
+            navigate(-1);
         }
     });
+
+    // --- Touch: one swipe = one section ---------------------------------------
+    const TOUCH_THRESHOLD = 40;
+    let touchStartY = null;
+
+    if (container) {
+        container.addEventListener(
+            "touchstart",
+            (e) => {
+                touchStartY = e.touches[0].clientY;
+            },
+            { passive: true },
+        );
+        container.addEventListener(
+            "touchmove",
+            (e) => {
+                e.preventDefault(); // no native panning
+            },
+            { passive: false },
+        );
+        container.addEventListener("touchend", (e) => {
+            if (touchStartY === null) return;
+            const dy = touchStartY - e.changedTouches[0].clientY;
+            touchStartY = null;
+            if (Math.abs(dy) > TOUCH_THRESHOLD) navigate(dy > 0 ? 1 : -1);
+        });
+    }
 </script>

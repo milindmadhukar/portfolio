@@ -36,6 +36,25 @@
       box-shadow: 0 0 8px rgba(249, 226, 175, 0.4);
     }
   }
+
+  /* One-shot blue glow when a project row is expanded — a brighter,
+   * quicker cousin of gold-pulse, tinted to the blue project names. */
+  @keyframes project-open-glow {
+    0% {
+      background-color: transparent;
+      box-shadow: none;
+    }
+
+    45% {
+      background-color: rgba(137, 180, 250, 0.12);
+      box-shadow: 0 0 12px rgba(137, 180, 250, 0.45);
+    }
+
+    100% {
+      background-color: rgba(137, 180, 250, 0.06);
+      box-shadow: none;
+    }
+  }
 }
 
 @layer components {
