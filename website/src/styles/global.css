@@ -77,6 +77,21 @@
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+/*
+ * Theme-switch transition suppression.
+ * Some elements (e.g. the Spotify "Listening to" link and the GitHub/blog
+ * links) use `transition-colors` for their hover effect. Their text color is
+ * theme-driven, so on a theme toggle they would animate their color change and
+ * visibly lag behind the surrounding text, which recolors instantly.
+ * ThemeSwitcher adds `.theme-switching` to <html> for a single frame around the
+ * toggle so the whole page recolors atomically. Hover transitions are unaffected.
+ */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 /* Shiki Theme Switching */
 /* 
  * Astro's Shiki integration applies the 'light' theme as default inline styles (color: #...).

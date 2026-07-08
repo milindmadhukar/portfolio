@@ -21,15 +21,29 @@ export default function ThemeSwitcher() {
     useEffect(() => {
         if (!mounted) return;
 
+        const root = document.documentElement;
+
+        // Suppress CSS transitions for one frame so theme-driven colors (e.g. the
+        // Spotify and GitHub links, which use transition-colors for hover) recolor
+        // instantly instead of visibly lagging behind the rest of the page.
+        root.classList.add("theme-switching");
+
         // Apply theme to document
         if (theme === "latte") {
-            document.documentElement.classList.add("latte");
+            root.classList.add("latte");
         } else {
-            document.documentElement.classList.remove("latte");
+            root.classList.remove("latte");
         }
 
         // Persist to localStorage
         localStorage.setItem("theme", theme);
+
+        // Force a reflow so the transition-less recolor is committed, then
+        // re-enable transitions on the next frame.
+        void root.offsetHeight;
+        requestAnimationFrame(() => {
+            root.classList.remove("theme-switching");
+        });
     }, [theme, mounted]);
 
     const toggleTheme = () => {
