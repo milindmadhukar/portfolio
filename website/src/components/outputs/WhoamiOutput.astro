@@ -1,33 +1,29 @@
 ---
 import { personalInfo } from "../../lib/constants";
+
+const bioParagraphs = personalInfo.bio.long.split("\n\n");
 ---
 
-<div class="fade-in max-w-4xl text-ctp-text">
-    <div class="mb-4">
-        <span class="text-ctp-green font-bold text-xl">{personalInfo.name}</span
-        >
-        <span class="text-ctp-overlay1 block mt-1">{personalInfo.tagline}</span>
+<div class="fade-in max-w-4xl text-ctp-text leading-snug">
+    <div class="mb-3">
+        <span class="text-ctp-green font-bold text-xl">{personalInfo.name}</span>
     </div>
 
-    <div class="mb-6 whitespace-pre-wrap leading-relaxed">
-        {personalInfo.bio.short}
-    </div>
-
-    <div class="text-ctp-blue mb-2 font-bold">
+    <div class="text-ctp-blue mb-1 font-bold">
         <i class="nf nf-fa-address_card"></i> Bio
     </div>
-    <div class="whitespace-pre-wrap leading-relaxed text-ctp-subtext0">
-        {personalInfo.bio.long}
+    <div class="text-ctp-subtext0 flex flex-col gap-2">
+        {bioParagraphs.map((para) => <p>{para}</p>)}
     </div>
 
-    <div class="mt-4 flex flex-wrap gap-x-6 gap-y-1 text-ctp-subtext0">
+    <div class="mt-3 flex flex-wrap gap-x-6 gap-y-1">
         <a
             href={personalInfo.links.plusxhub}
             target="_blank"
             rel="noopener noreferrer"
             class="text-ctp-blue hover:underline"
         >
-            <i class="nf nf-fa-instagram"></i> Plusxhub — my MG community
+            <i class="nf nf-fa-instagram"></i> Plusxhub, my MG community
         </a>
         <a
             href={personalInfo.links.garrixPlaylist}

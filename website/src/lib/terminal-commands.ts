@@ -17,6 +17,7 @@ import {
     experience,
     education,
     personalInfo,
+    projects,
     DISCORD_ID,
 } from "./constants";
 import { fetchGithubStats } from "./github";
@@ -141,9 +142,6 @@ export const getWhoami = () => {
     const lines = [];
 
     lines.push(`${bold(green(personalInfo.name))}`);
-    lines.push(`${overlay(personalInfo.tagline)}`);
-    lines.push("");
-    lines.push(personalInfo.bio.short);
     lines.push("");
     lines.push(`${bold(blue(" Bio"))}`);
     lines.push(subtext(personalInfo.bio.long));
@@ -151,11 +149,43 @@ export const getWhoami = () => {
     return lines.join("\n");
 };
 
+export const getProjects = () => {
+    const lines: string[] = [];
+
+    lines.push(subtext(`total ${projects.length}`));
+
+    // Directory names (project id + trailing slash), padded to a common width.
+    // Pad the RAW string before wrapping in ANSI — color codes break padEnd.
+    const names = projects.map(p => `${p.id}/`);
+    const nameWidth = Math.max(...names.map(n => n.length));
+
+    projects.forEach((p, i) => {
+        const perms = subtext("drwxr-xr-x");
+        const owner = overlay("milind");
+        const name = bold(blue(names[i].padEnd(nameWidth)));
+
+        // Listing row: permissions  owner  name/  description
+        lines.push(`${perms}  ${owner}  ${name}  ${text(p.description)}`);
+
+        // Expanded details: tech tags, then GitHub link (or private note).
+        lines.push(`   ${overlay("├─")} ${subtext(p.technologies.join(" · "))}`);
+        const repo = p.links.github
+            ? cyan(p.links.github.replace(/^https?:\/\//, ""))
+            : subtext("source private");
+        lines.push(`   ${overlay("└─")} ${repo}`);
+        lines.push("");
+    });
+
+    // Drop the trailing blank line.
+    return lines.join("\n").replace(/\n+$/, "");
+};
+
 export const getHelp = () => {
     return `Available commands:
-  ${green("fastfetch")}  - Display system information
-  ${green("whoami")}     - Display user information
-  ${green("help")}       - Show this help message
-  ${green("exit")}       - Close the connection
+  ${green("fastfetch")}     - Display system information
+  ${green("whoami")}        - Display user information
+  ${green("ls projects/")}  - List my projects
+  ${green("help")}          - Show this help message
+  ${green("exit")}          - Close the connection
 `;
 };
