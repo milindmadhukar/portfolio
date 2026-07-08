@@ -6,16 +6,18 @@ import ThemeSwitcher from "../components/ThemeSwitcher.tsx";
 interface Props {
     title?: string;
     description?: string;
+    ogDescription?: string;
     includePadding?: boolean;
     image?: string;
     bodyClass?: string;
 }
 
 const {
-    title = `${personalInfo.name} — Developer & DevOps Enthusiast`,
-    description = personalInfo.tagline,
+    title = personalInfo.seoTitle,
+    description = personalInfo.seoDescription,
+    ogDescription = personalInfo.ogDescription,
     includePadding = true,
-    image = `${Astro.site}favicon.ico`,
+    image = `${Astro.site}og.png`,
     bodyClass = "",
 } = Astro.props;
 ---
@@ -26,6 +28,7 @@ const {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
         <meta name="generator" content={Astro.generator} />
 
         <title>{title}</title>
@@ -35,7 +38,7 @@ const {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={Astro.url} />
         <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
+        <meta property="og:description" content={ogDescription} />
         <meta property="og:image" content={image} />
         <meta property="og:site_name" content={personalInfo.name} />
         <meta property="og:locale" content="en_US" />
@@ -44,7 +47,7 @@ const {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={Astro.url} />
         <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
+        <meta name="twitter:description" content={ogDescription} />
         <meta name="twitter:image" content={image} />
         <meta name="twitter:creator" content="@milind_1504" />
         <meta name="twitter:site" content="@milind_1504" />

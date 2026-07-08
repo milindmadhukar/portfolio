@@ -43,6 +43,16 @@ When I'm off the screen you'll usually catch me messing with electronics and sol
 
   tagline: "Developer • Hardware tinkerer • Music obsessive",
 
+  // Purpose-built strings for SEO / social cards, in my own voice.
+  // seoTitle drives <title> + og:title (~60 chars, uses the SERP space well).
+  seoTitle: "Milind Madhukar: I build useful software people actually use",
+  // seoDescription drives <meta name="description"> (~148 chars for the snippet).
+  seoDescription:
+    "I'm Milind, a developer and DevOps engineer from Mumbai. I build genuinely useful software and tinker with just about anything that has a chip in it.",
+  // ogDescription drives og:/twitter: descriptions (~114 chars, the social sweet spot).
+  ogDescription:
+    "Developer and DevOps engineer building genuinely useful software, and tinkering with anything that has a chip in it.",
+
   links: {
     plusxhub: "https://www.instagram.com/plusxhub/",
     garrixPlaylist: "https://open.spotify.com/playlist/4lL415o4NDd2cOm2OSF6TS",

@@ -10,7 +10,8 @@
     "astro": "astro",
     "clean": "bun scripts/clean.ts",
     "sync-blog": "bun scripts/sync-blog.ts",
-    "prebuild": "bun run sync-blog",
+    "generate-og": "bun scripts/generate-og.ts",
+    "prebuild": "bun run sync-blog && bun run generate-og",
     "start": "bun ./dist/server/entry.mjs"
   },
   "dependencies": {
@@ -27,6 +28,8 @@
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
-    "@catppuccin/tailwindcss": "^1.0.0"
+    "@catppuccin/tailwindcss": "^1.0.0",
+    "decode-ico": "^0.4.1",
+    "satori": "^0.26.0"
   }
 }
