@@ -50,8 +50,8 @@ interface DiscordStatusProps {
 // Playful labels for each Discord presence state (Lanyard `discord_status`).
 // Possible values: "online" | "idle" | "dnd" | "offline".
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  online: { label: "online & vibing", color: "text-ctp-green" },
-  idle: { label: "afk (probably chai)", color: "text-ctp-yellow" },
+  online: { label: "online, apparently", color: "text-ctp-green" },
+  idle: { label: "back in a bit", color: "text-ctp-yellow" },
   dnd: { label: "locked in", color: "text-ctp-red" },
   offline: { label: "touching grass", color: "text-ctp-overlay1" },
 };

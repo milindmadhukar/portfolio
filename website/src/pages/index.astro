@@ -69,7 +69,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 
 			const uptimeElements = document.querySelectorAll(".uptime");
 			uptimeElements.forEach((el) => {
-				el.textContent = `${years} years, ${months} months, ${days} days (${unixSeconds.toLocaleString()}s)`;
+				el.textContent = `${years} years, ${months} months, ${days} days (${unixSeconds})`;
 			});
 		}
 
