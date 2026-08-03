@@ -75,11 +75,26 @@
   }
 }
 
-/*
- * Terminal output has no reveal animation at all — no fade, no stagger. The
- * output container is simply un-hidden once its command finishes typing, and
- * the whole block lands in one frame, which is what a real terminal does.
- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
 
 /*
  * Theme-switch transition suppression.

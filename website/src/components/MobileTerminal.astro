@@ -34,7 +34,7 @@ const commands = [
         commands.map((cmd, index) => (
             <div
                 id={`section-${cmd.id}`}
-                class={`mobile-command-section ${index !== 0 ? "hidden" : ""}`}
+                class={`mobile-command-section opacity-0 transition-opacity duration-500 ${index !== 0 ? "hidden" : ""}`}
                 data-trigger-event={cmd.triggerEvent}
                 data-next-section={
                     index < commands.length - 1
@@ -57,7 +57,7 @@ const commands = [
                 </div>
                 <div
                     id={`${cmd.id}-output`}
-                    class="mobile-output hidden"
+                    class="mobile-output hidden transition-all duration-500"
                 >
                     <cmd.output />
                 </div>
@@ -81,6 +81,8 @@ const commands = [
                 const triggerEvent = element.dataset.triggerEvent;
 
                 if (triggerEvent && !element.classList.contains("triggered")) {
+                    // Reveal the section
+                    element.classList.remove("opacity-0");
                     element.classList.add("triggered");
 
                     // Trigger the typing animation
@@ -104,7 +106,10 @@ const commands = [
     commandIds.forEach((id) => {
         window.addEventListener(`${id}-complete`, () => {
             const output = document.getElementById(`${id}-output`);
-            if (output) output.classList.remove("hidden");
+            if (output) {
+                output.classList.remove("hidden");
+                output.classList.add("animate-fade-in");
+            }
             // Hide cursor
             const cursor = document.getElementById(`${id}-cursor`);
             if (cursor) cursor.style.display = "none";
