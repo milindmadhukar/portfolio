@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/charmbracelet/ssh"
@@ -70,6 +71,21 @@ func main() {
 
 					// Setup terminal
 					term := term.NewTerminal(s, prompt)
+
+					// Project names for tab completion, fetched once per
+					// session — AutoCompleteCallback fires on every keypress,
+					// so it must never touch the network itself.
+					projectIDs := commands.ProjectIDs()
+
+					term.AutoCompleteCallback = func(line string, pos int, key rune) (string, int, bool) {
+						c := commands.Complete(line, pos, key, projectIDs)
+						if len(c.Candidates) > 0 {
+							// Writing through the terminal clears the current
+							// line and redraws the prompt afterwards.
+							fmt.Fprintf(term, "%s\r\n", strings.Join(c.Candidates, "  "))
+						}
+						return c.Line, c.Pos, c.Replace
+					}
 
 					// Welcome message
 					// "When a client connects run the fast fetch command and say type help for more commands"

@@ -34,7 +34,7 @@ const commands = [
         commands.map((cmd, index) => (
             <div
                 id={`section-${cmd.id}`}
-                class={`mobile-command-section opacity-0 transition-opacity duration-500 ${index !== 0 ? "hidden" : ""}`}
+                class={`mobile-command-section ${index !== 0 ? "hidden" : ""}`}
                 data-trigger-event={cmd.triggerEvent}
                 data-next-section={
                     index < commands.length - 1
@@ -57,7 +57,7 @@ const commands = [
                 </div>
                 <div
                     id={`${cmd.id}-output`}
-                    class="mobile-output hidden transition-all duration-500"
+                    class="mobile-output hidden"
                 >
                     <cmd.output />
                 </div>
@@ -67,6 +67,22 @@ const commands = [
 </div>
 
 <script define:vars={{ commandIds: commands.map((c) => c.id) }}>
+    // Paint output the way a terminal does: line by line, top to bottom, each
+    // one landing fully formed. Duplicated in DesktopTerminal — this script is
+    // inlined by `define:vars`, so it can't import a shared helper.
+    const REVEAL_STEP_MS = 20;
+    function revealLines(container) {
+        if (!container) return;
+        const lines = container.querySelectorAll("[data-term-line]");
+        lines.forEach((line) => line.classList.add("term-line-pending"));
+        lines.forEach((line, i) =>
+            setTimeout(
+                () => line.classList.remove("term-line-pending"),
+                i * REVEAL_STEP_MS,
+            ),
+        );
+    }
+
     // Intersection Observer to trigger animations
     const observerOptions = {
         root: null,
@@ -81,8 +97,6 @@ const commands = [
                 const triggerEvent = element.dataset.triggerEvent;
 
                 if (triggerEvent && !element.classList.contains("triggered")) {
-                    // Reveal the section
-                    element.classList.remove("opacity-0");
                     element.classList.add("triggered");
 
                     // Trigger the typing animation
@@ -108,7 +122,7 @@ const commands = [
             const output = document.getElementById(`${id}-output`);
             if (output) {
                 output.classList.remove("hidden");
-                output.classList.add("animate-fade-in");
+                revealLines(output);
             }
             // Hide cursor
             const cursor = document.getElementById(`${id}-cursor`);

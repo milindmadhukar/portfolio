@@ -97,13 +97,52 @@ When I'm off the screen you'll usually catch me messing with electronics and sol
   ]
 };
 
+// `description` is the one-liner in the `ls projects/` listing — it sits in a
+// column ~40 chars in, so keep it under ~50 chars or the row wraps past 80
+// columns on SSH. `longDescription` is the expanded body on the web.
 export const projects = [
+  {
+    id: "kora",
+    title: "Kora - Reading Feed",
+    description: "A reading feed for articles, highlights, and notes",
+    longDescription: "A reading feed where curious people share the articles they save, the lines they highlight, and the notes they take. Built end to end: Go backend and scraper, a React web app, a browser extension, and a mobile app.",
+    technologies: ["Go", "TypeScript", "React", "PostgreSQL"],
+    highlights: [
+      "Built the full stack — Go API and scraper, React web app, browser extension, and mobile app",
+      "Full-text search and RSS ingestion across every saved article and highlight",
+      "Public RPC API so a library can be driven programmatically"
+    ],
+    links: {
+      github: null,
+      demo: "https://kora.sh"
+    },
+    featured: true,
+    tags: ["Full-Stack", "Go", "Reading"]
+  },
+  {
+    id: "martin-garrix-bot",
+    title: "Martin Garrix Discord Bot",
+    description: "Discord bot for 6,000+ users across 150+ servers",
+    longDescription: "A multipurpose Discord bot built for the Martin Garrix community — music playback, fan trivia, levelling, and a lyrics engine. Rewritten from Python to Go and still running 24/7.",
+    technologies: ["Go", "DiscordGo", "PostgreSQL", "Spotify API"],
+    highlights: [
+      "Serves 6,000+ users across 150+ servers with 24/7 uptime",
+      "Processes 10,000+ music requests daily with intelligent caching",
+      "Rewritten from Python to Go for lower memory use and faster startup"
+    ],
+    links: {
+      github: "https://github.com/milindmadhukar/MartinGarrixBot",
+      demo: null
+    },
+    featured: true,
+    tags: ["Go", "Discord", "API Integration"]
+  },
   {
     id: "dreamteam",
     title: "DreamTeam - IPL Auction Portal",
-    description: "Engineered comprehensive auction simulation platform handling 500+ concurrent users with WebSocket-powered real-time bidding",
+    description: "IPL auction sim with real-time WebSocket bidding",
     longDescription: "A full-stack auction simulation platform built for IPL fantasy leagues, featuring real-time bidding, player statistics, and multi-room support.",
-    technologies: ["TypeScript", "Next.js", "WebSocket", "PostgreSQL", "Redis"],
+    technologies: ["TypeScript", "Next.js", "Go", "WebSocket", "PostgreSQL"],
     highlights: [
       "Integrated player statistics API serving 200+ player profiles with sub-100ms response times",
       "Delivered full-stack solution supporting 50+ simultaneous auction rooms with zero downtime during peak usage",
@@ -117,9 +156,27 @@ export const projects = [
     tags: ["Full-Stack", "Real-Time", "WebSocket"]
   },
   {
+    id: "stonksapi",
+    title: "StonksAPI - Market Data API",
+    description: "REST API for live stocks, crypto, and market news",
+    longDescription: "A REST API that scrapes and serves live stock quotes, cryptocurrency prices, and market news from a single endpoint, so hobby projects don't need a paid data vendor.",
+    technologies: ["Go", "go-chi", "Colly", "Astro"],
+    highlights: [
+      "Serves stock, crypto, and news data from one API with no key required",
+      "Scrapes and normalises multiple upstream sources with Colly",
+      "Documented and deployed with a companion docs site"
+    ],
+    links: {
+      github: "https://github.com/milindmadhukar/stonksapi",
+      demo: "https://stonksapi.milind.dev/"
+    },
+    featured: true,
+    tags: ["Go", "API", "Finance"]
+  },
+  {
     id: "raytracer",
     title: "Golang RayTracer",
-    description: "High-performance ray tracing engine in Go with advanced lighting models and parallel processing",
+    description: "Ray tracing engine in Go with parallel rendering",
     longDescription: "A from-scratch ray tracing engine built in Go, featuring advanced lighting, materials, and optimized parallel rendering.",
     technologies: ["Go", "Goroutines", "3D Graphics"],
     highlights: [
@@ -135,40 +192,38 @@ export const projects = [
     tags: ["Go", "Graphics", "Performance"]
   },
   {
-    id: "prismvault",
-    title: "PrismVault - Cloud Backup Solution",
-    description: "Enterprise-grade backup platform supporting multiple cloud providers with AES-256 encryption",
-    longDescription: "A comprehensive cloud backup solution with multi-provider support, encryption, and intelligent backup algorithms.",
-    technologies: ["Node.js", "AWS S3", "Google Drive API", "Dropbox API", "Encryption"],
+    id: "go-piston",
+    title: "go-piston",
+    description: "Go wrapper for the Piston code-execution API",
+    longDescription: "An idiomatic Go client for Piston, the sandboxed code-execution engine behind a lot of Discord eval bots. Covers every endpoint with a typed, chainable API.",
+    technologies: ["Go", "REST"],
     highlights: [
-      "Architected enterprise-grade backup platform supporting AWS S3, Google Drive, and Dropbox",
-      "Built auto-scaling microservices handling 100GB+ daily backup volumes across 500+ client accounts",
-      "Implemented incremental backup algorithms reducing storage costs by 40% and backup times by 65%"
+      "Typed, chainable client covering the full Piston API surface",
+      "The most starred of my Go libraries, used by other people's bots"
     ],
     links: {
-      github: null,
-      demo: null
-    },
-    featured: true,
-    tags: ["Cloud", "Security", "Microservices"]
-  },
-  {
-    id: "martin-garrix-bot",
-    title: "Martin Garrix Discord Bot",
-    description: "Discord bot serving 6,000+ users across 150+ servers with music features and 24/7 uptime",
-    longDescription: "A feature-rich Discord bot for music playback, integrating with Spotify and YouTube APIs.",
-    technologies: ["Python", "Discord.py", "Spotify API", "YouTube API"],
-    highlights: [
-      "Deployed Discord bot serving 6,000+ users across 150+ servers with 24/7 uptime",
-      "Integrated Spotify and YouTube APIs processing 10,000+ music requests daily with intelligent caching",
-      "Maintained 99.8% uptime through robust error handling and automated failover mechanisms"
-    ],
-    links: {
-      github: "https://github.com/milindmadhukar/MartinGarrixBot/",
-      demo: null
+      github: "https://github.com/milindmadhukar/go-piston",
+      demo: "https://pkg.go.dev/github.com/milindmadhukar/go-piston"
     },
     featured: false,
-    tags: ["Python", "Discord", "API Integration"]
+    tags: ["Go", "Library", "API Wrapper"]
+  },
+  {
+    id: "go-musixmatch",
+    title: "go-musixmatch",
+    description: "Go wrapper for the Musixmatch lyrics API",
+    longDescription: "A complete Go client for the Musixmatch API — track, artist, album, and lyrics lookups with typed responses and every optional query parameter mapped.",
+    technologies: ["Go", "REST"],
+    highlights: [
+      "Covers the full Musixmatch API surface with typed responses",
+      "Every optional query parameter exposed as a functional option"
+    ],
+    links: {
+      github: "https://github.com/milindmadhukar/go-musixmatch",
+      demo: "https://pkg.go.dev/github.com/milindmadhukar/go-musixmatch"
+    },
+    featured: false,
+    tags: ["Go", "Library", "API Wrapper"]
   }
 ];
 

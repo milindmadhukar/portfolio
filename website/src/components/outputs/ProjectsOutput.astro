@@ -1,14 +1,22 @@
 ---
 import { projects } from "../../lib/constants";
+import { projectLink } from "../../lib/utils";
+
+const prettyUrl = (url: string) =>
+    url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 ---
 
-<div class="fade-in max-w-4xl text-ctp-text leading-snug font-mono">
-    <div class="text-ctp-subtext0 mb-2">total {projects.length}</div>
+<div class="max-w-4xl text-ctp-text leading-snug font-mono">
+    <div class="text-ctp-subtext0 mb-2" data-term-line>
+        total {projects.length}
+    </div>
 
     <div class="flex flex-col gap-1">
         {
-            projects.map((p) => (
-                <details class="project group rounded">
+            projects.map((p) => {
+                const link = projectLink(p);
+                return (
+                <details class="project group rounded" data-term-line>
                     {/* Collapsed row: just the project name + a hint of the description */}
                     <summary class="summary flex flex-wrap items-baseline gap-x-3 px-2 py-1.5 -ml-2 rounded cursor-pointer select-none">
                         <span class="chevron text-ctp-overlay1 inline-block transition-transform duration-200">
@@ -22,32 +30,44 @@ import { projects } from "../../lib/constants";
                         </span>
                     </summary>
 
-                    {/* Expanded details: description, tech tags, then GitHub link */}
+                    {/* Expanded details: the fuller story, then where to find it */}
                     <div class="pl-8 pr-2 pb-2 pt-1 flex flex-col gap-1">
-                        <div class="text-ctp-text">{p.description}</div>
-                        <div class="text-ctp-subtext0">
-                            <span class="text-ctp-overlay1">├─</span>{" "}
-                            {p.technologies.join(" · ")}
-                        </div>
+                        <div class="text-ctp-text">{p.longDescription}</div>
                         <div>
-                            <span class="text-ctp-overlay1">└─</span>{" "}
-                            {p.links.github ? (
+                            <span class="text-ctp-overlay1">↳</span>{" "}
+                            {link ? (
                                 <a
-                                    href={p.links.github}
+                                    href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    class="text-ctp-teal hover:underline"
+                                    class={
+                                        link.kind === "github"
+                                            ? "text-ctp-teal hover:underline"
+                                            : "text-ctp-green hover:underline"
+                                    }
                                 >
-                                    <i class="nf nf-fa-github" />{" "}
-                                    {p.links.github.replace(/^https?:\/\//, "")}
+                                    <i
+                                        class={
+                                            link.kind === "github"
+                                                ? "nf nf-fa-github"
+                                                : "nf nf-md-web"
+                                        }
+                                    />{" "}
+                                    {prettyUrl(link.url)}
                                 </a>
                             ) : (
                                 <span class="text-ctp-subtext0">source private</span>
                             )}
+                            {link?.kind === "web" && (
+                                <span class="text-ctp-subtext0">
+                                    {"  "}(source private)
+                                </span>
+                            )}
                         </div>
                     </div>
                 </details>
-            ))
+                );
+            })
         }
     </div>
 </div>

@@ -18,11 +18,12 @@ import {
     education,
     personalInfo,
     projects,
+    BIRTH_DATE,
     DISCORD_ID,
     EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
-import { calculateExperience } from "./utils";
+import { calculateExperience, formatUptime, projectLink } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
 
@@ -68,13 +69,13 @@ export const getFastfetch = async () => {
     info.push(`${red("portfolio")}${overlay("@")}${cyan("milind.dev")}`);
     info.push(overlay("--------------------------"));
 
-    // Role
-    info.push(`${blue(" Role")} : ${experience[0]?.title ?? "DevOps & Backend Engineer"}`);
-
     // Work
     if (experience[0]) {
         info.push(`${blue(" Work")} : ${experience[0].company}`);
     }
+
+    // Role
+    info.push(`${blue(" Role")} : ${experience[0]?.title ?? "DevOps & Backend Engineer"}`);
 
     // Education
     if (education[0]) {
@@ -84,10 +85,9 @@ export const getFastfetch = async () => {
     // Experience
     info.push(`${blue(" Experience")} : ${calculateExperience(new Date(EXPERIENCE_START_DATE))}`);
 
-    // Uptime (Mock for static)
-    // Note: Uptime is tricky since it's client-side JS. We'll put a placeholder or basic calcs.
-    // Or just "Forever" as it's an SSH session mostly.
-    info.push(`${blue(" Uptime")} : Forever`);
+    // Uptime — elapsed time since I booted. Recomputed per request, so the
+    // SSH banner is as live as the web one.
+    info.push(`${blue(" Uptime")} : ${formatUptime(new Date(BIRTH_DATE))}`);
 
     // Blog
     const blogCount = posts.length;
@@ -151,6 +151,17 @@ export const getWhoami = () => {
     return lines.join("\n");
 };
 
+const prettyUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+// The link line under a listing row: repo in cyan, or the live site in green
+// with the closed-source status spelled out rather than left to be inferred.
+const linkFragment = (project: (typeof projects)[number]) => {
+    const link = projectLink(project);
+    if (!link) return subtext("source private");
+    if (link.kind === "github") return cyan(prettyUrl(link.url));
+    return `${green(prettyUrl(link.url))}  ${subtext("(source private)")}`;
+};
+
 export const getProjects = () => {
     const lines: string[] = [];
 
@@ -161,33 +172,56 @@ export const getProjects = () => {
     const names = projects.map(p => `${p.id}/`);
     const nameWidth = Math.max(...names.map(n => n.length));
 
+    // Where the description column starts: "drwxr-xr-x" + 2 + "milind" + 2 +
+    // name + 2. Measured on the raw strings so the continuation lines beneath
+    // each row line up with the description above them.
+    const descIndent = " ".repeat(10 + 2 + 6 + 2 + nameWidth + 2);
+
     projects.forEach((p, i) => {
-        const perms = subtext("drwxr-xr-x");
-        const owner = overlay("milind");
+        const perms = overlay("drwxr-xr-x");
+        const owner = peach("milind");
         const name = bold(blue(names[i].padEnd(nameWidth)));
 
         // Listing row: permissions  owner  name/  description
         lines.push(`${perms}  ${owner}  ${name}  ${text(p.description)}`);
-
-        // Expanded details: tech tags, then GitHub link (or private note).
-        lines.push(`   ${overlay("├─")} ${subtext(p.technologies.join(" · "))}`);
-        const repo = p.links.github
-            ? cyan(p.links.github.replace(/^https?:\/\//, ""))
-            : subtext("source private");
-        lines.push(`   ${overlay("└─")} ${repo}`);
-        lines.push("");
+        // Continuation row: the project's link, hanging under the description.
+        lines.push(`${descIndent}${overlay("↳")} ${linkFragment(p)}`);
     });
 
-    // Drop the trailing blank line.
-    return lines.join("\n").replace(/\n+$/, "");
+    return lines.join("\n");
 };
+
+// One project's own page, shown by `ls projects/<name>` over SSH.
+export const getProjectDetails = () => {
+    return Object.fromEntries(projects.map(p => {
+        const lines: string[] = [];
+
+        lines.push(bold(blue(`${p.id}/`)));
+        lines.push(`${overlay("├─")} ${text(p.title)}`);
+        lines.push(`${overlay("├─")} ${subtext(p.longDescription)}`);
+        lines.push(`${overlay("├─")} ${subtext(p.technologies.join(" · "))}`);
+        p.highlights.forEach(h => lines.push(`${overlay("│")}  ${subtext("•")} ${text(h)}`));
+        lines.push(`${overlay("└─")} ${linkFragment(p)}`);
+
+        return [p.id, lines.join("\n")];
+    }));
+};
+
+export const getUptime = () => {
+    return ` ${blue("up")} ${text(formatUptime(new Date(BIRTH_DATE)))}`;
+};
+
+export const getProjectIds = () => projects.map(p => p.id);
 
 export const getHelp = () => {
     return `Available commands:
-  ${green("fastfetch")}     - Display system information
-  ${green("whoami")}        - Display user information
-  ${green("ls projects/")}  - List my projects
-  ${green("help")}          - Show this help message
-  ${green("exit")}          - Close the connection
+  ${green("fastfetch")}          - Display system information
+  ${green("whoami")}             - Display user information
+  ${green("ls projects/")}       - List my projects
+  ${green("ls projects/<name>")} - Show one project in detail
+  ${green("uptime")}             - How long I've been running
+  ${green("help")}               - Show this help message
+  ${green("clear")}              - Clear the screen
+  ${green("exit")}               - Close the connection
 `;
 };

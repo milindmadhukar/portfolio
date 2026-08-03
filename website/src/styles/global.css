@@ -75,25 +75,21 @@
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/*
+ * Terminal output reveal. Real terminals don't fade content in — lines land
+ * fully formed as they're written out. Rows marked [data-term-line] start
+ * hidden and are un-hidden top to bottom on a short stagger (see revealLines in
+ * DesktopTerminal / MobileTerminal). `visibility` rather than `opacity` so each
+ * line snaps in with no transition, and the layout never shifts underneath it.
+ */
+.term-line-pending {
+  visibility: hidden;
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+@media (prefers-reduced-motion: reduce) {
+  .term-line-pending {
+    visibility: visible;
+  }
 }
 
 /*

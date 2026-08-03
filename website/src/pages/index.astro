@@ -13,7 +13,6 @@ import { personalInfo, experience, education } from "../lib/constants";
 import {
 	SOCIAL_CONFIG,
 	TERMINAL_CONFIG,
-	BIRTH_DATE,
 	DISCORD_ID,
 } from "../lib/constants";
 import { getBlogPosts } from "../lib/blog";
@@ -36,40 +35,16 @@ const latestPost = posts.length > 0 ? posts[0] : null;
 		<DesktopTerminal />
 	</div>
 
-	<script define:vars={{ BIRTH_DATE }}>
-		// Uptime Logic
+	<script>
+		// Shares formatUptime with the server-rendered SSH banner, so the two
+		// surfaces can't drift apart on the format or the arithmetic.
+		import { BIRTH_DATE } from "../lib/constants";
+		import { formatUptime } from "../lib/utils";
+
 		function updateUptime() {
-			const birthDate = new Date(BIRTH_DATE);
-			const now = new Date();
-
-			let years = now.getFullYear() - birthDate.getFullYear();
-			let months = now.getMonth() - birthDate.getMonth();
-			let days = now.getDate() - birthDate.getDate();
-
-			if (days < 0) {
-				months--;
-				// Get days in previous month
-				const prevMonth = new Date(
-					now.getFullYear(),
-					now.getMonth(),
-					0,
-				);
-				days += prevMonth.getDate();
-			}
-
-			if (months < 0) {
-				years--;
-				months += 12;
-			}
-
-			// Elapsed unix time: seconds since DOB (how much "unix time" has ticked by)
-			const unixSeconds = Math.floor(
-				(now.getTime() - birthDate.getTime()) / 1000,
-			);
-
-			const uptimeElements = document.querySelectorAll(".uptime");
-			uptimeElements.forEach((el) => {
-				el.textContent = `${years} years, ${months} months, ${days} days (${unixSeconds})`;
+			const uptime = formatUptime(new Date(BIRTH_DATE));
+			document.querySelectorAll(".uptime").forEach((el) => {
+				el.textContent = uptime;
 			});
 		}
 

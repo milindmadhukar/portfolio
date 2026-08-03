@@ -59,7 +59,7 @@ const states = [
                             </div>
                             <div
                                 id={`output-${state.key}`}
-                                class="output-container hidden fade-in"
+                                class="output-container hidden"
                             >
                                 <Output />
                             </div>
@@ -131,6 +131,22 @@ const states = [
     const outputEl = (k) => document.getElementById(`output-${k}`);
     const clearEl = (k) => document.getElementById(`clear-${k}`);
 
+    // Paint output the way a terminal does: line by line, top to bottom, each
+    // one landing fully formed. Duplicated in MobileTerminal — this script is
+    // inlined by `define:vars`, so it can't import a shared helper.
+    const REVEAL_STEP_MS = 20;
+    function revealLines(container) {
+        if (!container) return;
+        const lines = container.querySelectorAll("[data-term-line]");
+        lines.forEach((line) => line.classList.add("term-line-pending"));
+        lines.forEach((line, i) =>
+            setTimeout(
+                () => line.classList.remove("term-line-pending"),
+                i * REVEAL_STEP_MS,
+            ),
+        );
+    }
+
     // Reset a "clear" prompt back to its empty, cursor-visible waiting state.
     function resetClear(k) {
         const text = document.getElementById(`cmd-clear-${k}-text`);
@@ -160,7 +176,10 @@ const states = [
         // Command finished typing -> reveal output, park a waiting "clear" prompt.
         window.addEventListener(`complete-${k}`, () => {
             const out = outputEl(k);
-            if (out) out.classList.remove("hidden");
+            if (out) {
+                out.classList.remove("hidden");
+                revealLines(out);
+            }
 
             const cmdCursor = document.getElementById(`cmd-${k}-cursor`);
             if (cmdCursor) cmdCursor.style.display = "none";
