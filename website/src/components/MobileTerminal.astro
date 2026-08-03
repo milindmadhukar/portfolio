@@ -57,7 +57,7 @@ const commands = [
                 </div>
                 <div
                     id={`${cmd.id}-output`}
-                    class="mobile-output hidden transition-all duration-500"
+                    class="mobile-output hidden"
                 >
                     <cmd.output />
                 </div>
@@ -107,8 +107,15 @@ const commands = [
         window.addEventListener(`${id}-complete`, () => {
             const output = document.getElementById(`${id}-output`);
             if (output) {
+                // Same downward sweep as desktop; the class comes back off once
+                // it lands so the mask stops clipping the project-row glow.
                 output.classList.remove("hidden");
-                output.classList.add("animate-fade-in");
+                output.classList.add("reveal-sweep");
+                output.addEventListener("animationend", function done(e) {
+                    if (e.animationName !== "reveal-sweep") return;
+                    output.classList.remove("reveal-sweep");
+                    output.removeEventListener("animationend", done);
+                });
             }
             // Hide cursor
             const cursor = document.getElementById(`${id}-cursor`);

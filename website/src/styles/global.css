@@ -75,25 +75,52 @@
   }
 }
 
-@keyframes fadeIn {
+/*
+ * Terminal output reveal.
+ * A terminal paints downward from the prompt, so output is uncovered by a soft
+ * edge sweeping from the command line to the bottom of the block — not slid up
+ * into place from below.
+ *
+ * The mask is three times the block height: opaque top third, soft edge in the
+ * middle third, transparent bottom third. Sliding it from `0% 100%` (the block
+ * sits over the transparent third) to `0% 0%` (over the opaque third) walks the
+ * edge down the block. A 2x mask would force a hard cut at the midpoint —
+ * there'd be no room for the fade without leaving the block partly visible at
+ * the start or permanently washed out at the end.
+ */
+@keyframes reveal-sweep {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    -webkit-mask-position: 0% 100%;
+    mask-position: 0% 100%;
   }
 
   to {
-    opacity: 1;
-    transform: translateY(0);
+    -webkit-mask-position: 0% 0%;
+    mask-position: 0% 0%;
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+.reveal-sweep {
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 33.34%, transparent 50%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 33.34%, transparent 50%, transparent 100%);
+  -webkit-mask-size: 100% 300%;
+  mask-size: 100% 300%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: reveal-sweep 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+/*
+ * `animation: none` means `animationend` never fires, so the JS that strips
+ * .reveal-sweep once the sweep lands never runs. The mask has to be cleared
+ * here or the bottom of the block would stay clipped forever.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-sweep {
+    animation: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
 }
 
 /*

@@ -59,7 +59,7 @@ const states = [
                             </div>
                             <div
                                 id={`output-${state.key}`}
-                                class="output-container hidden fade-in"
+                                class="output-container hidden"
                             >
                                 <Output />
                             </div>
@@ -131,6 +131,21 @@ const states = [
     const outputEl = (k) => document.getElementById(`output-${k}`);
     const clearEl = (k) => document.getElementById(`clear-${k}`);
 
+    // Uncover an output block with a soft edge sweeping down from the command
+    // line. The class is stripped once the sweep lands: a live mask clips
+    // everything to the container's border box, which would cut the glow off
+    // the project rows, and re-resolves against the block height whenever the
+    // Discord island changes size after hydration.
+    function revealOutput(el) {
+        el.classList.remove("hidden");
+        el.classList.add("reveal-sweep");
+        el.addEventListener("animationend", function done(e) {
+            if (e.animationName !== "reveal-sweep") return;
+            el.classList.remove("reveal-sweep");
+            el.removeEventListener("animationend", done);
+        });
+    }
+
     // Reset a "clear" prompt back to its empty, cursor-visible waiting state.
     function resetClear(k) {
         const text = document.getElementById(`cmd-clear-${k}-text`);
@@ -160,7 +175,7 @@ const states = [
         // Command finished typing -> reveal output, park a waiting "clear" prompt.
         window.addEventListener(`complete-${k}`, () => {
             const out = outputEl(k);
-            if (out) out.classList.remove("hidden");
+            if (out) revealOutput(out);
 
             const cmdCursor = document.getElementById(`cmd-${k}-cursor`);
             if (cmdCursor) cmdCursor.style.display = "none";
@@ -195,7 +210,11 @@ const states = [
             const target = stateEl(targetKey);
             if (target) target.classList.remove("hidden");
             const targetOut = outputEl(targetKey);
-            if (targetOut) targetOut.classList.add("hidden");
+            if (targetOut) {
+                targetOut.classList.add("hidden");
+                // Clear a half-finished sweep so re-entering this state starts one.
+                targetOut.classList.remove("reveal-sweep");
+            }
             const targetClear = clearEl(targetKey);
             if (targetClear) targetClear.classList.add("hidden");
 
