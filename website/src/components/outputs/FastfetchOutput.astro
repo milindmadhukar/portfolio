@@ -17,7 +17,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
     <div
         class="flex flex-col lg:flex-row gap-10 items-center lg:items-start w-fit"
     >
-        <div class="select-none text-ctp-blue font-bold" data-term-line>
+        <div class="select-none text-ctp-blue font-bold">
             <pre
                 class="hidden lg:block">
    ,=====================.
@@ -67,13 +67,13 @@ const latestPost = posts.length > 0 ? posts[0] : null;
         </div>
 
         <div class="flex flex-col gap-[2px]">
-            <div class="mb-2" data-term-line>
+            <div class="mb-2">
                 <span class="text-ctp-red">portfolio</span><span
                     class="text-ctp-overlay2">@</span
                 ><span class="text-ctp-teal">milind.dev</span>
             </div>
-            <div class="text-ctp-overlay1" data-term-line>--------------------------</div>
-            <div data-term-line>
+            <div class="text-ctp-overlay1">--------------------------</div>
+            <div>
                 <a
                     href={experience[0].website}
                     target="_blank"
@@ -89,25 +89,25 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                     >
                 </a>
             </div>
-            <div data-term-line>
+            <div>
                 <span class="text-ctp-blue"
                     ><i class="nf nf-fa-id_badge"></i> Role</span
                 >
                 <span> : {experience[0].title}</span>
             </div>
-            <div data-term-line>
+            <div>
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-school"></i> Education</span
                 >
                 <span> : {education[0].institution}</span>
             </div>
-            <div data-term-line>
+            <div>
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-briefcase"></i> Experience</span
                 >
                 <span> : {experienceLabel}</span>
             </div>
-            <div data-term-line>
+            <div>
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-clock"></i> Uptime</span
                 >
@@ -115,7 +115,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
             </div>
             {
                 posts.length > 0 && (
-                    <div data-term-line>
+                    <div>
                         <a
                             href="/blog"
                             class="group flex items-center gap-2 animate-gold-pulse -ml-2 px-2 rounded w-fit"
@@ -136,7 +136,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
             }
             {
                 latestPost && (
-                    <div data-term-line>
+                    <div>
                         <span class="text-ctp-mauve">
                             <i class="nf nf-fa-pen_nib" /> Latest Post
                         </span>
@@ -154,10 +154,10 @@ const latestPost = posts.length > 0 ? posts[0] : null;
             {
                 githubStats && (
                     <>
-                        <div class="text-ctp-overlay1" data-term-line>
+                        <div class="text-ctp-overlay1">
                             --------------------------
                         </div>
-                        <div data-term-line>
+                        <div>
                             <i class="nf nf-fa-github" /> Github Stats
                             <span> : </span>
                             <span>
@@ -167,7 +167,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                             </span>
                         </div>
                         {githubStats.lastPush && (
-                            <div data-term-line>
+                            <div>
                                 <span class="text-ctp-mauve">
                                     <i class="nf nf-oct-git_commit" /> Last
                                     Commit
@@ -192,15 +192,15 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                 )
             }
 
-            <div data-term-line>
+            <div>
                 <DiscordStatus
                     client:load
                     userId={DISCORD_ID}
                     socketUrl={process.env.LANYARD_SOCKET_URL || ""}
                 />
             </div>
-            <div class="text-ctp-overlay1" data-term-line>--------------------------</div>
-            <div class="mt-4 mb-2" data-term-line>
+            <div class="text-ctp-overlay1">--------------------------</div>
+            <div class="mt-4 mb-2">
                 <SocialIcons
                     size="w-10 h-10 lg:w-10 lg:h-10"
                     iconSize="text-lg lg:text-lg"

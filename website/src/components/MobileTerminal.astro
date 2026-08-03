@@ -67,22 +67,6 @@ const commands = [
 </div>
 
 <script define:vars={{ commandIds: commands.map((c) => c.id) }}>
-    // Paint output the way a terminal does: line by line, top to bottom, each
-    // one landing fully formed. Duplicated in DesktopTerminal — this script is
-    // inlined by `define:vars`, so it can't import a shared helper.
-    const REVEAL_STEP_MS = 20;
-    function revealLines(container) {
-        if (!container) return;
-        const lines = container.querySelectorAll("[data-term-line]");
-        lines.forEach((line) => line.classList.add("term-line-pending"));
-        lines.forEach((line, i) =>
-            setTimeout(
-                () => line.classList.remove("term-line-pending"),
-                i * REVEAL_STEP_MS,
-            ),
-        );
-    }
-
     // Intersection Observer to trigger animations
     const observerOptions = {
         root: null,
@@ -120,10 +104,7 @@ const commands = [
     commandIds.forEach((id) => {
         window.addEventListener(`${id}-complete`, () => {
             const output = document.getElementById(`${id}-output`);
-            if (output) {
-                output.classList.remove("hidden");
-                revealLines(output);
-            }
+            if (output) output.classList.remove("hidden");
             // Hide cursor
             const cursor = document.getElementById(`${id}-cursor`);
             if (cursor) cursor.style.display = "none";

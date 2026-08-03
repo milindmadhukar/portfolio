@@ -7,7 +7,7 @@ const prettyUrl = (url: string) =>
 ---
 
 <div class="max-w-4xl text-ctp-text leading-snug font-mono">
-    <div class="text-ctp-subtext0 mb-2" data-term-line>
+    <div class="text-ctp-subtext0 mb-2">
         total {projects.length}
     </div>
 
@@ -16,7 +16,7 @@ const prettyUrl = (url: string) =>
             projects.map((p) => {
                 const link = projectLink(p);
                 return (
-                <details class="project group rounded" data-term-line>
+                <details class="project group rounded">
                     {/* Collapsed row: just the project name + a hint of the description */}
                     <summary class="summary flex flex-wrap items-baseline gap-x-3 px-2 py-1.5 -ml-2 rounded cursor-pointer select-none">
                         <span class="chevron text-ctp-overlay1 inline-block transition-transform duration-200">
