@@ -43,12 +43,15 @@ const { states, initialIndex } = Astro.props;
                         terminal cell rather than a carousel bullet. */}
                     <span class="rail-mark block w-[6px] h-[6px] bg-ctp-overlay0 transition-all duration-200" />
 
-                    {/* Hover/focus chip naming the real command. Sits to the
+                    {/* Hover/focus label naming the real command. Bare text on
+                        the background, at the same size ladder as
+                        #terminal-content, so it reads as another line of
+                        terminal output rather than as UI chrome. Sits to the
                         left of the rail so it never runs off-screen. */}
                     <span
-                        class="rail-chip pointer-events-none absolute right-full mr-3 whitespace-nowrap border border-ctp-surface1 bg-ctp-mantle px-2 py-1 font-mono text-sm text-ctp-text opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
+                        class="rail-chip pointer-events-none absolute right-full mr-4 whitespace-nowrap font-mono text-lg xl:text-xl leading-tight text-ctp-text opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
                     >
-                        <span class="text-ctp-green">$</span> {state.command}
+                        {state.command}
                     </span>
                 </button>
             </>
