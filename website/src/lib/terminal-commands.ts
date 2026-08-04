@@ -12,14 +12,17 @@ import {
     yellow,
     bold,
     ANSI,
+    displayWidth,
+    padEndDisplay,
 } from "./ansi";
+import { getPresence } from "./lanyard-server";
+import { PRESENCE_LABELS, type PresenceStatus } from "./lanyard";
 import {
     experience,
     education,
     personalInfo,
     projects,
     BIRTH_DATE,
-    DISCORD_ID,
     EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
@@ -27,8 +30,58 @@ import { calculateExperience, formatUptime, projectLink } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
 
+// The info column is capped at the same width the web page caps it at, so a
+// long value wraps rather than dragging the separators out to match it.
+const MAX_COLS = 64;
+const CONT_INDENT = "  ";
+
+// Stands in for a separator while the block is being built: its width is a
+// function of lines that don't exist yet, so the rules can only be rendered on
+// a second pass once every row is known.
+const RULE = Symbol("rule");
+
+const STATUS_ANSI: Record<PresenceStatus, (s: string) => string> = {
+    online: green,
+    idle: yellow,
+    dnd: red,
+    offline: subtext,
+};
+
+// A `label : value` row, word-wrapped to MAX_COLS. Continuation lines get a
+// hanging indent, mirroring `.term-row` on the web so the two surfaces break
+// long values the same way.
+const row = (label: string, value: string, paint = text): string[] => {
+    const head = `${label} : `;
+    const firstBudget = Math.max(MAX_COLS - displayWidth(head), 16);
+    const contBudget = Math.max(MAX_COLS - CONT_INDENT.length, 16);
+
+    const chunks: string[] = [];
+    let current = "";
+    for (const word of value.split(" ")) {
+        const budget = chunks.length === 0 ? firstBudget : contBudget;
+        const candidate = current ? `${current} ${word}` : word;
+        if (current && displayWidth(candidate) > budget) {
+            chunks.push(current);
+            current = word;
+        } else {
+            current = candidate;
+        }
+    }
+    if (current) chunks.push(current);
+
+    return [
+        `${head}${paint(chunks[0] ?? "")}`,
+        ...chunks.slice(1).map((c) => `${CONT_INDENT}${paint(c)}`),
+    ];
+};
+
 export const getFastfetch = async () => {
-    const githubStats = await fetchGithubStats();
+    // The presence read is an in-memory snapshot once the socket is warm, so
+    // it costs the SSH path nothing even though it re-fetches per command.
+    const [githubStats, presence] = await Promise.all([
+        fetchGithubStats(),
+        getPresence(),
+    ]);
     const posts = getBlogPosts();
 
     // ASCII Art (Desktop version primarily)
@@ -62,32 +115,32 @@ export const getFastfetch = async () => {
         ` """""""""""""""""""""""""""`,
     ].map(line => bold(blue(line))); // Color the whole ASCII art blue/bold as in component
 
-    // Info lines
-    const info = [];
+    // Info lines. RULE entries are placeholders — see the second pass below.
+    const info: (string | typeof RULE)[] = [];
 
     // User@Host
     info.push(`${red("portfolio")}${overlay("@")}${cyan("milind.dev")}`);
-    info.push(overlay("--------------------------"));
+    info.push(RULE);
 
     // Work
     if (experience[0]) {
-        info.push(`${blue(" Work")} : ${experience[0].company}`);
+        info.push(...row(blue(" Work"), experience[0].company));
     }
 
     // Role
-    info.push(`${blue(" Role")} : ${experience[0]?.title ?? "DevOps & Backend Engineer"}`);
+    info.push(...row(blue(" Role"), experience[0]?.title ?? "DevOps & Backend Engineer"));
 
     // Education
     if (education[0]) {
-        info.push(`${blue(" Education")} : ${education[0].institution}`);
+        info.push(...row(blue(" Education"), education[0].institution));
     }
 
     // Experience
-    info.push(`${blue(" Experience")} : ${calculateExperience(new Date(EXPERIENCE_START_DATE))}`);
+    info.push(...row(blue(" Experience"), calculateExperience(new Date(EXPERIENCE_START_DATE))));
 
     // Uptime — elapsed time since I booted. Recomputed per request, so the
     // SSH banner is as live as the web one.
-    info.push(`${blue(" Uptime")} : ${formatUptime(new Date(BIRTH_DATE))}`);
+    info.push(...row(blue(" Uptime"), formatUptime(new Date(BIRTH_DATE))));
 
     // Blog
     const blogCount = posts.length;
@@ -96,45 +149,63 @@ export const getFastfetch = async () => {
 
     // Latest Post
     if (posts.length > 0) {
-        info.push(`${magenta(" Latest Post")} : ${text(posts[0].title)}`);
+        info.push(...row(magenta(" Latest Post"), posts[0].title));
     }
 
     // Github Stats
     if (githubStats) {
-        info.push(overlay("--------------------------"));
-        info.push(`${text(" Github Stats")} : Repos: ${githubStats.repos} | Followers: ${githubStats.followers} | Following: ${githubStats.following}`);
+        info.push(RULE);
+        info.push(...row(
+            text(" Github Stats"),
+            `Repos: ${githubStats.repos} | Followers: ${githubStats.followers} | Following: ${githubStats.following}`,
+        ));
 
         if (githubStats.lastPush) {
-            info.push(`${magenta(" Last Commit")} : ${text(githubStats.lastPush.repo)} - ${formatTimeAgo(githubStats.lastPush.at)}`);
+            info.push(...row(
+                magenta(" Last Commit"),
+                `${githubStats.lastPush.repo} - ${formatTimeAgo(githubStats.lastPush.at)}`,
+            ));
         }
     }
 
-    // Discord (simplified for text)
-    info.push(overlay("--------------------------"));
-    info.push(`${blue(" Discord")} : User ID ${DISCORD_ID}`);
+    // Discord presence, read from the socket the server already holds open —
+    // so the SSH banner shows the same status and the same track as the web
+    // page, from the same snapshot.
+    info.push(RULE);
+    info.push(...row(
+        blue("󰙯 Status"),
+        PRESENCE_LABELS[presence.status],
+        STATUS_ANSI[presence.status],
+    ));
+    if (presence.spotify) {
+        info.push(...row(
+            green(" Listening to"),
+            `${presence.spotify.song} by ${presence.spotify.artist}`,
+        ));
+    }
+    for (const activity of presence.playing) {
+        info.push(...row(
+            yellow("󰮂 Playing"),
+            activity.state ? `${activity.name} (${activity.state})` : activity.name,
+        ));
+    }
 
+    // Second pass: every real row exists now, so the rules can be sized to
+    // the widest of them.
+    const infoWidth = Math.max(
+        ...info.filter((l): l is string => l !== RULE).map(displayWidth),
+    );
+    const rendered = info.map((l) => (l === RULE ? overlay("-".repeat(infoWidth)) : l));
 
-    // Combine Side by Side
-    // ASCII height is 27 lines. Info is around 12-15 lines.
-    // We need to pad info to match or just print them. 
-    // Side-by-side relies on iterating lines.
-
-    const outputLines = [];
-    const maxLines = Math.max(ascii.length, info.length);
+    // Combine side by side. The art is padded to its own *measured* width:
+    // its lines are 26, 27 and 28 cells wide, so assuming a constant width
+    // left the info column ragged by up to two columns.
+    const artWidth = Math.max(...ascii.map(displayWidth));
+    const outputLines: string[] = [];
+    const maxLines = Math.max(ascii.length, rendered.length);
 
     for (let i = 0; i < maxLines; i++) {
-        const art = ascii[i] || " ".repeat(30); // simplistic padding
-        const data = info[i] || "";
-        // Adjust padding between art and data
-        // The ascii art lines are constant length approx 28 chars? 
-        // Wait, the strings contain ANSI codes, so length calculation is hard.
-        // We should rely on the visual padding. 
-        // The ASCII block is roughly 28 display chars wide.
-
-        // Instead of complex ansi-aware padding, let's just use a tab or fixed visual spacer.
-        // The ascii art lines provided above are fixed width visually.
-
-        outputLines.push(`${art}   ${data}`);
+        outputLines.push(`${padEndDisplay(ascii[i] ?? "", artWidth)}   ${rendered[i] ?? ""}`);
     }
 
     return outputLines.join("\n");

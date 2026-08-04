@@ -1,63 +1,38 @@
 import { useEffect, useState, useRef } from "react";
-
-interface LanyardData {
-  spotify: {
-    track_id: string;
-    timestamps: {
-      start: number;
-      end: number;
-    };
-    song: string;
-    artist: string;
-    album_art_url: string;
-    album: string;
-  } | null;
-  activities: Array<{
-    type: number;
-    state: string;
-    name: string;
-    id: string;
-    emoji?: {
-      name: string;
-      id: string;
-      animated: boolean;
-    };
-    created_at: number;
-    application_id: string | null;
-    assets?: {
-      large_image: string;
-      large_text: string;
-      small_image: string;
-      small_text: string;
-    };
-  }>;
-  listening_to_spotify: boolean;
-  discord_user: {
-    username: string;
-    public_flags: number;
-    id: string;
-    discriminator: string;
-    avatar: string;
-  };
-  discord_status: string;
-}
+import {
+  toSnapshot,
+  PRESENCE_LABELS,
+  OFFLINE_SNAPSHOT,
+  type PresenceSnapshot,
+  type PresenceStatus,
+} from "../lib/lanyard";
 
 interface DiscordStatusProps {
   userId: string;
   socketUrl: string;
+  // The snapshot the server already had when it rendered this page. Seeding
+  // state with it means the hydrated markup matches the SSR'd markup exactly,
+  // so nothing appears — or re-widths the column — after hydration.
+  initialData: PresenceSnapshot | null;
 }
 
-// Playful labels for each Discord presence state (Lanyard `discord_status`).
-// Possible values: "online" | "idle" | "dnd" | "offline".
-const STATUS_MAP: Record<string, { label: string; color: string }> = {
-  online: { label: "online, apparently", color: "text-ctp-green" },
-  idle: { label: "back in a bit", color: "text-ctp-yellow" },
-  dnd: { label: "locked in", color: "text-ctp-red" },
-  offline: { label: "touching grass", color: "text-ctp-overlay1" },
+const STATUS_COLOR: Record<PresenceStatus, string> = {
+  online: "text-ctp-green",
+  idle: "text-ctp-yellow",
+  dnd: "text-ctp-red",
+  offline: "text-ctp-overlay1",
 };
 
-export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps) {
-  const [status, setStatus] = useState<LanyardData | null>(null);
+export default function DiscordStatus({
+  userId,
+  socketUrl,
+  initialData,
+}: DiscordStatusProps) {
+  // Seeded directly, never in an effect — an effect would render the fallback
+  // first and mismatch the server's HTML.
+  const [presence, setPresence] = useState<PresenceSnapshot>(
+    initialData ?? OFFLINE_SNAPSHOT
+  );
   const socketRef = useRef<WebSocket | null>(null);
   const heartbeatIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -72,10 +47,6 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
 
       const ws = new WebSocket(socketUrl);
       socketRef.current = ws;
-
-      ws.onopen = () => {
-        // Connected
-      };
 
       ws.onmessage = (event) => {
         if (!isMounted) return;
@@ -107,16 +78,14 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
 
             case 0: // Event
               if (message.t === "INIT_STATE" || message.t === "PRESENCE_UPDATE") {
-                setStatus(message.d);
-                // Dispatch event when data is received for the first time
-                window.dispatchEvent(new CustomEvent('lanyard-ready'));
+                // Same mapping the server used, so a live update can't render
+                // differently from the version that shipped with the HTML.
+                setPresence(toSnapshot(message.d));
               }
               break;
           }
         } catch (e) {
           console.error("Lanyard parse error:", e);
-          // Dispatch ready even on error so we don't block
-          window.dispatchEvent(new CustomEvent('lanyard-ready'));
         }
       };
 
@@ -129,10 +98,8 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
         }
       };
 
-      ws.onerror = (error) => {
+      ws.onerror = () => {
         ws.close();
-        // Dispatch ready on error so we don't block
-        window.dispatchEvent(new CustomEvent('lanyard-ready'));
       };
     };
 
@@ -150,62 +117,45 @@ export default function DiscordStatus({ userId, socketUrl }: DiscordStatusProps)
     };
   }, [userId, socketUrl]);
 
-  if (!status) return null;
-
-  const { spotify, activities } = status;
-
-  // Filter out Spotify from activities to avoid duplication if it appears there too
-  // Activity type 2 is Listening (often Spotify)
-  const otherActivities = activities.filter(
-    (activity) => activity.type !== 2 && activity.name !== "Spotify"
-  );
+  const { spotify, playing } = presence;
 
   return (
     <div className="flex flex-col gap-[2px]">
-      <div>
+      {/* Always rendered, so the row can never be the thing that appears late. */}
+      <div className="term-row">
         <span className="text-ctp-blue">
           <i className="nf nf-md-discord"></i> Status
         </span>
         <span> : </span>
-        <span
-          className={(STATUS_MAP[status.discord_status] ?? STATUS_MAP.offline).color}
-          title={status.discord_status}
-        >
-          {(STATUS_MAP[status.discord_status] ?? STATUS_MAP.offline).label}
+        <span className={STATUS_COLOR[presence.status]} title={presence.status}>
+          {PRESENCE_LABELS[presence.status]}
         </span>
       </div>
 
-      {status.listening_to_spotify && spotify && (
-        <div>
+      {spotify && (
+        <div className="term-row">
           <span className="text-ctp-green">
             <i className="nf nf-fa-spotify"></i> Listening to
           </span>
           <span> : </span>
           <a
-            href={`https://open.spotify.com/track/${spotify.track_id}`}
+            href={`https://open.spotify.com/track/${spotify.trackId}`}
             target="_blank"
             rel="noopener noreferrer"
             className="hover:underline hover:text-ctp-green transition-colors"
           >
             {spotify.song}
-            <span> by {(() => {
-              const artists = spotify.artist;
-              const semiColonIndex = artists.indexOf(';');
-              if (semiColonIndex !== -1) {
-                return artists.slice(0, semiColonIndex);
-              }
-              return artists;
-            })()}</span>
+            <span> by {spotify.artist}</span>
           </a>
         </div>
       )}
 
-      {otherActivities.map((activity, index) => (
-        <div key={index}>
+      {playing.map((activity, index) => (
+        <div key={index} className="term-row">
           <span className="text-ctp-yellow">
             <i className="nf nf-md-controller_classic"></i> Playing
           </span>
-          <span> : {activity.name} {activity.state ? `(${activity.state})` : ''}</span>
+          <span> : {activity.name}{activity.state ? ` (${activity.state})` : ''}</span>
         </div>
       ))}
     </div>

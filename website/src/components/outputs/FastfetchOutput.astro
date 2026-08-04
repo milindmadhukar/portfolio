@@ -3,14 +3,24 @@ import { fetchGithubStats } from "../../lib/github";
 import { formatTimeAgo } from "../../lib/date";
 import DiscordStatus from "../DiscordStatus";
 import SocialIcons from "../SocialIcons.astro";
-import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE } from "../../lib/constants";
+import TerminalRule from "../TerminalRule.astro";
+import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE } from "../../lib/constants";
 import { getBlogPosts } from "../../lib/blog";
-import { calculateExperience } from "../../lib/utils";
+import { calculateExperience, formatUptime } from "../../lib/utils";
+import { getPresence } from "../../lib/lanyard-server";
 
 const githubStats = await fetchGithubStats();
 const experienceLabel = calculateExperience(new Date(EXPERIENCE_START_DATE));
 const posts = getBlogPosts();
 const latestPost = posts.length > 0 ? posts[0] : null;
+
+// Rendered from the socket the server already holds open, so the Discord /
+// Spotify rows are in the initial HTML rather than arriving after hydration.
+const presence = await getPresence();
+
+// Likewise the uptime: the per-second ticker in index.astro takes over from
+// here, but the first paint shows the real elapsed time, not "Loading...".
+const uptime = formatUptime(new Date(BIRTH_DATE));
 ---
 
 <div>
@@ -66,14 +76,22 @@ const latestPost = posts.length > 0 ? posts[0] : null;
           </pre>
         </div>
 
-        <div class="flex flex-col gap-[2px]">
+        <!--
+            The rules size themselves to this column, so the column's width is
+            what makes them look right: it hugs its widest line, capped at 64ch
+            (a few cells above the natural longest row, the GitHub stats one).
+            The cap only engages for outliers like a very long song title,
+            which then wraps onto a second, hanging-indented line instead of
+            re-widthing the whole block mid-track.
+        -->
+        <div class="term-info flex flex-col gap-[2px] min-w-0 max-w-full lg:max-w-[64ch]">
             <div class="mb-2">
                 <span class="text-ctp-red">portfolio</span><span
                     class="text-ctp-overlay2">@</span
                 ><span class="text-ctp-teal">milind.dev</span>
             </div>
-            <div class="text-ctp-overlay1">--------------------------</div>
-            <div>
+            <TerminalRule />
+            <div class="term-row">
                 <a
                     href={experience[0].website}
                     target="_blank"
@@ -89,29 +107,29 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                     >
                 </a>
             </div>
-            <div>
+            <div class="term-row">
                 <span class="text-ctp-blue"
                     ><i class="nf nf-fa-id_badge"></i> Role</span
                 >
                 <span> : {experience[0].title}</span>
             </div>
-            <div>
+            <div class="term-row">
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-school"></i> Education</span
                 >
                 <span> : {education[0].institution}</span>
             </div>
-            <div>
+            <div class="term-row">
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-briefcase"></i> Experience</span
                 >
                 <span> : {experienceLabel}</span>
             </div>
-            <div>
+            <div class="term-row">
                 <span class="text-ctp-blue"
                     ><i class="nf nf-md-clock"></i> Uptime</span
                 >
-                <span> : </span><span class="uptime">Loading...</span>
+                <span> : </span><span class="uptime">{uptime}</span>
             </div>
             {
                 posts.length > 0 && (
@@ -136,7 +154,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
             }
             {
                 latestPost && (
-                    <div>
+                    <div class="term-row">
                         <span class="text-ctp-mauve">
                             <i class="nf nf-fa-pen_nib" /> Latest Post
                         </span>
@@ -154,10 +172,8 @@ const latestPost = posts.length > 0 ? posts[0] : null;
             {
                 githubStats && (
                     <>
-                        <div class="text-ctp-overlay1">
-                            --------------------------
-                        </div>
-                        <div>
+                        <TerminalRule />
+                        <div class="term-row">
                             <i class="nf nf-fa-github" /> Github Stats
                             <span> : </span>
                             <span>
@@ -167,7 +183,7 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                             </span>
                         </div>
                         {githubStats.lastPush && (
-                            <div>
+                            <div class="term-row">
                                 <span class="text-ctp-mauve">
                                     <i class="nf nf-oct-git_commit" /> Last
                                     Commit
@@ -197,9 +213,10 @@ const latestPost = posts.length > 0 ? posts[0] : null;
                     client:load
                     userId={DISCORD_ID}
                     socketUrl={process.env.LANYARD_SOCKET_URL || ""}
+                    initialData={presence}
                 />
             </div>
-            <div class="text-ctp-overlay1">--------------------------</div>
+            <TerminalRule />
             <div class="mt-4 mb-2">
                 <SocialIcons
                     size="w-10 h-10 lg:w-10 lg:h-10"

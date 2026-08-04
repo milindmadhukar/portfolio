@@ -1,0 +1,35 @@
+---
+// A fastfetch separator that is always exactly as wide as the widest line in
+// its column — no measurement, no JS, correct on the first paint.
+//
+// The dash run is deliberately longer than any column can be. `width: 0` gives
+// the box a definite preferred width, so those dashes contribute *nothing* to
+// the column's max-content size (otherwise the rule itself would decide how
+// wide the column is). `min-width` then pulls it back out to the column width
+// during layout, and overflow-hidden clips the tail.
+//
+// Sizing the min-width with round() snaps the clip to a whole character cell,
+// so the run never ends on a sliced half-dash. 1ch is the advance width of
+// every glyph in a monospace font, which is why this works without counting
+// characters — and counting would be unreliable anyway, since the info lines
+// carry Nerd Font icons and Tailwind-spaced flex rows.
+const DASHES = "-".repeat(120);
+---
+
+<div class="terminal-rule select-none text-ctp-overlay1" aria-hidden="true">{DASHES}</div>
+
+<style>
+    .terminal-rule {
+        width: 0;
+        min-width: round(down, 100%, 1ch);
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    /* Engines without round(): flush to the column edge, half-dash and all. */
+    @supports not (min-width: round(down, 100%, 1ch)) {
+        .terminal-rule {
+            min-width: 100%;
+        }
+    }
+</style>

@@ -1,27 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { fetchGithubStats } from "../lib/github";
-import { formatTimeAgo } from "../lib/date";
-import TerminalPrompt from "../components/TerminalPrompt.astro";
-import TerminalCommand from "../components/TerminalCommand.astro";
 import DesktopTerminal from "../components/DesktopTerminal.astro";
 import MobileTerminal from "../components/MobileTerminal.astro";
-import DiscordStatus from "../components/DiscordStatus";
-import SocialIcons from "../components/SocialIcons.astro";
-import { personalInfo, experience, education } from "../lib/constants";
-
-import {
-	SOCIAL_CONFIG,
-	TERMINAL_CONFIG,
-	DISCORD_ID,
-} from "../lib/constants";
-import { getBlogPosts } from "../lib/blog";
 
 export const prerender = false;
-
-const githubStats = await fetchGithubStats();
-const posts = getBlogPosts();
-const latestPost = posts.length > 0 ? posts[0] : null;
 ---
 
 <Layout includePadding={false}>

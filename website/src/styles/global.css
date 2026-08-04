@@ -88,6 +88,19 @@
  * there'd be no room for the fade without leaving the block partly visible at
  * the start or permanently washed out at the end.
  */
+/*
+ * Info rows in the fastfetch block. The column is capped (see
+ * FastfetchOutput.astro), so a long value — a Spotify title, a post title —
+ * wraps rather than stretching the column and dragging the rules out with it.
+ * The hanging indent makes that second line read as a continuation of the row
+ * above rather than a new key. Not applied to the Blog row: it's a flex
+ * container, where text-indent doesn't reach the items anyway.
+ */
+.term-info .term-row {
+  padding-left: 2ch;
+  text-indent: -2ch;
+}
+
 @keyframes reveal-sweep {
   from {
     -webkit-mask-position: 0% 100%;
