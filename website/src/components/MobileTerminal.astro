@@ -5,28 +5,31 @@ import FastfetchOutput from "./outputs/FastfetchOutput.astro";
 import WhoamiOutput from "./outputs/WhoamiOutput.astro";
 import ProjectsOutput from "./outputs/ProjectsOutput.astro";
 import { TERMINAL_CONFIG } from "../lib/constants";
+import { TERMINAL_STATES, stateIndexForKey } from "../lib/terminal-states";
 
-// Configuration for mobile commands
-const commands = [
-    {
-        id: "mobile-fastfetch",
-        command: "fastfetch",
-        output: FastfetchOutput,
-        triggerEvent: "trigger-mobile-fastfetch",
-    },
-    {
-        id: "mobile-whoami",
-        command: "whoami",
-        output: WhoamiOutput,
-        triggerEvent: "trigger-mobile-whoami",
-    },
-    {
-        id: "mobile-projects",
-        command: "ls projects/",
-        output: ProjectsOutput,
-        triggerEvent: "trigger-mobile-projects",
-    },
-];
+interface Props {
+    /** Which command a shared link asked for. Everything above it is pre-filled. */
+    initialKey?: string;
+}
+
+const { initialKey } = Astro.props;
+const initialIndex = stateIndexForKey(initialKey);
+
+// Same sequence as the desktop terminal (see terminal-states.ts) — only the
+// presentation differs: mobile scrolls and reveals each command in turn rather
+// than swapping one full-screen state for the next.
+const OUTPUTS: Record<string, any> = {
+    fastfetch: FastfetchOutput,
+    whoami: WhoamiOutput,
+    projects: ProjectsOutput,
+};
+
+const commands = TERMINAL_STATES.map((state) => ({
+    id: `mobile-${state.key}`,
+    command: state.command,
+    output: OUTPUTS[state.key],
+    triggerEvent: `trigger-mobile-${state.key}`,
+}));
 ---
 
 <div class="flex flex-col gap-16 pb-20">
@@ -34,7 +37,7 @@ const commands = [
         commands.map((cmd, index) => (
             <div
                 id={`section-${cmd.id}`}
-                class={`mobile-command-section opacity-0 transition-opacity duration-500 ${index !== 0 ? "hidden" : ""}`}
+                class={`mobile-command-section opacity-0 transition-opacity duration-500 ${index > initialIndex ? "hidden" : ""}`}
                 data-trigger-event={cmd.triggerEvent}
                 data-next-section={
                     index < commands.length - 1
@@ -66,7 +69,13 @@ const commands = [
     }
 </div>
 
-<script define:vars={{ commandIds: commands.map((c) => c.id) }}>
+<script
+    define:vars={{
+        commandIds: commands.map((c) => c.id),
+        commandTexts: commands.map((c) => c.command),
+        initialIndex,
+    }}
+>
     // Intersection Observer to trigger animations
     const observerOptions = {
         root: null,
@@ -133,4 +142,75 @@ const commands = [
             }
         });
     });
+
+    // --- Deep links ------------------------------------------------------------
+    // A shared /projects link has to land on projects, but the cascade only
+    // un-hides a section once the one above it finishes typing. So we fast-
+    // forward everything above the target — filling in the typed text and
+    // revealing the output with no animation — then scroll to the target and
+    // let the observer play its typing and sweep as usual. That arrival is the
+    // good part; replaying two commands the visitor didn't ask for is not.
+    if (initialIndex > 0) {
+        for (let i = 0; i < initialIndex; i++) {
+            const id = commandIds[i];
+
+            const text = document.getElementById(`${id}-text`);
+            if (text) text.textContent = commandTexts[i];
+
+            const cursor = document.getElementById(`${id}-cursor`);
+            if (cursor) cursor.style.display = "none";
+
+            const output = document.getElementById(`${id}-output`);
+            if (output) output.classList.remove("hidden");
+
+            // `triggered` is the observer's fire-once guard — setting it here is
+            // what stops these sections from typing themselves out again when
+            // the visitor scrolls back up.
+            const section = document.getElementById(`section-${id}`);
+            if (section) {
+                section.classList.remove("opacity-0");
+                section.classList.add("triggered");
+            }
+        }
+
+        const target = document.getElementById(
+            `section-${commandIds[initialIndex]}`,
+        );
+
+        if (target) {
+            // Clear the theme switcher, which is fixed at the top of the
+            // viewport — scrolling the section flush to y=0 would park the
+            // prompt line right back underneath it.
+            const TOP_GAP = 72;
+
+            let cancelled = false;
+            const cancel = () => {
+                cancelled = true;
+            };
+            // The moment the visitor scrolls themselves, stop re-aligning —
+            // yanking the page back under them would be worse than landing
+            // slightly off.
+            const opts = { once: true, passive: true };
+            window.addEventListener("wheel", cancel, opts);
+            window.addEventListener("touchstart", cancel, opts);
+            window.addEventListener("keydown", cancel, { once: true });
+
+            function align() {
+                if (cancelled) return;
+                const top =
+                    target.getBoundingClientRect().top +
+                    window.scrollY -
+                    TOP_GAP;
+                window.scrollTo({ top: Math.max(0, top) });
+            }
+
+            // Everything above the target keeps growing after first paint — the
+            // Discord island hydrates, the web fonts swap in — so a single
+            // scroll lands hundreds of pixels short. Re-align until it settles.
+            requestAnimationFrame(align);
+            window.addEventListener("load", align);
+            const settle = setInterval(align, 150);
+            setTimeout(() => clearInterval(settle), 1500);
+        }
+    }
 </script>

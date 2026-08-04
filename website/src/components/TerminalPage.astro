@@ -1,0 +1,71 @@
+---
+// The terminal home page. Shared by `/` and by the per-command routes in
+// [cmd].astro, so a deep link renders the requested state directly rather than
+// booting at fastfetch and animating its way over.
+import Layout from "../layouts/Layout.astro";
+import DesktopTerminal from "./DesktopTerminal.astro";
+import MobileTerminal from "./MobileTerminal.astro";
+import { DEFAULT_STATE_KEY } from "../lib/terminal-states";
+
+interface Props {
+    initialKey?: string;
+    title?: string;
+    description?: string;
+    ogDescription?: string;
+}
+
+const {
+    initialKey = DEFAULT_STATE_KEY,
+    title,
+    description,
+    ogDescription,
+} = Astro.props;
+---
+
+<!--
+    lg:overflow-hidden lets the DesktopTerminal container own "scrolling" — it
+    disables native scroll entirely and steps one state per gesture. Passed as
+    bodyClass rather than a scoped `body { … }` rule, which Astro would rewrite
+    with this component's scope attribute and never match.
+-->
+<Layout
+    includePadding={false}
+    bodyClass="lg:overflow-hidden"
+    title={title}
+    description={description}
+    ogDescription={ogDescription}
+>
+    <!--
+        Mobile Terminal.
+        pt-20 clears the theme switcher, which is fixed at top-4 right-4 and
+        40px tall on this breakpoint — at pt-12 the first prompt line sat inside
+        that band and `fastfetch` disappeared under the button on narrow phones
+        (body is overflow-x-hidden, so it was clipped, not scrollable).
+    -->
+    <div class="block lg:hidden pt-20 p-8">
+        <MobileTerminal initialKey={initialKey} />
+    </div>
+
+    <!-- Desktop Terminal -->
+    <div class="hidden lg:block">
+        <DesktopTerminal initialKey={initialKey} />
+    </div>
+
+    <script>
+        // Shares formatUptime with the server-rendered SSH banner, so the two
+        // surfaces can't drift apart on the format or the arithmetic.
+        import { BIRTH_DATE } from "../lib/constants";
+        import { formatUptime } from "../lib/utils";
+
+        function updateUptime() {
+            const uptime = formatUptime(new Date(BIRTH_DATE));
+            document.querySelectorAll(".uptime").forEach((el) => {
+                el.textContent = uptime;
+            });
+        }
+
+        // Tick every second so the elapsed-seconds counter stays live.
+        setInterval(updateUptime, 1000);
+        updateUptime();
+    </script>
+</Layout>

@@ -1,20 +1,36 @@
 ---
 import TerminalPrompt from "./TerminalPrompt.astro";
 import TerminalCommand from "./TerminalCommand.astro";
+import TerminalRail from "./TerminalRail.astro";
 import FastfetchOutput from "./outputs/FastfetchOutput.astro";
 import WhoamiOutput from "./outputs/WhoamiOutput.astro";
 import ProjectsOutput from "./outputs/ProjectsOutput.astro";
 import { TERMINAL_CONFIG } from "../lib/constants";
+import { TERMINAL_STATES, stateIndexForKey } from "../lib/terminal-states";
+
+interface Props {
+    /** Which state to open on. Deep links land here already rendered. */
+    initialKey?: string;
+}
+
+const { initialKey } = Astro.props;
+const initialIndex = stateIndexForKey(initialKey);
 
 // Ordered list of terminal "states". Scrolling steps forward/backward through
-// these; each renders a typed command followed by its output. Adding a new
-// command is a one-line entry here (plus its Output component) — the controller
-// below is fully generic over this array.
-const states = [
-    { key: "fastfetch", command: "fastfetch", Output: FastfetchOutput, startDelay: 0 },
-    { key: "whoami", command: "whoami", Output: WhoamiOutput, startDelay: 500 },
-    { key: "projects", command: "ls projects/", Output: ProjectsOutput, startDelay: 500 },
-];
+// these; each renders a typed command followed by its output. The sequence
+// itself lives in terminal-states.ts (the rail and the [cmd] route read the
+// same list); only the output component is bound here, since those are
+// component imports. The controller below is fully generic over this array.
+const OUTPUTS: Record<string, any> = {
+    fastfetch: FastfetchOutput,
+    whoami: WhoamiOutput,
+    projects: ProjectsOutput,
+};
+
+const states = TERMINAL_STATES.map((state) => ({
+    ...state,
+    Output: OUTPUTS[state.key],
+}));
 ---
 
 <!--
@@ -41,7 +57,7 @@ const states = [
                     return (
                         <div
                             id={`state-${state.key}`}
-                            class={`terminal-state transition-opacity duration-300 ${index !== 0 ? "hidden" : ""}`}
+                            class={`terminal-state transition-opacity duration-300 ${index !== initialIndex ? "hidden" : ""}`}
                         >
                             <div class="mb-4">
                                 <TerminalPrompt
@@ -89,6 +105,9 @@ const states = [
         </div>
     </div>
 
+    <!-- Jump navigation. Desktop-only; renders nothing below lg. -->
+    <TerminalRail states={TERMINAL_STATES} initialIndex={initialIndex} />
+
     <!-- Scroll Indicator -->
     <div
         id="scroll-indicator"
@@ -110,18 +129,28 @@ const states = [
     </div>
 </div>
 
-<script define:vars={{ stateKeys: states.map((s) => s.key) }}>
+<script
+    define:vars={{
+        stateKeys: states.map((s) => s.key),
+        statePaths: states.map((s) => s.path),
+        initialIndex,
+    }}
+>
     const lastIndex = stateKeys.length - 1;
 
     // Controller state — `currentIndex` is the single source of truth for which
     // section is visible. There is no native scroll position to fall out of sync
     // with it, so the old "stuck between sections" desync is impossible.
-    let currentIndex = 0;
+    let currentIndex = initialIndex;
     let isAnimating = false;
-    let pendingTarget = 0;
+    let pendingTarget = initialIndex;
     // A navigation intent (+1 / -1) requested while a transition is mid-flight.
     // The latest one wins, so reversing direction mid-animation is honoured.
     let queuedDir = 0;
+    // An absolute target requested by the rail mid-flight. Kept separate from
+    // queuedDir and drained first: a click names a destination, so it shouldn't
+    // be reinterpreted as a relative step once the transition lands.
+    let queuedIndex = null;
 
     const container = document.getElementById("desktop-scroll-container");
     const scrollIndicator = document.getElementById("scroll-indicator");
@@ -165,9 +194,21 @@ const states = [
         }
     }
 
-    // Kick off the first command.
+    // Keep the address bar on the visible command so any state can be shared.
+    // replaceState, not pushState: scrolling is a passive gesture, and stacking
+    // a history entry per step would mean three Back presses to leave the site.
+    // The first state keeps the bare "/" — the homepage is never rewritten to a
+    // slug, though /fastfetch is still accepted on the way in.
+    function syncUrl(index) {
+        const path = statePaths[index];
+        if (!path || window.location.pathname === path) return;
+        history.replaceState(null, "", path + window.location.search);
+    }
+
+    // Kick off whichever command this URL asked for. A deep link is already
+    // rendered as the visible state server-side, so nothing else ever paints.
     setTimeout(() => {
-        window.dispatchEvent(new Event(`trigger-${stateKeys[0]}`));
+        window.dispatchEvent(new Event(`trigger-${stateKeys[initialIndex]}`));
     }, 100);
 
     // Per-state handlers: command completion + clear completion.
@@ -189,9 +230,24 @@ const states = [
             currentIndex = idx;
             isAnimating = false;
             updateIndicator();
+            syncUrl(idx);
 
-            // Apply any gesture that arrived while we were animating.
-            if (queuedDir !== 0) {
+            // The rail's active dot follows this, not the click — a click is a
+            // request, and only this handler knows the state actually landed.
+            window.dispatchEvent(
+                new CustomEvent("terminal-state-change", {
+                    detail: { index: idx, key: k },
+                }),
+            );
+
+            // Apply any navigation that arrived while we were animating. An
+            // absolute target (rail click) wins over a relative one (gesture).
+            if (queuedIndex !== null) {
+                const target = queuedIndex;
+                queuedIndex = null;
+                queuedDir = 0;
+                startTransition(target);
+            } else if (queuedDir !== 0) {
                 const dir = queuedDir;
                 queuedDir = 0;
                 navigate(dir);
@@ -251,6 +307,20 @@ const states = [
         startTransition(target);
     }
 
+    // --- Rail: jump straight to any state ---------------------------------------
+    // startTransition already accepts an arbitrary index and routes through the
+    // typed `clear`, so a jump looks exactly like a scroll step — the same clear,
+    // then the target's command typed out fresh.
+    window.addEventListener("terminal-goto", (e) => {
+        const index = e.detail?.index;
+        if (typeof index !== "number" || index < 0 || index > lastIndex) return;
+        if (isAnimating) {
+            queuedIndex = index;
+            return;
+        }
+        startTransition(index);
+    });
+
     // --- Wheel: one gesture = exactly one section ------------------------------
     // A continuous scroll (and trackpad inertia) fires a burst of wheel events.
     // We act on the first event of a burst, then stay locked until the wheel has
@@ -287,6 +357,15 @@ const states = [
     // --- Keyboard --------------------------------------------------------------
     window.addEventListener("keydown", (e) => {
         if (!container || container.offsetParent === null) return;
+
+        // Space is the one key a focused rail button already acts on, so it
+        // would otherwise both activate the button and advance a state. Scoped
+        // to Space deliberately: arrows and PageUp/PageDown aren't button
+        // activation keys, and clicking a dot leaves it focused — a broader
+        // guard would kill keyboard navigation for the rest of the visit.
+        if (e.key === " " && document.activeElement?.closest("#terminal-rail")) {
+            return;
+        }
 
         if (e.key === "ArrowDown" || e.key === "PageDown" || e.key === " ") {
             e.preventDefault();

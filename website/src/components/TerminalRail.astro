@@ -1,0 +1,124 @@
+---
+// Desktop-only jump navigation for the terminal states.
+//
+// The terminal disables native scrolling and advances one state per gesture, so
+// without this there is no way to reach `ls projects/` except by sitting through
+// two full type-and-clear animations. The rail is a hairline with one dot per
+// state: hovering names the command, clicking jumps straight to it.
+//
+// It owns no state of its own. Clicks go out as `terminal-goto`; the active dot
+// follows `terminal-state-change` back from the controller in DesktopTerminal,
+// which stays the single source of truth for `currentIndex`.
+import type { TerminalState } from "../lib/terminal-states";
+
+interface Props {
+    states: TerminalState[];
+    initialIndex: number;
+}
+
+const { states, initialIndex } = Astro.props;
+---
+
+<nav
+    id="terminal-rail"
+    class="hidden lg:flex fixed right-8 top-1/2 -translate-y-1/2 z-50 flex-col items-center pointer-events-auto"
+    aria-label="Terminal history"
+>
+    {
+        states.map((state, index) => (
+            <>
+                {index > 0 && (
+                    <span
+                        class="rail-connector w-px h-10 bg-ctp-surface1"
+                        aria-hidden="true"
+                    />
+                )}
+                <button
+                    type="button"
+                    class="rail-dot group relative flex items-center justify-center w-6 h-6 cursor-pointer"
+                    data-index={index}
+                    aria-current={index === initialIndex ? "true" : "false"}
+                >
+                    {/* The marker itself. Square, not round — it reads as a
+                        terminal cell rather than a carousel bullet. */}
+                    <span class="rail-mark block w-[6px] h-[6px] bg-ctp-overlay0 transition-all duration-200" />
+
+                    {/* Hover/focus chip naming the real command. Sits to the
+                        left of the rail so it never runs off-screen. */}
+                    <span
+                        class="rail-chip pointer-events-none absolute right-full mr-3 whitespace-nowrap border border-ctp-surface1 bg-ctp-mantle px-2 py-1 font-mono text-sm text-ctp-text opacity-0 translate-x-1 transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0"
+                    >
+                        <span class="text-ctp-green">$</span> {state.command}
+                    </span>
+                </button>
+            </>
+        ))
+    }
+</nav>
+
+<style>
+    /* Colors come from --catppuccin-color-*, not --color-ctp-*: the latter is
+     * declared in an `@theme inline` block, so Tailwind inlines it at the use
+     * site and never emits it as a custom property. These are the real
+     * variables, and they re-resolve on their own when .latte is toggled. */
+
+    /* Active marker: a filled peach block, taller than it is wide so it reads
+     * as a cursor sitting on the rail. The glow matches the peach already used
+     * by the scroll indicator. */
+    .rail-dot[aria-current="true"] .rail-mark {
+        width: 4px;
+        height: 16px;
+        background-color: var(--catppuccin-color-peach);
+        box-shadow: 0 0 8px
+            color-mix(in srgb, var(--catppuccin-color-peach) 55%, transparent);
+    }
+
+    .rail-dot:hover .rail-mark,
+    .rail-dot:focus-visible .rail-mark {
+        background-color: var(--catppuccin-color-text);
+    }
+
+    .rail-dot[aria-current="true"]:hover .rail-mark {
+        background-color: var(--catppuccin-color-peach);
+    }
+
+    .rail-dot:focus-visible {
+        outline: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rail-mark,
+        .rail-chip {
+            transition: none;
+        }
+    }
+</style>
+
+<script>
+    const rail = document.getElementById("terminal-rail");
+
+    if (rail) {
+        const dots = Array.from(
+            rail.querySelectorAll<HTMLButtonElement>(".rail-dot"),
+        );
+
+        dots.forEach((dot) => {
+            dot.addEventListener("click", () => {
+                const index = Number(dot.dataset.index);
+                if (Number.isNaN(index)) return;
+                window.dispatchEvent(
+                    new CustomEvent("terminal-goto", { detail: { index } }),
+                );
+            });
+        });
+
+        // The controller decides when a state has actually settled — a click is
+        // a request, not a commitment, so the active dot only moves on this.
+        window.addEventListener("terminal-state-change", (event) => {
+            const { index } = (event as CustomEvent<{ index: number }>).detail;
+            dots.forEach((dot, i) => {
+                dot.setAttribute("aria-current", i === index ? "true" : "false");
+            });
+        });
+    }
+</script>

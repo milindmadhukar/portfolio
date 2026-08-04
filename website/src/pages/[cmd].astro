@@ -1,0 +1,50 @@
+---
+// A shareable URL per terminal command: /whoami, /projects (and /fastfetch,
+// which mirrors the homepage). The page renders the requested state directly,
+// so a deep link never flashes fastfetch on its way over.
+//
+// Single-segment only, and every unknown value 404s — /blog, /sitemap.xml and
+// /api/* all match more specific routes and never reach here.
+import TerminalPage from "../components/TerminalPage.astro";
+import { personalInfo, projects } from "../lib/constants";
+import { TERMINAL_STATES, stateIndexForSlug } from "../lib/terminal-states";
+
+export const prerender = false;
+
+const index = stateIndexForSlug(Astro.params.cmd);
+
+if (index === -1) {
+    return new Response(null, { status: 404 });
+}
+
+const state = TERMINAL_STATES[index];
+
+// Per-command metadata, so the three URLs don't all share one title in search
+// results and link previews.
+const META: Record<string, { title: string; description: string }> = {
+    fastfetch: {
+        title: personalInfo.seoTitle,
+        description: personalInfo.seoDescription,
+    },
+    whoami: {
+        title: `whoami — ${personalInfo.name}`,
+        description: personalInfo.bio.short,
+    },
+    projects: {
+        title: `ls projects/ — ${personalInfo.name}`,
+        description: `Projects built by ${personalInfo.name}, including ${projects
+            .filter((p) => p.featured)
+            .slice(0, 3)
+            .map((p) => p.title.split(" - ")[0])
+            .join(", ")}.`,
+    },
+};
+
+const meta = META[state.key];
+---
+
+<TerminalPage
+    initialKey={state.key}
+    title={meta.title}
+    description={meta.description}
+/>

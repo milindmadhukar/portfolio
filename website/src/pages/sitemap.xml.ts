@@ -11,6 +11,10 @@ export const prerender = false;
 const STATIC_ROUTES: { path: string; changefreq: string; priority: string }[] = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
   { path: '/blog/', changefreq: 'weekly', priority: '0.8' },
+  // One URL per terminal command (see terminal-states.ts). '/fastfetch' is
+  // deliberately absent — it renders the same page as '/', which is canonical.
+  { path: '/whoami', changefreq: 'monthly', priority: '0.7' },
+  { path: '/projects', changefreq: 'weekly', priority: '0.9' },
 ];
 
 function xmlEscape(value: string): string {

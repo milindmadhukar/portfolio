@@ -1,45 +1,8 @@
 ---
-import Layout from "../layouts/Layout.astro";
-import DesktopTerminal from "../components/DesktopTerminal.astro";
-import MobileTerminal from "../components/MobileTerminal.astro";
+import TerminalPage from "../components/TerminalPage.astro";
+import { DEFAULT_STATE_KEY } from "../lib/terminal-states";
 
 export const prerender = false;
 ---
 
-<Layout includePadding={false}>
-	<!-- Mobile Terminal -->
-	<div class="block lg:hidden pt-12 p-8">
-		<MobileTerminal />
-	</div>
-
-	<!-- Desktop Terminal -->
-	<div class="hidden lg:block">
-		<DesktopTerminal />
-	</div>
-
-	<script>
-		// Shares formatUptime with the server-rendered SSH banner, so the two
-		// surfaces can't drift apart on the format or the arithmetic.
-		import { BIRTH_DATE } from "../lib/constants";
-		import { formatUptime } from "../lib/utils";
-
-		function updateUptime() {
-			const uptime = formatUptime(new Date(BIRTH_DATE));
-			document.querySelectorAll(".uptime").forEach((el) => {
-				el.textContent = uptime;
-			});
-		}
-
-		// Tick every second so the elapsed-seconds counter stays live.
-		setInterval(updateUptime, 1000);
-		updateUptime();
-	</script>
-</Layout>
-
-<style>
-	@media (min-width: 1024px) {
-		body {
-			overflow: hidden; /* Let the DesktopTerminal container handle scrolling */
-		}
-	}
-</style>
+<TerminalPage initialKey={DEFAULT_STATE_KEY} />

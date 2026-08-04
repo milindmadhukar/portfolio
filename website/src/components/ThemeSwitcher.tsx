@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
 
+// Shared by the pre-mount placeholder and the hydrated button — if the two ever
+// disagree on position or size, the button visibly jumps on hydration.
+//
+// It shrinks and tucks in below lg: the button is fixed, so at top-6/w-10 it sat
+// squarely over the first prompt line on a phone and swallowed `fastfetch` on
+// narrow screens. Paired with the pt-20 on the mobile terminal wrapper in
+// TerminalPage.astro, content now starts well clear of it.
+const POSITION =
+    "fixed top-4 right-4 w-9 h-9 lg:top-6 lg:right-6 lg:w-10 lg:h-10 z-50 rounded-lg bg-ctp-surface0 border border-ctp-surface1 flex items-center justify-center transition-all duration-300 hover:bg-ctp-surface1";
+
 export default function ThemeSwitcher() {
     const [theme, setTheme] = useState<"mocha" | "latte">("mocha");
     const [mounted, setMounted] = useState(false);
@@ -54,7 +64,7 @@ export default function ThemeSwitcher() {
     if (!mounted) {
         return (
             <button
-                className="fixed top-6 right-6 z-50 w-10 h-10 rounded-lg bg-ctp-surface0 border border-ctp-surface1 flex items-center justify-center transition-all duration-300 hover:bg-ctp-surface1"
+                className={POSITION}
                 aria-label="Toggle theme"
             >
                 <span className="text-ctp-text">
@@ -67,7 +77,7 @@ export default function ThemeSwitcher() {
     return (
         <button
             onClick={toggleTheme}
-            className="fixed top-6 right-6 z-50 w-10 h-10 rounded-lg bg-ctp-surface0 latte:bg-ctp-surface0 border border-ctp-surface1 latte:border-ctp-surface1 flex items-center justify-center transition-all duration-300 hover:bg-ctp-surface1 latte:hover:bg-ctp-surface1 hover:scale-110 active:scale-95"
+            className={`${POSITION} latte:bg-ctp-surface0 latte:border-ctp-surface1 latte:hover:bg-ctp-surface1 hover:scale-110 active:scale-95`}
             aria-label={`Switch to ${theme === "mocha" ? "light" : "dark"} theme`}
             title={`Switch to ${theme === "mocha" ? "light" : "dark"} theme`}
         >
