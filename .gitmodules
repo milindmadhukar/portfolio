@@ -1,0 +1,4 @@
+[submodule "website/blog-content"]
+	path = website/blog-content
+	url = https://github.com/milindmadhukar/blog.git
+	branch = main

@@ -1,8 +1,9 @@
 #!/usr/bin/env bun
 /**
- * Syncs blog content from either:
+ * Syncs blog content from, in order of preference:
  * 1. Local folder (BLOG_FOLDER_PATH) for development
- * 2. GitHub repo (using BLOG_REPO_GH_TOKEN) for production builds
+ * 2. The blog-content submodule, pinned to a commit — the normal path for builds
+ * 3. GitHub repo (using GITHUB_TOKEN) — fallback for clones made without submodules
  */
 
 import { join } from 'path';
@@ -11,6 +12,7 @@ import { existsSync } from 'fs';
 import { execSync } from 'child_process';
 
 const BLOG_DEST = join(process.cwd(), 'src/pages/blog');
+const BLOG_SUBMODULE = join(process.cwd(), 'blog-content');
 // Get this from env
 const BLOG_REPO_URL = process.env.BLOG_REPO_URL || '';
 
@@ -137,6 +139,18 @@ async function syncFromGitHub(token: string) {
   }
 }
 
+// An uninitialised submodule leaves an empty directory behind, which would
+// otherwise sync zero posts and look like a success.
+async function isCheckedOut(dir: string) {
+  if (!existsSync(dir)) {
+    return false;
+  }
+
+  const items = await readdir(dir);
+
+  return items.length > 0;
+}
+
 async function main() {
   // Clean up old blog posts before syncing
   await cleanupBlogFolder();
@@ -152,10 +166,23 @@ async function main() {
   }
 
   if (localPath && existsSync(localPath)) {
+    console.log(`📁 Syncing blog from local folder: ${localPath}`);
     await syncFromLocal(localPath);
+  } else if (await isCheckedOut(BLOG_SUBMODULE)) {
+    console.log('📦 Syncing blog from the blog-content submodule');
+    await syncFromLocal(BLOG_SUBMODULE);
   } else if (githubToken) {
+    console.log('☁️  Syncing blog from GitHub (submodule not checked out)');
     await syncFromGitHub(githubToken);
+  } else {
+    console.error(
+      'Error: no blog source available. Run `git submodule update --init website/blog-content`, ' +
+      'or set BLOG_FOLDER_PATH, or set GITHUB_TOKEN and BLOG_REPO_URL.'
+    );
+    process.exit(1);
   }
+
+  console.log('✓ Blog sync complete');
 }
 
 main();

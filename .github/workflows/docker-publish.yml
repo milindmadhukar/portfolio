@@ -14,7 +14,40 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  # The blog repo dispatches here when a post changes. Bump the pinned submodule
+  # commit and push; that push is what triggers the build below.
+  bump-blog:
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # PAT_TOKEN, not GITHUB_TOKEN: it needs read access to the private blog
+      # repo, and pushes made with GITHUB_TOKEN do not trigger workflows.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Bump blog content
+        run: |
+          git submodule update --remote website/blog-content
+
+          if git diff --quiet -- website/blog-content; then
+            echo "Blog content already up to date, nothing to do"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: bump blog content" -- website/blog-content
+          git push
+
   build:
+    if: github.event_name != 'repository_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,8 +65,13 @@ jobs:
             image-name: ${{ github.repository }}-ssh
 
     steps:
+      # PAT_TOKEN: the blog-content submodule lives in a private repo, which the
+      # default GITHUB_TOKEN cannot read.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
@@ -78,7 +116,6 @@ jobs:
           # build-args are not needed for secrets when using --mount
           secrets: |
             gh_token=${{ secrets.PAT_TOKEN }}
-            blog_repo_url=${{ secrets.BLOG_REPO_URL }}
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
