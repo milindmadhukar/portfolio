@@ -6,7 +6,6 @@ import TerminalPrompt from '../../components/TerminalPrompt.astro';
 import TerminalCommand from '../../components/TerminalCommand.astro';
 import { getBlogPosts } from '../../lib/blog';
 import SocialIcons from '../../components/SocialIcons.astro';
-import TerminalRule from '../../components/TerminalRule.astro';
 
 export const prerender = false;
 
@@ -50,14 +49,14 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
         </h1>
 
         <!--
-          Socials sit between rules, the same way the fastfetch block brackets
-          its sections on the home page.
+          Separated by spacing alone. Dashed rules were tried here and read as
+          heavy: on the home page they divide dense rows inside one block, but
+          here they span a column whose width is set by a 7xl heading, so they
+          became the loudest thing on the page.
         -->
-        <TerminalRule />
-        <div class="my-4">
+        <div class="mb-6">
           <SocialIcons />
         </div>
-        <TerminalRule />
 
         <!-- Tags Filter (above terminal) -->
         {allTags.length > 0 && (

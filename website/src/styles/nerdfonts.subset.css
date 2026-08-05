@@ -1,0 +1,135 @@
+/*
+ * GENERATED - do not edit. Run `bun scripts/subset-nerdfont.ts` to refresh.
+ *
+ * 28 of 10764 upstream icons, i.e. the ones this site
+ * actually references. Adding an `nf-` class without re-running the script
+ * leaves that icon rendering as tofu.
+ */
+
+@font-face {
+  font-family: 'NerdFontsSymbols Nerd Font';
+  src: url("./fonts/symbols-nerd-font-subset.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.nf {
+  font-family: 'NerdFontsSymbols Nerd Font';
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nf-fa-address_card:before {
+  content: "\f2bb";
+}
+
+.nf-fa-adjust:before {
+  content: "\f042";
+}
+
+.nf-fa-angle_down:before {
+  content: "\f107";
+}
+
+.nf-fa-angle_right:before {
+  content: "\f105";
+}
+
+.nf-fa-angle_up:before {
+  content: "\f106";
+}
+
+.nf-fa-building:before {
+  content: "\f1ad";
+}
+
+.nf-fa-discord:before {
+  content: "\f1ff";
+}
+
+.nf-fa-github:before {
+  content: "\f09b";
+}
+
+.nf-fa-id_badge:before {
+  content: "\f2c1";
+}
+
+.nf-fa-instagram:before {
+  content: "\f16d";
+}
+
+.nf-fa-linkedin:before {
+  content: "\f0e1";
+}
+
+.nf-fa-moon_o:before {
+  content: "\f186";
+}
+
+.nf-fa-pen_nib:before {
+  content: "\ee75";
+}
+
+.nf-fa-spotify:before {
+  content: "\f1bc";
+}
+
+.nf-fa-sun_o:before {
+  content: "\f185";
+}
+
+.nf-fa-twitter:before {
+  content: "\f099";
+}
+
+.nf-md-briefcase:before {
+  content: "\f00d6";
+}
+
+.nf-md-calendar_month:before {
+  content: "\f0e17";
+}
+
+.nf-md-clock:before {
+  content: "\f0954";
+}
+
+.nf-md-clock_outline:before {
+  content: "\f0150";
+}
+
+.nf-md-controller_classic:before {
+  content: "\f0b82";
+}
+
+.nf-md-discord:before {
+  content: "\f066f";
+}
+
+.nf-md-email:before {
+  content: "\f01ee";
+}
+
+.nf-md-file_document:before {
+  content: "\f0219";
+}
+
+.nf-md-file_document_outline:before {
+  content: "\f09ee";
+}
+
+.nf-md-school:before {
+  content: "\f0474";
+}
+
+.nf-md-web:before {
+  content: "\f059f";
+}
+
+.nf-oct-git_commit:before {
+  content: "\f417";
+}

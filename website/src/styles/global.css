@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+/*
+ * JetBrains Mono is requested once, by the <link> in Layout.astro. There used
+ * to be an @import for it here as well: a duplicate request, and the worse of
+ * the two - a CSS @import cannot start until this stylesheet has been fetched
+ * and parsed, so it serialised a round trip behind the bundle.
+ */
 @import "tailwindcss";
 
 /* 
@@ -8,7 +13,11 @@
  */
 @import "@catppuccin/tailwindcss/mocha.css";
 
-@import "./nerdfonts.css";
+/*
+ * Generated subset - 28 icons, not the upstream 10,764. Regenerate with
+ * `bun scripts/subset-nerdfont.ts` after adding an `nf-` class.
+ */
+@import "./nerdfonts.subset.css";
 
 /* 
  * Tailwind v4 custom variant for latte theme.
