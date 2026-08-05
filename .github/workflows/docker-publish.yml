@@ -48,6 +48,11 @@ jobs:
           # PAT_TOKEN is read-only on this repo, so push as GITHUB_TOKEN, which
           # has contents: write above. That push deliberately does not trigger a
           # new workflow run - the build below already follows via `needs`.
+          #
+          # checkout persists PAT_TOKEN as an auth header for github.com, and it
+          # outranks credentials in the push URL, so drop it first. The submodule
+          # fetch above is already done by this point.
+          git config --unset-all http.https://github.com/.extraheader || true
           git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:main
 
   build:
