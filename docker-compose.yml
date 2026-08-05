@@ -12,6 +12,13 @@
 #   - ssh-portfolio publishes its port directly rather than routing through
 #     Traefik (see the note on that service)
 #
+# Dokploy must have "Enable Submodules" OFF for this service (Provider tab).
+# It only needs this file - both services run prebuilt public images from ghcr,
+# so there is no build context and website/blog-content is never read here. With
+# the toggle on, the clone recurses into the private blog repo and fails: Dokploy
+# clones as https://oauth2:<token>@github.com/..., and git will not reuse that
+# credential for a submodule pointing at a different repo.
+#
 # Routing can also be left to Dokploy's UI Domains tab, which injects
 # equivalent labels at deploy time. Defining them here keeps the compose file
 # self-describing; if you use the UI instead, drop the traefik.* labels below
