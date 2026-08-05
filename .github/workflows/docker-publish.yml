@@ -23,8 +23,8 @@ jobs:
       contents: write
 
     steps:
-      # PAT_TOKEN, not GITHUB_TOKEN: it needs read access to the private blog
-      # repo, and pushes made with GITHUB_TOKEN do not trigger workflows.
+      # PAT_TOKEN is what can read the private blog repo, so it has to be the
+      # checkout token for the submodule to resolve.
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -44,10 +44,16 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: bump blog content" -- website/blog-content
-          git push
+
+          # PAT_TOKEN is read-only on this repo, so push as GITHUB_TOKEN, which
+          # has contents: write above. That push deliberately does not trigger a
+          # new workflow run - the build below already follows via `needs`.
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:main
 
   build:
-    if: github.event_name != 'repository_dispatch'
+    # Runs on push/manual (bump-blog skipped) and after a successful bump.
+    needs: [bump-blog]
+    if: always() && (needs.bump-blog.result == 'success' || needs.bump-blog.result == 'skipped')
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -67,9 +73,12 @@ jobs:
     steps:
       # PAT_TOKEN: the blog-content submodule lives in a private repo, which the
       # default GITHUB_TOKEN cannot read.
+      # On a dispatch run, main has moved on since the event fired - check out
+      # the branch so the bump commit is included.
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event_name == 'repository_dispatch' && 'main' || github.sha }}
           submodules: recursive
           token: ${{ secrets.PAT_TOKEN }}
 
