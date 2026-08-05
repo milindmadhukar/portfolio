@@ -1,11 +1,19 @@
 [submodule "website/blog-content"]
 	path = website/blog-content
-	# SSH so Dokploy can clone this private repo with its own deploy key, which
-	# it stores in its database and therefore survives container restarts and
-	# updates - unlike a credentials file inside the Dokploy container.
+	# Relative on purpose, and it is what makes the private blog clone anywhere
+	# without storing a credential.
 	#
-	# GitHub Actions is unaffected: actions/checkout configures
-	# url.https://github.com/.insteadOf git@github.com: and applies it to
-	# submodules, so the bump-blog job still resolves this over HTTPS.
-	url = git@github.com:milindmadhukar/blog.git
+	# Git resolves a relative submodule URL against the superproject's own remote,
+	# carrying that remote's credentials with it. So whoever cloned the parent can
+	# clone this, using the access they already had:
+	#   - Dokploy clones as https://oauth2:<token>@github.com/.../portfolio.git,
+	#     so this resolves to the same host and token. An absolute URL got no
+	#     credential at all, which is why it failed.
+	#   - actions/checkout authenticates https://github.com/ with an extraheader,
+	#     which likewise applies here.
+	#   - a local clone just reuses whatever credentials you already use.
+	#
+	# The alternative was a deploy key stored in Dokploy - but that instance is
+	# shared, so any key there is readable by its other users.
+	url = ../blog.git
 	branch = main
