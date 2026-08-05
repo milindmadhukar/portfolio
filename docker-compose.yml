@@ -64,10 +64,18 @@ services:
     # it needs a TCP entrypoint added to Traefik's *static* config on the host
     # plus that port bound on the Traefik container - server-side setup this
     # file cannot express. Publishing the port directly keeps the deployment
-    # self-contained. Set SSH_PORT in Dokploy's environment to pick the public
-    # port; the container always listens on 2222.
+    # self-contained.
+    #
+    # Port 22 so the advertised command is a bare `ssh milind.dev`. Two things
+    # this depends on, both outside this file:
+    #   - the host's own sshd must not be on 22, or this bind fails
+    #   - milind.dev must be DNS-only in Cloudflare; the proxy carries HTTP(S)
+    #     only, so SSH to a proxied record just times out
+    # Override SSH_PORT (e.g. 2222) when running this compose anywhere that
+    # cannot take 22. The container always listens on 2222 internally, so
+    # cap_drop: ALL is fine - the host does the privileged bind.
     ports:
-      - "${SSH_PORT:-2222}:2222"
+      - "${SSH_PORT:-22}:2222"
     read_only: true
     cap_drop:
       - ALL
