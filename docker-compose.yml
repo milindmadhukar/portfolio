@@ -7,17 +7,21 @@
 # Differences that matter, versus that file:
 #   - no container_name: Dokploy needs to name containers itself, otherwise
 #     logs, metrics and the redeploy button break
-#   - no watchtower labels: Dokploy redeploys on its own webhook
+#   - no watchtower labels: Dokploy builds and deploys on its own
 #   - HTTP routing is configured in the dashboard (Domains tab), not here
 #   - ssh-portfolio publishes its port directly rather than routing through
 #     Traefik (see the note on that service)
 #
-# Dokploy must have "Enable Submodules" OFF for this service (Provider tab).
-# It only needs this file - both services run prebuilt public images from ghcr,
-# so there is no build context and website/blog-content is never read here. With
-# the toggle on, the clone recurses into the private blog repo and fails: Dokploy
-# clones as https://oauth2:<token>@github.com/..., and git will not reuse that
-# credential for a submodule pointing at a different repo.
+# Both images are built here on the server rather than pulled from a registry.
+# That removes the race the previous setup had - Dokploy deployed on the push
+# webhook while CI was still building, so it kept redeploying the previous
+# image - because there is no longer a gap between "commit landed" and "image
+# exists".
+#
+# This requires "Enable Submodules" ON in Dokploy (Provider tab), plus a Dokploy
+# SSH key registered as a deploy key on the private blog repo: the build reads
+# the posts from website/blog-content, and .gitmodules points at that repo over
+# SSH precisely so Dokploy's key can reach it.
 #
 # The domain is configured in Dokploy's Domains tab (host milind.dev, service
 # portfolio, port 4321, HTTPS via letsencrypt); Dokploy injects the router,
@@ -26,7 +30,8 @@
 
 services:
   portfolio:
-    image: ghcr.io/milindmadhukar/portfolio:latest
+    build:
+      context: ./website
     restart: always
     environment:
       - NODE_ENV=production
@@ -43,7 +48,8 @@ services:
       - internal
 
   ssh-portfolio:
-    image: ghcr.io/milindmadhukar/portfolio-ssh:latest
+    build:
+      context: ./ssh-server
     restart: always
     environment:
       - SSH_HOST=0.0.0.0

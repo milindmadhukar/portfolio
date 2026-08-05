@@ -16,9 +16,11 @@ COPY . .
 ENV ASTRO_TELEMETRY_DISABLED=1
 
 # Build the application
-RUN --mount=type=secret,id=gh_token \
-    GITHUB_TOKEN=$(cat /run/secrets/gh_token) \
-    bun run build
+# No build secret. Every page that reads GitHub stats is prerender = false, so
+# nothing calls the API at build time - the token is only needed at runtime, via
+# the environment. Dropping the mount is what lets plain `docker compose build`
+# work, on Dokploy or locally.
+RUN bun run build
 
 # Production image
 FROM oven/bun:1-alpine AS release

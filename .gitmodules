@@ -1,4 +1,11 @@
 [submodule "website/blog-content"]
 	path = website/blog-content
-	url = https://github.com/milindmadhukar/blog.git
+	# SSH so Dokploy can clone this private repo with its own deploy key, which
+	# it stores in its database and therefore survives container restarts and
+	# updates - unlike a credentials file inside the Dokploy container.
+	#
+	# GitHub Actions is unaffected: actions/checkout configures
+	# url.https://github.com/.insteadOf git@github.com: and applies it to
+	# submodules, so the bump-blog job still resolves this over HTTPS.
+	url = git@github.com:milindmadhukar/blog.git
 	branch = main
