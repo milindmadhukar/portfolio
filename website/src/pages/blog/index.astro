@@ -18,11 +18,20 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   description="📚 Where bugs become features and features become blog posts. Dive into chaos-driven development, DevOps disasters (and triumphs), and tech rants you didn't know you needed. Grab your coffee and prepare for a wild ride!"
   includePadding={false}
 >
-  <div class="min-h-screen py-8 sm:py-20 px-4 sm:px-6 bg-ctp-crust relative">
-    <div class="max-w-6xl mx-auto relative z-10">
+  <!--
+    Same layout primitives as the home terminal (see DesktopTerminal.astro and
+    TerminalPage.astro): p-8 with pt-20 on mobile to clear the fixed theme
+    switcher, dropping to pt-12 once the switcher is out of the text column, and
+    the same responsive mono scale. Left-aligned and natural-width rather than
+    centred in a max-w container, so the left edge lines up with the home page.
+  -->
+  <div class="min-h-screen p-8 pt-20 lg:pt-12 bg-ctp-crust relative">
+    <div
+      class="w-fit relative z-10 font-mono text-base md:text-base lg:text-lg xl:text-xl leading-tight"
+    >
       <!-- Terminal Header -->
-      <div class="mt-2 sm:mt-8 mb-4">
-        <div class="mb-4 sm:mb-8">
+      <div class="mb-4">
+        <div class="mb-4">
           <a
             href="/"
             class="group flex items-center gap-2 text-ctp-overlay2 hover:text-ctp-teal transition-colors"
@@ -30,7 +39,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            <span class="text-sm font-medium">Back to Home</span>
+            <span class="text-[0.75em] font-medium">Back to Home</span>
           </a>
         </div>
 
@@ -40,29 +49,29 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
         </h1>
 
         <!-- Socials & RSS -->
-        <div class="mb-6">
+        <div class="mb-4">
           <SocialIcons />
         </div>
 
 
         <!-- Tags Filter (above terminal) -->
         {allTags.length > 0 && (
-          <div class="mb-6">
-            <div class="flex items-center gap-3 mb-4">
-              <span class="text-sm font-mono text-ctp-overlay2">
+          <div class="mb-4">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="text-[0.8em] text-ctp-overlay2">
                 <span class="text-ctp-green hidden md:inline">$</span> <span class="hidden md:inline">filter:</span><span class="md:hidden">Filter by tag:</span>
               </span>
             </div>
             <div class="flex flex-wrap gap-2">
               <button
-                class="tag-filter-btn px-3 py-1 text-sm font-mono bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all active"
+                class="tag-filter-btn px-3 py-1 text-[0.8em] bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all active"
                 data-tag="all"
               >
                 all
               </button>
               {allTags.map((tag: string) => (
                 <button
-                  class="tag-filter-btn px-3 py-1 text-sm font-mono bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all"
+                  class="tag-filter-btn px-3 py-1 text-[0.8em] bg-ctp-surface0 border border-ctp-surface2 rounded hover:border-ctp-teal transition-all"
                   data-tag={tag}
                 >
                   #{tag}
@@ -72,7 +81,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           </div>
         )}
 
-        <div class="mb-1 font-mono text-ctp-text text-sm sm:text-lg">
+        <div class="mb-4 text-ctp-text">
           <TerminalPrompt user="blog" host="milind.dev" directory="~/posts">
             <TerminalCommand 
               command="ls -la" 
@@ -87,16 +96,20 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
       </div>
 
       {posts.length === 0 ? (
-        <div class="font-mono text-sm text-ctp-overlay2">
+        <div class="text-ctp-overlay2">
           <p>total 0</p>
           <p class="mt-2">$ echo "No posts yet... Coming soon!"</p>
         </div>
       ) : (
         <div>
-          <!-- Unified ls -la style (responsive) -->
-          <div class="font-mono mb-2 ls-output" style="opacity: 0;">
+          <!--
+            Starts hidden, not at opacity 0: the listing is uncovered by the
+            shared reveal-sweep (global.css), the same downward mask the home
+            page uses for command output.
+          -->
+          <div class="mb-2 ls-output hidden">
             <!-- Total line -->
-            <div class="text-ctp-overlay1 posts-total text-base md:text-base md:mb-0 mb-2">
+            <div class="text-ctp-overlay1 posts-total md:mb-0 mb-2">
               total {posts.length}
             </div>
 
@@ -190,15 +203,11 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
     }
   }
 
-  .ls-output.animate-in {
-    animation: instantShow 0.1s ease-out forwards;
-  }
-
-  @keyframes instantShow {
-    to {
-      opacity: 1;
-    }
-  }
+  /*
+   * The listing reveal is the shared .reveal-sweep from global.css — no local
+   * animation here. It also carries the prefers-reduced-motion handling, which
+   * a bespoke fade did not.
+   */
 
 
 </style>
@@ -216,9 +225,17 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
             cursorElement.style.display = 'none';
           }
           if (lsOutput) {
-            lsOutput.classList.add('animate-in');
-            // Force opacity 1 just in case, though class handles it
-            (lsOutput as HTMLElement).style.opacity = '1';
+            // Mirrors revealOutput() in DesktopTerminal.astro: uncover with the
+            // sweep, then strip the class once it lands. The mask clips to the
+            // border box while it is applied, which would cut off the hover
+            // states on the rows below.
+            lsOutput.classList.remove('hidden');
+            lsOutput.classList.add('reveal-sweep');
+            lsOutput.addEventListener('animationend', function done(e) {
+              if ((e as AnimationEvent).animationName !== 'reveal-sweep') return;
+              lsOutput.classList.remove('reveal-sweep');
+              lsOutput.removeEventListener('animationend', done);
+            });
           }
        }, 200);
     });

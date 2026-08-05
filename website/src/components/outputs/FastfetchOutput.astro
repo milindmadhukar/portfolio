@@ -6,7 +6,7 @@ import SocialIcons from "../SocialIcons.astro";
 import TerminalRule from "../TerminalRule.astro";
 import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE } from "../../lib/constants";
 import { getBlogPosts } from "../../lib/blog";
-import { calculateExperience, formatUptime } from "../../lib/utils";
+import { calculateExperience, formatUptime, pluralize } from "../../lib/utils";
 import { getPresence } from "../../lib/lanyard-server";
 
 const githubStats = await fetchGithubStats();
@@ -143,7 +143,7 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
                             </span>
                             <span class="text-ctp-overlay2">::</span>
                             <span class="text-ctp-text group-hover:underline decoration-ctp-yellow underline-offset-4">
-                                {posts.length} articles
+                                {pluralize(posts.length, "article")}
                             </span>
                             <span class="text-xs text-ctp-overlay0 opacity-0 group-hover:opacity-100 transition-opacity">
                                 [READ]

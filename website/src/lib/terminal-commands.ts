@@ -26,7 +26,7 @@ import {
     EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
-import { calculateExperience, formatUptime, projectLink } from "./utils";
+import { calculateExperience, formatUptime, pluralize, projectLink } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
 
@@ -145,7 +145,7 @@ export const getFastfetch = async () => {
     // Blog
     const blogCount = posts.length;
     if (blogCount > 0)
-        info.push(`${yellow(" Blog")} ${overlay("::")} ${text(`${blogCount} articles`)} ${subtext("[READ]")}`);
+        info.push(`${yellow(" Blog")} ${overlay("::")} ${text(pluralize(blogCount, "article"))} ${subtext("[READ]")}`);
 
     // Latest Post
     if (posts.length > 0) {

@@ -83,6 +83,18 @@ const colorHexMap: Record<string, string> = {
 
 const iconColor = colorHexMap[colorClass] || "94e2d5"; // default to teal
 
+// Full literal class strings, not `decoration-${colorClass}`. Tailwind v4 scans
+// source for complete class names, so an interpolated one emits no rule at all —
+// every post past the first silently lost its hover underline colour.
+const decorationClassMap: Record<string, string> = {
+  "ctp-teal": "decoration-ctp-teal",
+  "ctp-mauve": "decoration-ctp-mauve",
+  "ctp-pink": "decoration-ctp-pink",
+  "ctp-green": "decoration-ctp-green",
+};
+
+const decorationClass = decorationClassMap[colorClass] || "decoration-ctp-teal";
+
 const isDraft = draft;
 const permissions = getPermissions(index);
 const formattedDate = formatDateCompact(date);
@@ -125,11 +137,16 @@ if (coverDark) {
     data-post-tags={JSON.stringify(tags)}
   >
     <!-- Desktop: Full ls -la style -->
+    <!--
+      No font or text-size classes on these rows: they inherit the page's
+      responsive terminal scale, the same way the home page's output blocks do.
+      Hardcoding text-base here pinned the listing flat at every breakpoint.
+    -->
     <div
-      class="hidden md:grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center font-jetbrains"
+      class="hidden md:grid grid-cols-[auto_auto_auto_auto_1fr] gap-4 items-center"
     >
       <!-- Permissions (colored by section) -->
-      <span class="text-base" style="letter-spacing: 0;"
+      <span style="letter-spacing: 0;"
         ><span
           class={permissions.type === "d"
             ? "text-ctp-blue"
@@ -140,17 +157,15 @@ if (coverDark) {
       >
 
       <!-- Owner -->
-      <span class="text-ctp-yellow text-base"> milind </span>
+      <span class="text-ctp-yellow"> milind </span>
 
       <!-- Word Count -->
-      <span
-        class={`${wordCountColor} whitespace-nowrap text-base font-semibold`}
-      >
+      <span class={`${wordCountColor} whitespace-nowrap font-semibold`}>
         {wordCountFormatted}
       </span>
 
       <!-- Date -->
-      <span class="text-ctp-blue whitespace-nowrap text-base">
+      <span class="text-ctp-blue whitespace-nowrap">
         {formattedDate}
       </span>
 
@@ -162,13 +177,13 @@ if (coverDark) {
           class="w-5 h-5 flex-shrink-0 opacity-80 blog-icon"
         />
         <span
-          class={`text-ctp-text font-bold group-hover:underline decoration-${colorClass} transition-all text-base`}
+          class={`text-ctp-text font-bold group-hover:underline ${decorationClass} transition-all`}
         >
           {title}
         </span>
         {
           draft && (
-            <span class="px-2 py-1 text-sm bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/50 rounded flex-shrink-0">
+            <span class="px-2 py-0.5 text-[0.7em] bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/50 rounded flex-shrink-0">
               draft
             </span>
           )
@@ -177,11 +192,9 @@ if (coverDark) {
     </div>
 
     <!-- Mobile: Simplified style (date + icon + title) -->
-    <div class="flex md:hidden items-start gap-3 font-jetbrains">
+    <div class="flex md:hidden items-start gap-3">
       <!-- Date -->
-      <span
-        class="text-ctp-blue whitespace-nowrap text-sm flex-shrink-0 pt-0.5"
-      >
+      <span class="text-ctp-blue whitespace-nowrap flex-shrink-0 pt-0.5">
         {formattedDate}
       </span>
 
@@ -194,14 +207,14 @@ if (coverDark) {
 
       <!-- Title - wraps on multiple lines -->
       <span
-        class={`text-ctp-text font-medium group-hover:underline decoration-${colorClass} transition-all text-sm break-words flex-1 min-w-0`}
+        class={`text-ctp-text font-medium group-hover:underline ${decorationClass} transition-all break-words flex-1 min-w-0`}
       >
         {title}
       </span>
 
       {
         draft && (
-          <span class="px-1.5 py-0.5 text-xs bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/50 rounded flex-shrink-0">
+          <span class="px-1.5 py-0.5 text-[0.7em] bg-ctp-yellow/20 text-ctp-yellow border border-ctp-yellow/50 rounded flex-shrink-0">
             draft
           </span>
         )

@@ -22,6 +22,11 @@ export const formatUptime = (dob: Date, now = new Date()) => {
     return `${years} years, ${months} months, ${days} days (${seconds})`;
 }
 
+// "1 article" / "2 articles". Lives here rather than in either renderer because
+// the count is stated on both surfaces, and a copy each is how they drift.
+export const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
+    `${count} ${count === 1 ? singular : plural}`;
+
 // The primary outbound link for a project: its repo if public, else its live
 // site. `web` implies the source isn't public, which the renderers call out.
 export const projectLink = (project: { links: { github: string | null; demo: string | null } }) => {
