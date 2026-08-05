@@ -37,29 +37,24 @@ export function remarkObsidianExcalidraw() {
           const baseMatch = filename.match(/^(.+\.excalidraw)(?:\.(light|dark))?(?:\.png)?$/);
           const baseName = baseMatch ? baseMatch[1] : filename;
 
-          // Generate paths for light and dark variants in excalidraw folder
-          const lightPath = `./_assets/excalidraw/${baseName}.light.png`;
+          // Only the dark path is referenced here; the light variant is still
+          // built because src/lib/blog.ts eagerly globs every _assets image.
           const darkPath = `./_assets/excalidraw/${baseName}.dark.png`;
           const altText = baseName.replace('.excalidraw', '');
 
-          // Create a container div with two separate image nodes
-          // This allows Astro's markdown processor to handle the images properly
+          // Only the dark variant is emitted. Shipping both and hiding one with
+          // CSS meant anything that ignores CSS — feed readers, reader mode,
+          // text browsers — rendered the diagram twice.
+          //
+          // Dark is the default theme, so it is what the server renders. The
+          // light swap happens on the client: this runs on mdast, long before
+          // Astro rewrites image paths to hashed /_astro/ URLs, so the light URL
+          // cannot be written here. Instead the light variant is named by source
+          // filename in data-light-key, and BlogPost.astro injects a map from
+          // those keys to the built URLs.
           segments.push({
             type: 'html',
             value: `<div class="relative my-8 rounded-xl overflow-hidden">`
-          });
-
-          segments.push({
-            type: 'image',
-            url: lightPath,
-            alt: altText,
-            data: {
-              hProperties: {
-                loading: 'lazy',
-                decoding: 'async',
-                class: 'excalidraw-light'
-              }
-            }
           });
 
           segments.push({
@@ -70,7 +65,8 @@ export function remarkObsidianExcalidraw() {
               hProperties: {
                 loading: 'lazy',
                 decoding: 'async',
-                class: 'excalidraw-dark'
+                class: 'excalidraw',
+                'data-light-key': `${baseName}.light.png`
               }
             }
           });

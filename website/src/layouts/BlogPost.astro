@@ -1,7 +1,7 @@
 ---
 import Layout from "./Layout.astro";
 import "../styles/global.css";
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 
 import {
   formatDateLong,
@@ -104,8 +104,41 @@ if (banner) {
   }
 }
 
+// Optimised URLs for both banner variants. Only the dark one is rendered; the
+// light one rides along in a data attribute for the client-side swap.
+const bannerDarkSrc = bannerDarkImage
+  ? (await getImage({ src: bannerDarkImage, width: 1200, height: 675 })).src
+  : null;
+const bannerLightSrc = bannerLightImage
+  ? (await getImage({ src: bannerLightImage, width: 1200, height: 675 })).src
+  : null;
+
 // Use banner image for social media, otherwise use favicon
 const socialImage = bannerImageUrl || `${Astro.site}favicon.ico`;
+
+// Light-variant URLs for the in-content diagrams, keyed by source filename.
+//
+// The remark plugin emits only the dark image (see remark-obsidian-excalidraw.js)
+// and names the light one in data-light-key, because it runs on mdast — long
+// before Astro rewrites asset paths to hashed /_astro/ URLs. This resolves those
+// names to built URLs so the swap script in Layout.astro can use them.
+//
+// The glob is eager, which is also what keeps the light variants in the build at
+// all now that nothing renders them directly.
+const slugForAssets = Astro.url.pathname.split("/").filter(Boolean).pop() ?? "";
+const excalidrawLightMap: Record<string, string> = {};
+{
+  const assetImages = import.meta.glob<{ default: ImageMetadata }>(
+    "/src/pages/blog/**/_assets/**/*.{png,jpg,jpeg,gif,webp,svg}",
+    { eager: true },
+  );
+  const prefix = `/src/pages/blog/${slugForAssets}/_assets/excalidraw/`;
+  for (const [path, mod] of Object.entries(assetImages)) {
+    // Scoped to this post's assets so two posts can share a diagram filename.
+    if (!path.startsWith(prefix) || !path.endsWith(".light.png")) continue;
+    excalidrawLightMap[path.slice(prefix.length)] = mod.default.src;
+  }
+}
 
 // Create fun blog description
 const blogDescription =
@@ -134,6 +167,17 @@ const prevPost =
   image={socialImage}
   bodyClass="!overflow-visible !h-auto scroll-smooth"
 >
+  {
+    /* Consumed by the theme-image swap script in Layout.astro. */
+    Object.keys(excalidrawLightMap).length > 0 && (
+      <script
+        id="excalidraw-light-map"
+        type="application/json"
+        set:html={JSON.stringify(excalidrawLightMap)}
+      />
+    )
+  }
+
   <div
     class="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] relative"
   >
@@ -263,28 +307,24 @@ const prevPost =
                   }
                 >
                   {isExcalidrawBanner ? (
-                    <>
-                      {bannerLightImage && (
-                        <Image
-                          src={bannerLightImage}
-                          alt={title}
-                          width={1200}
-                          height={675}
-                          class="hidden [.latte_&]:block w-full h-auto m-0! border-none! rounded-none! shadow-none!"
-                          loading="eager"
-                        />
-                      )}
-                      {bannerDarkImage && (
-                        <Image
-                          src={bannerDarkImage}
-                          alt={title}
-                          width={1200}
-                          height={675}
-                          class="block [.latte_&]:hidden w-full h-auto m-0! border-none! rounded-none! shadow-none!"
-                          loading="eager"
-                        />
-                      )}
-                    </>
+                    /*
+                     * One image, dark (the default theme). Both variants used to
+                     * be emitted with [.latte_&] toggling which showed, so
+                     * anything ignoring CSS rendered the banner twice. The swap
+                     * script in Layout.astro reads data-light-src.
+                     */
+                    bannerDarkSrc && (
+                      <img
+                        src={bannerDarkSrc}
+                        data-dark-src={bannerDarkSrc}
+                        data-light-src={bannerLightSrc}
+                        alt={title}
+                        width={1200}
+                        height={675}
+                        class="block w-full h-auto m-0! border-none! rounded-none! shadow-none!"
+                        loading="eager"
+                      />
+                    )
                   ) : typeof bannerImage === "string" ? (
                     <img
                       src={bannerImage}

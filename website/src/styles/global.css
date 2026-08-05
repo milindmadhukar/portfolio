@@ -58,20 +58,15 @@
 }
 
 @layer components {
-  .excalidraw-light {
-    @apply hidden w-full h-auto;
-  }
-
-  .latte .excalidraw-light {
-    @apply block;
-  }
-
-  .excalidraw-dark {
+  /*
+   * Excalidraw diagrams render as a single <img> now — the dark variant, which
+   * is the default theme — and the swap script in Layout.astro points it at the
+   * light URL when latte is active. The old .excalidraw-light/.excalidraw-dark
+   * pair shipped both images and hid one, so feed readers and anything else
+   * ignoring CSS drew the diagram twice.
+   */
+  .excalidraw {
     @apply block w-full h-auto;
-  }
-
-  .latte .excalidraw-dark {
-    @apply hidden;
   }
 }
 

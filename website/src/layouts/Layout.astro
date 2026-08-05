@@ -97,5 +97,67 @@ const {
         <div class={includePadding ? "p-8" : "p-0"}>
             <slot />
         </div>
+
+        <!--
+            Theme-aware images.
+
+            Only one variant is ever server-rendered — the dark one, matching the
+            default theme. Shipping both and hiding one with CSS meant feed
+            readers, reader mode and text browsers all showed the image twice.
+
+            Inline and at the end of <body> on purpose: the theme class is
+            already set by the is:inline script in <head> before paint, so
+            running as the parser reaches here swaps a latte reader's images
+            about as early as is possible without shipping both. A latte reader
+            may still catch a frame of the dark variant — that is the accepted
+            cost of emitting one image.
+        -->
+        <script is:inline>
+            (function () {
+                const root = document.documentElement;
+
+                // In-content diagrams only know their light variant by source
+                // filename (the remark plugin runs before Astro hashes asset
+                // URLs), so BlogPost.astro injects the resolved map.
+                const mapEl = document.getElementById("excalidraw-light-map");
+                if (mapEl) {
+                    let map = {};
+                    try {
+                        map = JSON.parse(mapEl.textContent || "{}");
+                    } catch {}
+                    document
+                        .querySelectorAll("img[data-light-key]")
+                        .forEach((img) => {
+                            const url = map[img.dataset.lightKey];
+                            if (!url) return;
+                            img.dataset.lightSrc = url;
+                            img.dataset.darkSrc = img.getAttribute("src");
+                        });
+                }
+
+                function apply() {
+                    const latte = root.classList.contains("latte");
+                    document
+                        .querySelectorAll("img[data-light-src]")
+                        .forEach((img) => {
+                            const next = latte
+                                ? img.dataset.lightSrc
+                                : img.dataset.darkSrc;
+                            if (next && img.getAttribute("src") !== next) {
+                                img.setAttribute("src", next);
+                            }
+                        });
+                }
+
+                apply();
+
+                // ThemeSwitcher only toggles the class and emits no event, so
+                // watch the attribute rather than coupling to the component.
+                new MutationObserver(apply).observe(root, {
+                    attributes: true,
+                    attributeFilter: ["class"],
+                });
+            })();
+        </script>
     </body>
 </html>

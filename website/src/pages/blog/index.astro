@@ -137,8 +137,8 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
           <!-- Cursor-following hover card (desktop only) -->
           <div id="hover-card" class="fixed w-96 p-4 bg-ctp-surface0 border border-ctp-surface2 rounded-lg shadow-lg opacity-0 invisible transition-opacity duration-200 z-50 pointer-events-none hidden md:block" style="left: 0; top: 0;">
             <div id="hover-card-banner" class="mb-3 rounded-lg overflow-hidden border border-ctp-surface2 hidden">
-              <img id="hover-card-image-light" src="" alt="" class="w-full object-contain hover-card-light" />
-              <img id="hover-card-image-dark" src="" alt="" class="w-full object-contain hover-card-dark" />
+              <!-- One image; the swap script in Layout.astro follows the theme. -->
+              <img id="hover-card-image" src="" alt="" class="w-full object-contain" />
             </div>
             <p id="hover-card-description" class="text-sm text-ctp-subtext0 leading-relaxed"></p>
             <div id="hover-card-tags" class="flex flex-wrap gap-1 mt-3 pt-3 border-t border-ctp-surface2"></div>
@@ -156,25 +156,6 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
   a:hover .text-ctp-teal,
   a:hover .text-ctp-mauve {
     filter: brightness(1.3);
-  }
-
-  /* Hover card theme-aware images */
-  /* Default theme is mocha (dark) - show dark images */
-  .hover-card-light {
-    display: none;
-  }
-  
-  .hover-card-dark {
-    display: block;
-  }
-  
-  /* When latte theme is active - show light images */
-  .latte .hover-card-light {
-    display: block;
-  }
-  
-  .latte .hover-card-dark {
-    display: none;
   }
 
   /* Tag filter active state */
@@ -288,8 +269,7 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
     // Cursor-following hover card functionality
     const hoverCard = document.getElementById('hover-card') as HTMLElement | null;
     const hoverCardBanner = document.getElementById('hover-card-banner') as HTMLElement | null;
-    const hoverCardImageLight = document.getElementById('hover-card-image-light') as HTMLImageElement | null;
-    const hoverCardImageDark = document.getElementById('hover-card-image-dark') as HTMLImageElement | null;
+    const hoverCardImage = document.getElementById('hover-card-image') as HTMLImageElement | null;
     const hoverCardDescription = document.getElementById('hover-card-description') as HTMLElement | null;
     const hoverCardTags = document.getElementById('hover-card-tags') as HTMLElement | null;
     const postLinks = document.querySelectorAll('.post-link');
@@ -350,19 +330,20 @@ const allTags = [...new Set(posts.flatMap(post => post.tags))].sort();
 
         let hasContent = false;
 
-        // Populate hover card banner
-        if (isExcalidraw && bannerLight && bannerDark && hoverCardBanner && hoverCardImageLight && hoverCardImageDark) {
-          // Excalidraw image - show both light and dark variants
-          hoverCardImageLight.src = bannerLight;
-          hoverCardImageDark.src = bannerDark;
+        // Populate hover card banner. One <img>: dark is what gets set, and the
+        // data attributes let the swap script in Layout.astro follow the theme.
+        if (isExcalidraw && bannerLight && bannerDark && hoverCardBanner && hoverCardImage) {
+          const latte = document.documentElement.classList.contains('latte');
+          hoverCardImage.dataset.darkSrc = bannerDark;
+          hoverCardImage.dataset.lightSrc = bannerLight;
+          hoverCardImage.src = latte ? bannerLight : bannerDark;
           hoverCardBanner.classList.remove('hidden');
           hasContent = true;
-        } else if (banner && banner !== '' && hoverCardBanner && hoverCardImageLight) {
-          // Regular image - show only in light slot
-          hoverCardImageLight.src = banner;
-          if (hoverCardImageDark) {
-            hoverCardImageDark.src = '';
-          }
+        } else if (banner && banner !== '' && hoverCardBanner && hoverCardImage) {
+          // Single-variant image: nothing to swap, so drop any stale attributes.
+          delete hoverCardImage.dataset.darkSrc;
+          delete hoverCardImage.dataset.lightSrc;
+          hoverCardImage.src = banner;
           hoverCardBanner.classList.remove('hidden');
           hasContent = true;
         } else if (hoverCardBanner) {

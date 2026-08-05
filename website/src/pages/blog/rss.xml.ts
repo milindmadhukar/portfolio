@@ -73,29 +73,11 @@ export async function GET(context: APIContext) {
         // Replace href="/" with href="https://milind.dev/"
         content = content.replace(/href="(\/[^"]+)"/g, `href="${siteUrl}$1"`);
 
-        // Fix Excalidraw theme-aware images for RSS
-        // format: <div class="..."> <img ... class="excalidraw-light"> <img ... class="excalidraw-dark"> </div>
-        // or the old format with tailwind classes
-        // We want to keep only the dark variant and remove the container
-
-        // This regex looks for the container and captures the dark image content
-        // It's a bit complex because we need to handle the structure created by the remark plugin
-        // Relaxed regex to handle varying container attributes (like excalidraw-container or extra classes)
-        const containerRegex = /<div[^>]*>\s*<img[^>]*class="[^"]*excalidraw-light[^"]*"[^>]*>\s*(<img[^>]*class="[^"]*excalidraw-dark[^"]*"[^>]*>)\s*<\/div>/g;
-
-        content = content.replace(containerRegex, (match, darkImage) => {
-          // Extract src and alt from the dark image
-          const srcMatch = darkImage.match(/src="([^"]+)"/);
-          const altMatch = darkImage.match(/alt="([^"]+)"/);
-
-          if (srcMatch) {
-            const src = srcMatch[1];
-            const alt = altMatch ? altMatch[1] : 'Excalidraw Image';
-            // Return a simple clean image tag
-            return `<img src="${src}" alt="${alt}" style="display: block; width: 100%; height: auto;" />`;
-          }
-          return match; // fallback if parsing fails
-        });
+        // Excalidraw diagrams need no fixing up here any more. The remark plugin
+        // emits a single dark <img> (see remark-obsidian-excalidraw.js), so the
+        // feed gets one image per diagram for free. This used to be a regex that
+        // matched the light/dark pair and rewrote it — a workaround for markup
+        // the site should not have been producing in the first place.
       }
 
       // Prepend banner to content if banner exists
