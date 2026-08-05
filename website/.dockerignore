@@ -1,0 +1,17 @@
+# Deps are installed inside the image; copying the host's would clobber them
+node_modules
+
+# build output
+dist
+.astro
+.vercel
+
+# secrets — the build gets these via --mount=type=secret
+.env
+.env.local
+.env.production
+
+# scratch dir for the sync-blog fallback clone
+blog-content-temp
+
+.DS_Store
