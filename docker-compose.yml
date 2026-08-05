@@ -8,7 +8,7 @@
 #   - no container_name: Dokploy needs to name containers itself, otherwise
 #     logs, metrics and the redeploy button break
 #   - no watchtower labels: Dokploy redeploys on its own webhook
-#   - certresolver is `letsencrypt`, Dokploy's built-in resolver
+#   - HTTP routing is configured in the dashboard (Domains tab), not here
 #   - ssh-portfolio publishes its port directly rather than routing through
 #     Traefik (see the note on that service)
 #
@@ -19,10 +19,10 @@
 # clones as https://oauth2:<token>@github.com/..., and git will not reuse that
 # credential for a submodule pointing at a different repo.
 #
-# Routing can also be left to Dokploy's UI Domains tab, which injects
-# equivalent labels at deploy time. Defining them here keeps the compose file
-# self-describing; if you use the UI instead, drop the traefik.* labels below
-# so the two don't fight.
+# The domain is configured in Dokploy's Domains tab (host milind.dev, service
+# portfolio, port 4321, HTTPS via letsencrypt); Dokploy injects the router,
+# service and redirect labels at deploy time. Do not add traefik router labels
+# here as well - the two would fight over the same router names.
 
 services:
   portfolio:
@@ -33,21 +33,10 @@ services:
       - LANYARD_SOCKET_URL=${LANYARD_SOCKET_URL}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     labels:
-      - "traefik.enable=true"
-
-      # http -> https
-      - "traefik.http.routers.portfolio-web.rule=Host(`milind.dev`)"
-      - "traefik.http.routers.portfolio-web.entrypoints=web"
-      - "traefik.http.routers.portfolio-web.middlewares=portfolio-redirect"
-      - "traefik.http.middlewares.portfolio-redirect.redirectscheme.scheme=https"
-
-      - "traefik.http.routers.portfolio.rule=Host(`milind.dev`)"
-      - "traefik.http.routers.portfolio.entrypoints=websecure"
-      - "traefik.http.routers.portfolio.tls.certresolver=letsencrypt"
-      - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
-
-      # This service is on two networks. Without pinning the network, Traefik
-      # can resolve the container on `internal` and fail to reach it.
+      # Routers/services come from the Domains tab. This one stays: it is a
+      # network hint, not domain config, and it is still needed because this
+      # service sits on two networks - without pinning, Traefik can resolve the
+      # container on `internal` and fail to reach it.
       - "traefik.docker.network=dokploy-network"
     networks:
       - dokploy-network
@@ -66,16 +55,28 @@ services:
     # file cannot express. Publishing the port directly keeps the deployment
     # self-contained.
     #
-    # Port 22 so the advertised command is a bare `ssh milind.dev`. Two things
-    # this depends on, both outside this file:
-    #   - the host's own sshd must not be on 22, or this bind fails
+    # Bound to one specific public address on port 22, so the advertised command
+    # is a bare `ssh milind.dev`. SSH carries no SNI, so a proxy cannot tell
+    # `ssh milind.dev` from `ssh <that ip>` - the split between the portfolio and
+    # the host's real sshd has to be made by address, not hostname.
+    #
+    # Three things this depends on, all outside this file:
+    #   - the host's sshd must not hold 0.0.0.0:22, or this bind fails. On
+    #     Ubuntu 24.04 sshd is socket-activated, so ListenAddress in
+    #     sshd_config is ignored; it is set via a drop-in at
+    #     /etc/systemd/system/ssh.socket.d/override.conf that binds the
+    #     Tailscale address only.
     #   - milind.dev must be DNS-only in Cloudflare; the proxy carries HTTP(S)
-    #     only, so SSH to a proxied record just times out
-    # Override SSH_PORT (e.g. 2222) when running this compose anywhere that
-    # cannot take 22. The container always listens on 2222 internally, so
-    # cap_drop: ALL is fine - the host does the privileged bind.
+    #     only, so SSH to a proxied record just times out.
+    #   - milind.dev must have no AAAA pointing at the host, or v6 clients reach
+    #     the real sshd instead of this.
+    #
+    # Defaults stay 0.0.0.0:2222 so a local `docker compose up` is unaffected;
+    # Dokploy sets SSH_BIND_ADDR and SSH_PORT. The container always listens on
+    # 2222 internally, so cap_drop: ALL is fine - the host does the privileged
+    # bind.
     ports:
-      - "${SSH_PORT:-22}:2222"
+      - "${SSH_BIND_ADDR:-0.0.0.0}:${SSH_PORT:-2222}:2222"
     read_only: true
     cap_drop:
       - ALL
