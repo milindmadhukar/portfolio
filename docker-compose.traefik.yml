@@ -1,0 +1,44 @@
+services:
+  portfolio:
+    image: ghcr.io/milindmadhukar/portfolio:latest
+    container_name: portfolio
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - LANYARD_SOCKET_URL=${LANYARD_SOCKET_URL}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portfolio.rule=Host(`milind.dev`)"
+      - "traefik.http.routers.portfolio.entrypoints=web,websecure"
+      - "traefik.http.routers.portfolio.tls.certresolver=milindresolver"
+      - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - reverse_proxy
+
+  ssh-portfolio:
+    image: ghcr.io/milindmadhukar/portfolio-ssh:latest
+    container_name: ssh-portfolio
+    restart: always
+    environment:
+      - SSH_HOST=0.0.0.0
+      - SSH_PORT=${SSH_PORT}
+      - PORTFOLIO_API=http://portfolio:4321/api/commands
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.ssh.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.ssh.entrypoints=ssh"
+      - "traefik.tcp.services.ssh.loadbalancer.server.port=2222"
+      - "com.centurylinklabs.watchtower.enable=true"
+    read_only: true
+    cap_drop:
+      - ALL
+    volumes:
+      - ./ssh_data:/data
+    networks:
+      - reverse_proxy
+
+networks:
+  reverse_proxy:
+    external: true

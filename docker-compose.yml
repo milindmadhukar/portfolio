@@ -1,7 +1,25 @@
+# Dokploy deployment.
+#
+# Dokploy runs its own Traefik, so routing happens with labels against the
+# shared `dokploy-network` instead of a self-managed reverse proxy. The
+# previous standalone setup is kept verbatim in docker-compose.traefik.yml.
+#
+# Differences that matter, versus that file:
+#   - no container_name: Dokploy needs to name containers itself, otherwise
+#     logs, metrics and the redeploy button break
+#   - no watchtower labels: Dokploy redeploys on its own webhook
+#   - certresolver is `letsencrypt`, Dokploy's built-in resolver
+#   - ssh-portfolio publishes its port directly rather than routing through
+#     Traefik (see the note on that service)
+#
+# Routing can also be left to Dokploy's UI Domains tab, which injects
+# equivalent labels at deploy time. Defining them here keeps the compose file
+# self-describing; if you use the UI instead, drop the traefik.* labels below
+# so the two don't fight.
+
 services:
   portfolio:
     image: ghcr.io/milindmadhukar/portfolio:latest
-    container_name: portfolio
     restart: always
     environment:
       - NODE_ENV=production
@@ -9,36 +27,59 @@ services:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     labels:
       - "traefik.enable=true"
+
+      # http -> https
+      - "traefik.http.routers.portfolio-web.rule=Host(`milind.dev`)"
+      - "traefik.http.routers.portfolio-web.entrypoints=web"
+      - "traefik.http.routers.portfolio-web.middlewares=portfolio-redirect"
+      - "traefik.http.middlewares.portfolio-redirect.redirectscheme.scheme=https"
+
       - "traefik.http.routers.portfolio.rule=Host(`milind.dev`)"
-      - "traefik.http.routers.portfolio.entrypoints=web,websecure"
-      - "traefik.http.routers.portfolio.tls.certresolver=milindresolver"
+      - "traefik.http.routers.portfolio.entrypoints=websecure"
+      - "traefik.http.routers.portfolio.tls.certresolver=letsencrypt"
       - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
-      - "com.centurylinklabs.watchtower.enable=true"
+
+      # This service is on two networks. Without pinning the network, Traefik
+      # can resolve the container on `internal` and fail to reach it.
+      - "traefik.docker.network=dokploy-network"
     networks:
-      - reverse_proxy
+      - dokploy-network
+      - internal
 
   ssh-portfolio:
     image: ghcr.io/milindmadhukar/portfolio-ssh:latest
-    container_name: ssh-portfolio
     restart: always
     environment:
       - SSH_HOST=0.0.0.0
-      - SSH_PORT=${SSH_PORT}
+      - SSH_PORT=2222
       - PORTFOLIO_API=http://portfolio:4321/api/commands
-    labels:
-      - "traefik.enable=true"
-      - "traefik.tcp.routers.ssh.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.ssh.entrypoints=ssh"
-      - "traefik.tcp.services.ssh.loadbalancer.server.port=2222"
-      - "com.centurylinklabs.watchtower.enable=true"
+    # Dokploy's Traefik only defines HTTP entrypoints. Routing raw SSH through
+    # it needs a TCP entrypoint added to Traefik's *static* config on the host
+    # plus that port bound on the Traefik container - server-side setup this
+    # file cannot express. Publishing the port directly keeps the deployment
+    # self-contained. Set SSH_PORT in Dokploy's environment to pick the public
+    # port; the container always listens on 2222.
+    ports:
+      - "${SSH_PORT:-2222}:2222"
     read_only: true
     cap_drop:
       - ALL
     volumes:
-      - ./ssh_data:/data
+      - ssh_data:/data
     networks:
-      - reverse_proxy
+      - internal
+
+volumes:
+  # The wish host key is generated into /data on first boot (HOST_KEY_PATH is
+  # /data/id_ed25519, and the image is FROM scratch + read_only, so this is the
+  # only writable path). A named volume keeps it stable across redeploys -
+  # losing it makes every returning client warn about a changed host key.
+  ssh_data:
 
 networks:
-  reverse_proxy:
+  # Created by Dokploy; Traefik is attached to it.
+  dokploy-network:
     external: true
+  # Private hop for ssh-portfolio -> portfolio, so the service name cannot
+  # collide with another app's service on the shared network.
+  internal:
