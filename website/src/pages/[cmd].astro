@@ -20,23 +20,26 @@ if (index === -1) {
 const state = TERMINAL_STATES[index];
 
 // Per-command metadata, so the three URLs don't all share one title in search
-// results and link previews.
+// results and link previews. Each title is the prompt that would produce the
+// page, and each description clears the 120-char mark a SERP snippet wants.
+const PROMPT = `${personalInfo.seoTitle}:~`;
+
 const META: Record<string, { title: string; description: string }> = {
     fastfetch: {
         title: personalInfo.seoTitle,
         description: personalInfo.seoDescription,
     },
     whoami: {
-        title: `whoami — ${personalInfo.name}`,
-        description: personalInfo.bio.short,
+        title: `${PROMPT} whoami`,
+        description: `The long version of Milind Madhukar: a developer from Mumbai, ${personalInfo.bio.short.charAt(0).toLowerCase()}${personalInfo.bio.short.slice(1)}`,
     },
     projects: {
-        title: `ls projects/ — ${personalInfo.name}`,
-        description: `Projects built by ${personalInfo.name}, including ${projects
+        title: `${PROMPT} ls projects/`,
+        description: `Things Milind Madhukar has built, including ${projects
             .filter((p) => p.featured)
             .slice(0, 3)
             .map((p) => p.title.split(" - ")[0])
-            .join(", ")}.`,
+            .join(", ")}. Side projects, tools, and whatever the current obsession is.`,
     },
 };
 

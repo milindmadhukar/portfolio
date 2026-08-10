@@ -140,10 +140,11 @@ const excalidrawLightMap: Record<string, string> = {};
   }
 }
 
-// Create fun blog description
+// Fallback for a post with no description of its own. Kept under 160 chars so
+// the SERP snippet isn't cut mid-joke.
 const blogDescription =
   description ||
-  "💡 Dive into the digital rabbit hole! Tech tales, DevOps adventures, and code wisdom served with a side of chaos. Warning: May contain terrible jokes and actual useful information.";
+  "Dive into the digital rabbit hole. Tech tales, homelab adventures, and code wisdom served with a side of chaos. May contain terrible jokes and useful info.";
 
 // Filter headings to only include h2 and h3 for TOC
 const tocHeadings =
@@ -188,6 +189,11 @@ const prevPost =
   title={title}
   description={blogDescription}
   image={socialImage}
+  imageAlt={
+    bannerImageUrl
+      ? `Banner image for the post "${title}"`
+      : "The milind.dev site icon"
+  }
   includePadding={false}
   bodyClass="!overflow-visible !h-auto scroll-smooth"
 >

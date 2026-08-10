@@ -35,7 +35,7 @@ export const personalInfo = {
   },
 
   bio: {
-    short: "I'm trying to build software people actually use, and I tinker with anything that has a chip in it.",
+    short: "Trying to build software people actually use, and tinkering with anything that has a chip in it.",
     // One line per line - both surfaces render this broken up rather than as
     // prose, and it follows the blog's lowercase house style.
     long: `${calculateAge(BIRTH_DATE)} years old. hooked on tech before i could spell it.
@@ -49,14 +49,27 @@ i run plusxhub, a 100k+ instagram community for fans like me.`,
   },
 
   // Purpose-built strings for SEO / social cards, in my own voice.
-  // seoTitle drives <title> + og:title (~60 chars, uses the SERP space well).
-  seoTitle: "Milind Madhukar: trying to build software people actually use",
-  // seoDescription drives <meta name="description"> (~148 chars for the snippet).
+  //
+  // Apostrophes are deliberately absent from every description here. Naive SEO
+  // checkers and scrapers read `content="I'm Milind…"` by splitting on the
+  // quote character rather than parsing the attribute, and report the
+  // description as one character long. The markup is valid either way, but
+  // there is nothing to gain from tripping them.
+  //
+  // seoTitle drives <title> + og:title. It's the prompt, not a sentence: a
+  // descriptive title ran 61 chars, past where Google and X truncate.
+  seoTitle: `${TERMINAL_CONFIG.user}@${TERMINAL_CONFIG.host}`,
+  // seoDescription drives <meta name="description"> (120-160 chars for the
+  // snippet), and carries the name that seoTitle no longer spells out.
   seoDescription:
-    "I'm Milind, a developer from Mumbai. I'm trying to build software people actually use, and I tinker with just about anything that has a chip in it.",
+    "Milind Madhukar, a developer from Mumbai. Trying to build software people actually use, and tinkering with just about anything that has a chip in it.",
   // ogDescription drives og:/twitter: descriptions (~114 chars, the social sweet spot).
   ogDescription:
     "Developer from Mumbai, trying to build software people actually use and tinkering with anything that has a chip in it.",
+  // og:image:alt — describes the share card itself, which the title used to do
+  // badly once it became a shell prompt.
+  ogImageAlt:
+    "A terminal window: the whoami command, the name milind madhukar in green, and the line trying to build software people actually use.",
 
   links: {
     plusxhub: "https://www.instagram.com/plusxhub/",
