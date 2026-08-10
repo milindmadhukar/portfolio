@@ -38,14 +38,14 @@ export const personalInfo = {
     short: "I build useful software and tinker with anything that has a chip in it.",
     // One line per line - both surfaces render this broken up rather than as
     // prose, and it follows the blog's lowercase house style.
-    long: `${calculateAge(BIRTH_DATE)} years old. i take things apart and usually win.
-phones, servers, one printer i still feel bad about.
-learned to code by breaking things until they made sense.
-now i build software people use, which still surprises me.
+    long: `${calculateAge(BIRTH_DATE)} years old. hooked on tech before i could spell it.
+gadgets, phones, servers. if it has a chip, i've opened it.
+learned to code by breaking things. method unchanged.
+now i build software people actually use, which is progress.
 
-off screen i solder tiny pointless circuits because i can.
-die-hard martin garrix fan since 2016, ${yearsSince(GARRIX_FAN_SINCE)} years deep.
-i run plusxhub, an instagram community of 100k+ fans like me.`,
+off screen: soldering dumb little circuits, purely because i can.
+and music. die-hard martin garrix fan since 2016, ${yearsSince(GARRIX_FAN_SINCE)} years deep.
+i run plusxhub, a 100k+ instagram community for fans like me.`,
   },
 
   tagline: "Developer • Hardware tinkerer • Music obsessive",
