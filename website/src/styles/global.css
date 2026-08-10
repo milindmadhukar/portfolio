@@ -153,10 +153,16 @@
  * The hanging indent makes that second line read as a continuation of the row
  * above rather than a new key. Not applied to the Blog row: it's a flex
  * container, where text-indent doesn't reach the items anyway.
+ *
+ * Every row opens with `<icon><space><label>`, and the indent has to clear both
+ * so continuation lines start under the label. That is NOT 2ch: the Nerd Font
+ * glyphs advance a full 1em, while JetBrains Mono's cell is 0.6em, so the icon
+ * alone is 1.667ch. Hence 1em + 1ch — the same two cells the SSH surface
+ * indents by, where the glyph does occupy exactly one cell.
  */
 .term-info .term-row {
-  padding-left: 2ch;
-  text-indent: -2ch;
+  padding-left: calc(1em + 1ch);
+  text-indent: calc(-1em - 1ch);
 }
 
 @keyframes reveal-sweep {
