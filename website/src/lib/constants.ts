@@ -35,7 +35,7 @@ export const personalInfo = {
   },
 
   bio: {
-    short: "I build useful software and tinker with anything that has a chip in it.",
+    short: "I'm trying to build software people actually use, and I tinker with anything that has a chip in it.",
     // One line per line - both surfaces render this broken up rather than as
     // prose, and it follows the blog's lowercase house style.
     long: `${calculateAge(BIRTH_DATE)} years old. hooked on tech before i could spell it.
@@ -48,17 +48,15 @@ and music. die-hard martin garrix fan since 2016, ${yearsSince(GARRIX_FAN_SINCE)
 i run plusxhub, a 100k+ instagram community for fans like me.`,
   },
 
-  tagline: "Developer • Hardware tinkerer • Music obsessive",
-
   // Purpose-built strings for SEO / social cards, in my own voice.
   // seoTitle drives <title> + og:title (~60 chars, uses the SERP space well).
-  seoTitle: "Milind Madhukar: I build useful software people actually use",
+  seoTitle: "Milind Madhukar: trying to build software people actually use",
   // seoDescription drives <meta name="description"> (~148 chars for the snippet).
   seoDescription:
-    "I'm Milind, a developer and DevOps engineer from Mumbai. I build genuinely useful software and tinker with just about anything that has a chip in it.",
+    "I'm Milind, a developer from Mumbai. I'm trying to build software people actually use, and I tinker with just about anything that has a chip in it.",
   // ogDescription drives og:/twitter: descriptions (~114 chars, the social sweet spot).
   ogDescription:
-    "Developer and DevOps engineer building genuinely useful software, and tinkering with anything that has a chip in it.",
+    "Developer from Mumbai, trying to build software people actually use and tinkering with anything that has a chip in it.",
 
   links: {
     plusxhub: "https://www.instagram.com/plusxhub/",
