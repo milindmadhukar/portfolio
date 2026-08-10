@@ -16,9 +16,7 @@ import {
   extractBannerFilename,
 } from "../lib/excalidraw";
 import { getBlogPosts } from "../lib/blog";
-import TerminalPrompt from "../components/TerminalPrompt.astro";
-import VimCursor from "../components/VimCursor.astro";
-import { personalInfo, SOCIAL_CONFIG } from "../lib/constants";
+import SocialIcons from "../components/SocialIcons.astro";
 
 const { frontmatter, headings, rawContent } = Astro.props;
 const { title, description, date, tags, banner } = frontmatter;
@@ -147,37 +145,6 @@ const blogDescription =
   description ||
   "💡 Dive into the digital rabbit hole! Tech tales, DevOps adventures, and code wisdom served with a side of chaos. Warning: May contain terrible jokes and actual useful information.";
 
-// Footer contact row, rendered as `ls` output instead of the circular icon
-// buttons. Accents mirror SocialIcons' palette so the two read as the same
-// site; RSS carries an inline SVG because the Nerd Font subset has no glyph
-// for it.
-const SOCIAL_ACCENTS: Record<string, string> = {
-  GitHub: "text-ctp-mauve",
-  LinkedIn: "text-ctp-blue",
-  Email: "text-ctp-red",
-  Twitter: "text-ctp-sapphire",
-  Instagram: "text-ctp-pink",
-  Spotify: "text-ctp-green",
-  Discord: "text-ctp-lavender",
-};
-
-const footerLinks = [
-  ...personalInfo.social.map((social: { name: string; url: string; icon: string }) => ({
-    label: social.name.toLowerCase(),
-    url: social.url,
-    icon: SOCIAL_CONFIG[social.icon]?.icon ?? "nf-md-web",
-    accent: SOCIAL_ACCENTS[social.name] ?? "text-ctp-overlay1",
-    external: true,
-  })),
-  {
-    label: "rss",
-    url: "/blog/rss.xml",
-    icon: "rss",
-    accent: "text-ctp-peach",
-    external: false,
-  },
-];
-
 // Filter headings to only include h2 and h3 for TOC
 const tocHeadings =
   headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) || [];
@@ -219,7 +186,7 @@ const prevPost =
     </div>
 
     <div
-      class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-2 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 lg:items-start relative z-10 overflow-x-hidden"
+      class="max-w-7xl mx-auto px-2 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 lg:items-start relative z-10 overflow-x-hidden"
     >
       <!-- Main content -->
       <div class="flex-1 w-full min-w-0 max-w-none lg:max-w-[calc(100%-20rem)]">
@@ -312,13 +279,7 @@ const prevPost =
         }
 
         <!-- Article header with gradient -->
-        <!--
-          Capped and centred rather than max-w-none. At full width the column
-          ran ~80 characters of monospace, well past the 65-75 that reads
-          comfortably, and monospace is already harder going than proportional
-          type. 52rem holds it near 70 characters at the desktop size below.
-        -->
-        <article class="prose prose-invert prose-lg max-w-[52rem] mx-auto">
+        <article class="prose prose-invert prose-lg max-w-none">
           <header
             class="mb-8 sm:mb-12 pb-8 border-b border-[var(--border-color)]"
           >
@@ -438,13 +399,13 @@ const prevPost =
 
           <!-- Article content with enhanced styling -->
           <div
-            class="blog-content w-full break-words overflow-hidden text-base md:text-lg lg:text-xl leading-[1.75] text-[var(--text-primary)]
+            class="blog-content w-full break-words overflow-hidden text-base md:text-lg leading-relaxed text-[var(--text-primary)]
             [&_:is(h1,h2,h3,h4,h5,h6)]:text-[var(--text-primary)] [&_:is(h1,h2,h3,h4,h5,h6)]:font-bold [&_:is(h1,h2,h3,h4,h5,h6)]:mt-12 [&_:is(h1,h2,h3,h4,h5,h6)]:mb-6 [&_:is(h1,h2,h3,h4,h5,h6)]:leading-tight [&_:is(h1,h2,h3,h4,h5,h6)]:scroll-mt-8
             [&_h1]:text-4xl
             [&_h2]:text-3xl
             [&_h3]:text-2xl
             [&_h4]:text-xl
-            [&_p]:mb-7 [&_p]:leading-[1.75]
+            [&_p]:mb-6 [&_p]:leading-relaxed
             [&_a]:text-[var(--color-cyber-purple)] [&_a]:underline [&_a]:decoration-[var(--color-cyber-purple)] [&_a]:underline-offset-4 [&_a]:transition-all
             [&_a:hover]:text-[var(--color-cyber-cyan)] [&_a:hover]:decoration-[var(--color-cyber-cyan)]
             [&_img]:rounded-xl [&_img]:my-10 [&_img]:w-full [&_img]:h-auto [&_img]:shadow-lg
@@ -467,127 +428,94 @@ const prevPost =
             <slot />
           </div>
 
-          <!--
-            The footer reads as one continuous terminal session: cd out of the
-            post, list the contact entries, leave the cursor blinking. It uses
-            TerminalPrompt rather than a hand-rolled prompt so the colours match
-            the blog index and the home page - the old markup coloured the user
-            green and dropped the host entirely, which is why it read as a
-            different site.
-          -->
-          <footer class="mt-16 border-t border-ctp-surface0 pt-8">
-            {
-              (prevPost || nextPost) && (
-                <nav class="grid gap-4 sm:grid-cols-2" aria-label="More posts">
-                  {prevPost ? (
-                    <a
-                      href={prevPost.url}
-                      class="group rounded-xl border border-ctp-surface0 bg-ctp-mantle p-4 transition-colors hover:border-ctp-mauve"
-                    >
-                      <span class="font-mono text-xs text-ctp-overlay1 transition-colors group-hover:text-ctp-mauve">
-                        ← prev
-                      </span>
-                      <span class="mt-1.5 block leading-snug text-ctp-text line-clamp-2">
-                        {prevPost.title}
-                      </span>
-                    </a>
-                  ) : (
-                    <div class="hidden sm:block" />
-                  )}
-
-                  {nextPost ? (
-                    <a
-                      href={nextPost.url}
-                      class="group rounded-xl border border-ctp-surface0 bg-ctp-mantle p-4 text-right transition-colors hover:border-ctp-mauve"
-                    >
-                      <span class="font-mono text-xs text-ctp-overlay1 transition-colors group-hover:text-ctp-mauve">
-                        next →
-                      </span>
-                      <span class="mt-1.5 block leading-snug text-ctp-text line-clamp-2">
-                        {nextPost.title}
-                      </span>
-                    </a>
-                  ) : (
-                    <div class="hidden sm:block" />
-                  )}
-                </nav>
-              )
-            }
-
-            <div
-              class="mt-10 rounded-xl border border-ctp-surface0 bg-ctp-mantle px-5 py-5 font-mono text-sm sm:px-6"
-            >
-              <TerminalPrompt
-                user="blog"
-                host="milind.dev"
-                directory="~/posts"
-                command="cd .."
-              />
+          <!-- Back to blog footer -->
+          <footer class="mt-8 pt-8 border-t border-[var(--border-color)]">
+            <div class="mb-4">
+              <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
+                <span class="text-terminal-green">milind@blog</span>:<span
+                  class="text-terminal-blue">~/posts</span
+                >$ cd ..
+              </p>
               <a
                 href="/blog"
-                class="group mt-2 inline-flex items-center gap-2 text-ctp-mauve underline decoration-ctp-mauve underline-offset-4 transition-colors hover:text-ctp-sky hover:decoration-ctp-sky"
+                class="group inline-flex items-center gap-2 text-cyber-purple hover:text-cyber-cyan transition-colors font-medium"
               >
-                <span
-                  class="inline-block transition-transform group-hover:-translate-x-1"
-                  aria-hidden="true">←</span
+                <svg
+                  class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                view all posts
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                View all posts
               </a>
-
-              <div class="mt-6">
-                <TerminalPrompt
-                  user="blog"
-                  host="milind.dev"
-                  directory="~"
-                  command="ls ./connect"
-                />
-              </div>
-              <ul class="mt-3 flex flex-wrap gap-x-6 gap-y-2.5">
-                {
-                  footerLinks.map((link) => (
-                    <li>
-                      <a
-                        href={link.url}
-                        target={link.external ? "_blank" : undefined}
-                        rel={link.external ? "noopener noreferrer" : undefined}
-                        class="group inline-flex items-center gap-2 text-ctp-subtext0 transition-colors hover:text-ctp-text"
-                      >
-                        {link.icon === "rss" ? (
-                          <svg
-                            class={`h-3.5 w-3.5 shrink-0 ${link.accent}`}
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                          >
-                            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z" />
-                          </svg>
-                        ) : (
-                          <i
-                            class={`nf ${link.icon} ${link.accent} shrink-0`}
-                            aria-hidden="true"
-                          />
-                        )}
-                        <span class="underline-offset-4 group-hover:underline">
-                          {link.label}
-                        </span>
-                      </a>
-                    </li>
-                  ))
-                }
-              </ul>
-
-              <div class="mt-6">
-                <TerminalPrompt user="blog" host="milind.dev" directory="~">
-                  <VimCursor width="8px" height="1.1em" />
-                </TerminalPrompt>
-              </div>
             </div>
 
-            <p class="mt-5 font-mono text-xs text-ctp-overlay0">
-              <span class="text-ctp-surface2">#</span> © {
-                new Date().getFullYear()
-              } Milind Madhukar
-            </p>
+            <!-- Social Links & RSS -->
+            <div class="mt-4 pt-4">
+              <div class="flex flex-col gap-6">
+                <div>
+                  <h3
+                    class="text-sm font-mono text-[var(--text-tertiary)] mb-4"
+                  >
+                    <span class="text-terminal-green">$</span> Connect with me:
+                  </h3>
+                  <div class="mt-2">
+                    <SocialIcons />
+                  </div>
+                </div>
+
+                {
+                  (nextPost || prevPost) && (
+                    <div class="mt-4 pt-4  grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {prevPost ? (
+                        <a
+                          href={prevPost.url}
+                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all"
+                        >
+                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
+                            ← Previous Post
+                          </span>
+                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                            {prevPost.title}
+                          </span>
+                        </a>
+                      ) : (
+                        <div />
+                      )}
+
+                      {nextPost ? (
+                        <a
+                          href={nextPost.url}
+                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all text-right items-end"
+                        >
+                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
+                            Next Post →
+                          </span>
+                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                            {nextPost.title}
+                          </span>
+                        </a>
+                      ) : (
+                        <div />
+                      )}
+                    </div>
+                  )
+                }
+
+                <div class="mt-8 pt-4 border-t border-[var(--border-color)]">
+                  <p class="text-xs font-mono text-[var(--text-tertiary)]">
+                    <span class="text-terminal-blue">©</span>
+                    {new Date().getFullYear()} Milind Madhukar
+                  </p>
+                </div>
+              </div>
+            </div>
           </footer>
         </article>
       </div>
