@@ -142,11 +142,6 @@ export const getFastfetch = async () => {
     // SSH banner is as live as the web one.
     info.push(...row(blue(" Uptime"), formatUptime(new Date(BIRTH_DATE))));
 
-    // OS — the web surface renders the same row via nf-linux-archlinux.
-    // Escaped rather than pasted so the codepoint is greppable next to the
-    // class name it has to stay in sync with.
-    info.push(...row(blue(" OS"), "arch btw"));
-
     // Blog
     const blogCount = posts.length;
     if (blogCount > 0)
@@ -156,6 +151,10 @@ export const getFastfetch = async () => {
     if (posts.length > 0) {
         info.push(...row(magenta(" Latest Post"), posts[0].title));
     }
+
+    // OS — sits directly above the Github stats block, matching the web
+    // surface, which renders the same row via nf-linux-archlinux.
+    info.push(...row(blue(" OS"), "arch btw"));
 
     // Github Stats
     if (githubStats) {

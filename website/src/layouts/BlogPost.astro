@@ -178,10 +178,17 @@ const prevPost =
   currentPostIndex < posts.length - 1 ? posts[currentPostIndex + 1] : null; // Older post
 ---
 
+<!--
+  includePadding={false}: this layout sets its own gutters, and Layout's p-8
+  wrapper was stacking on top of them. On a 390px phone that meant 44px of
+  padding each side - 23% of the screen - before a word of the post.
+  blog/index.astro already opted out; post pages never did.
+-->
 <Layout
   title={title}
   description={blogDescription}
   image={socialImage}
+  includePadding={false}
   bodyClass="!overflow-visible !h-auto scroll-smooth"
 >
   {
@@ -217,10 +224,12 @@ const prevPost =
       aside as tall as the article, which is the distance the card sticks over.
     -->
     <div
-      class="max-w-7xl mx-auto px-2 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 relative z-10"
+      class="max-w-[104rem] mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16 lg:flex lg:gap-10 relative z-10"
     >
       <!-- Main content -->
-      <div class="flex-1 w-full min-w-0 max-w-none lg:max-w-[calc(100%-20rem)]">
+      <!-- flex-1 + min-w-0 already stops this squeezing the sidebar, which is
+           flex-shrink-0; the old calc() cap just left width on the table. -->
+      <div class="flex-1 w-full min-w-0">
         <!-- Terminal-style breadcrumb navigation -->
         <div class="mb-8 sm:mb-12">
           <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
@@ -310,7 +319,14 @@ const prevPost =
         }
 
         <!-- Article header with gradient -->
-        <article class="prose prose-invert prose-lg max-w-none">
+        <!--
+          Capped and centred inside the main column. Uncapped, the text ran
+          hard against the left edge with the whole sidebar's worth of space
+          idle on the right - 344px of gutter one side, 712px the other. This
+          is wider than that layout gave (1088 vs 864) while keeping the
+          leftover space balanced rather than all piled on one side.
+        -->
+        <article class="prose prose-invert prose-lg max-w-[68rem] mx-auto">
           <header
             class="mb-8 sm:mb-12 pb-8 border-b border-[var(--border-color)]"
           >
@@ -430,13 +446,13 @@ const prevPost =
 
           <!-- Article content with enhanced styling -->
           <div
-            class="blog-content w-full break-words overflow-hidden text-base md:text-lg leading-relaxed text-[var(--text-primary)]
+            class="blog-content w-full break-words overflow-hidden text-base md:text-lg lg:text-xl leading-[1.8] text-[var(--text-primary)]
             [&_:is(h1,h2,h3,h4,h5,h6)]:text-[var(--text-primary)] [&_:is(h1,h2,h3,h4,h5,h6)]:font-bold [&_:is(h1,h2,h3,h4,h5,h6)]:mt-12 [&_:is(h1,h2,h3,h4,h5,h6)]:mb-6 [&_:is(h1,h2,h3,h4,h5,h6)]:leading-tight [&_:is(h1,h2,h3,h4,h5,h6)]:scroll-mt-8
             [&_h1]:text-4xl
             [&_h2]:text-3xl
             [&_h3]:text-2xl
             [&_h4]:text-xl
-            [&_p]:mb-6 [&_p]:leading-relaxed
+            [&_p]:mb-7 [&_p]:leading-[1.8]
             [&_a]:text-[var(--color-cyber-purple)] [&_a]:underline [&_a]:decoration-[var(--color-cyber-purple)] [&_a]:underline-offset-4 [&_a]:transition-all
             [&_a:hover]:text-[var(--color-cyber-cyan)] [&_a:hover]:decoration-[var(--color-cyber-cyan)]
             [&_img]:rounded-xl [&_img]:my-10 [&_img]:w-full [&_img]:h-auto [&_img]:shadow-lg
@@ -545,7 +561,7 @@ const prevPost =
       <!-- Desktop TOC Sidebar -->
       {
         tocHeadings.length > 0 && (
-          <aside class="hidden lg:block lg:w-72 xl:w-80 flex-shrink-0">
+          <aside class="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
             <div class="sticky top-8">
               <div
                 class="toc-card max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-6 shadow-xl backdrop-blur-sm"
