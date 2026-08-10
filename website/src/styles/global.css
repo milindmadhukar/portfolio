@@ -26,6 +26,40 @@
  */
 @custom-variant latte (&:where(.latte, .latte *));
 
+/*
+ * The accent names the blog layout was built against, remapped onto Catppuccin.
+ *
+ * BlogPost.astro is the last file still speaking the pre-Catppuccin vocabulary -
+ * both as `var(--color-cyber-purple)` reads and as bare `text-terminal-green`
+ * utilities - and nothing had defined those names since the terminal redesign.
+ * An undefined custom property makes its declaration invalid at computed-value
+ * time, so every one of them silently fell back to `unset`: no inline-code chip,
+ * no blockquote panel or bar, no table striping, uncoloured links, and an `<hr>`
+ * whose gradient died on its middle colour stop.
+ *
+ * `@theme inline` rather than `@theme` because the value has to stay a live
+ * var() reference - Catppuccin reassigns --catppuccin-color-* under .latte, and
+ * a copied value would freeze these at whichever flavour was active at build.
+ */
+@theme inline {
+  --color-cyber-purple: var(--catppuccin-color-mauve);
+  --color-cyber-cyan: var(--catppuccin-color-sky);
+  --color-terminal-green: var(--catppuccin-color-green);
+  --color-terminal-yellow: var(--catppuccin-color-yellow);
+  --color-terminal-blue: var(--catppuccin-color-blue);
+}
+
+/* Read only as var() by BlogPost.astro, so no utilities need generating. */
+:root {
+  --text-primary: var(--catppuccin-color-text);
+  --text-secondary: var(--catppuccin-color-subtext1);
+  --text-tertiary: var(--catppuccin-color-overlay1);
+  --bg-primary: var(--catppuccin-color-base);
+  --bg-secondary: var(--catppuccin-color-mantle);
+  --bg-elevated: var(--catppuccin-color-surface0);
+  --border-color: var(--catppuccin-color-surface1);
+}
+
 @theme {
   --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
