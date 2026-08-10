@@ -6,7 +6,7 @@
 // Single-segment only, and every unknown value 404s — /blog, /sitemap.xml and
 // /api/* all match more specific routes and never reach here.
 import TerminalPage from "../components/TerminalPage.astro";
-import { personalInfo, projects } from "../lib/constants";
+import { pageTitle, personalInfo, projects } from "../lib/constants";
 import { TERMINAL_STATES, stateIndexForSlug } from "../lib/terminal-states";
 
 export const prerender = false;
@@ -20,21 +20,20 @@ if (index === -1) {
 const state = TERMINAL_STATES[index];
 
 // Per-command metadata, so the three URLs don't all share one title in search
-// results and link previews. Each title is the prompt that would produce the
-// page, and each description clears the 120-char mark a SERP snippet wants.
-const PROMPT = `${personalInfo.seoTitle}:~`;
-
+// results and link previews. pageTitle() is the prompt that would produce the
+// page plus the name; each description clears the 120-char mark a SERP snippet
+// wants.
 const META: Record<string, { title: string; description: string }> = {
     fastfetch: {
         title: personalInfo.seoTitle,
         description: personalInfo.seoDescription,
     },
     whoami: {
-        title: `${PROMPT} whoami`,
+        title: pageTitle("whoami"),
         description: `The long version of Milind Madhukar: a developer from Mumbai, ${personalInfo.bio.short.charAt(0).toLowerCase()}${personalInfo.bio.short.slice(1)}`,
     },
     projects: {
-        title: `${PROMPT} ls projects/`,
+        title: pageTitle("ls projects/"),
         description: `Things Milind Madhukar has built, including ${projects
             .filter((p) => p.featured)
             .slice(0, 3)

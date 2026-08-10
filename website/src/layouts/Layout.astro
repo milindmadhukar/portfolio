@@ -27,6 +27,30 @@ const {
     imageAlt = personalInfo.ogImageAlt,
     bodyClass = "",
 } = Astro.props;
+
+// Structured data for the one entity this whole site is about. A name in the
+// title is a string; this is what lets a search engine treat "Milind Madhukar"
+// as a person, tie the profiles together, and answer a name query with them.
+// Same @id on every page, so it reads as one entity rather than one per URL.
+const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${Astro.site}#person`,
+    name: personalInfo.name,
+    url: String(Astro.site),
+    email: `mailto:${personalInfo.email}`,
+    jobTitle: "Developer",
+    description: personalInfo.ogDescription,
+    address: {
+        "@type": "PostalAddress",
+        addressLocality: "Mumbai",
+        addressCountry: "IN",
+    },
+    // Profile URLs only — the mailto is already the email field above.
+    sameAs: personalInfo.social
+        .map((s) => s.url)
+        .filter((url) => url.startsWith("http")),
+};
 ---
 
 <!doctype html>
@@ -66,6 +90,10 @@ const {
 
         <!-- Additional SEO -->
         <meta name="author" content={personalInfo.name} />
+        <script
+            type="application/ld+json"
+            set:html={JSON.stringify(personSchema)}
+        />
         <meta name="theme-color" content="#8b5cf6" />
 
         <!-- Fonts -->

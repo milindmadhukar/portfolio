@@ -19,13 +19,26 @@ export const SOCIAL_CONFIG: Record<string, { icon: string; color: string }> = {
   discord: { icon: "nf-fa-discord", color: "#5865F2" },
 };
 
+const FULL_NAME = "Milind Madhukar";
+const PROMPT = `${TERMINAL_CONFIG.user}@${TERMINAL_CONFIG.host}`;
+
+/**
+ * A page title: the prompt that would produce the page, then the name so
+ * "Milind Madhukar" still sits in the field search engines weigh most. The
+ * longest one this builds is 53 chars, inside the ~60 Google and X allow.
+ *
+ * Blog posts deliberately don't use this — their own titles need the room.
+ */
+export const pageTitle = (command?: string) =>
+  `${command ? `${PROMPT}:~ ${command}` : PROMPT} | ${FULL_NAME}`;
+
 export const CACHE_FILE_PATH = "node_modules/.github-cache.json";
 export const GITHUB_USERNAME = "milindmadhukar";
 export const GITHUB_API_URL = "https://api.github.com";
 export const DISCORD_ID = "421608483629301772"
 
 export const personalInfo = {
-  name: "Milind Madhukar",
+  name: FULL_NAME,
   birthDate: BIRTH_DATE,
   email: "hey@milind.dev",
   location: "Mumbai, India",
@@ -56,9 +69,13 @@ i run plusxhub, a 100k+ instagram community for fans like me.`,
   // description as one character long. The markup is valid either way, but
   // there is nothing to gain from tripping them.
   //
-  // seoTitle drives <title> + og:title. It's the prompt, not a sentence: a
-  // descriptive title ran 61 chars, past where Google and X truncate.
-  seoTitle: `${TERMINAL_CONFIG.user}@${TERMINAL_CONFIG.host}`,
+  // seoTitle drives <title> + og:title. The prompt plus the name, not a
+  // sentence: the descriptive version ran 61 chars, past where Google and X
+  // truncate, but dropping the name entirely left nothing to rank on for it.
+  seoTitle: pageTitle(),
+  // The bare prompt, for anywhere that wants the shell string without the
+  // search-engine suffix.
+  promptTitle: PROMPT,
   // seoDescription drives <meta name="description"> (120-160 chars for the
   // snippet), and carries the name that seoTitle no longer spells out.
   seoDescription:
