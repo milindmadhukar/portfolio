@@ -71,22 +71,28 @@ const {
 
         <!-- Theme initialization script to prevent FOUC -->
         <script is:inline>
-            // Run immediately to prevent flash of unstyled content
+            // Run immediately to prevent flash of unstyled content.
+            //
+            // Both classes are set explicitly. Catppuccin only publishes its
+            // dark values under `@variant dark`, i.e. a prefers-color-scheme
+            // media query, so *removing* .latte does not select dark - it falls
+            // back to whatever the OS wants. On a light-mode phone that left the
+            // toggle flipping the class with no visible effect at all. .mocha is
+            // shipped by the same stylesheet and pins dark regardless of the OS.
             (function () {
-                const theme = localStorage.getItem("theme");
-                if (theme === "latte") {
-                    document.documentElement.classList.add("latte");
-                } else if (theme === "mocha") {
-                    document.documentElement.classList.remove("latte");
-                } else {
-                    // No stored preference, check system preference
-                    const prefersDark = window.matchMedia(
-                        "(prefers-color-scheme: dark)",
-                    ).matches;
-                    if (!prefersDark) {
-                        document.documentElement.classList.add("latte");
-                    }
-                }
+                const stored = localStorage.getItem("theme");
+                const prefersDark = window.matchMedia(
+                    "(prefers-color-scheme: dark)",
+                ).matches;
+                const theme =
+                    stored === "latte" || stored === "mocha"
+                        ? stored
+                        : prefersDark
+                          ? "mocha"
+                          : "latte";
+                const root = document.documentElement;
+                root.classList.toggle("latte", theme === "latte");
+                root.classList.toggle("mocha", theme === "mocha");
             })();
         </script>
     </head>

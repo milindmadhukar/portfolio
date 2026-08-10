@@ -27,13 +27,27 @@ export const formatUptime = (dob: Date, now = new Date()) => {
 export const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
     `${count} ${count === 1 ? singular : plural}`;
 
-// The primary outbound link for a project: its repo if public, else its live
-// site. `web` implies the source isn't public, which the renderers call out.
-export const projectLink = (project: { links: { github: string | null; demo: string | null } }) => {
-    if (project.links.github) return { kind: "github" as const, url: project.links.github };
-    if (project.links.demo) return { kind: "web" as const, url: project.links.demo };
-    return null;
+type LinkedProject = {
+    links: { github: string | null; demo: string | null };
+    extraLinks?: readonly { label: string; url: string }[];
+};
+
+// Every place a project can be found, live site first. This used to return a
+// single link, which silently hid the demo on any project that also had a repo
+// — stonksapi's site was in the data all along and never rendered — and left
+// no way to show a project that spans several repos.
+export const projectLinks = (project: LinkedProject) => {
+    const out: { kind: "github" | "web"; url: string; label?: string }[] = [];
+    if (project.links.demo) out.push({ kind: "web", url: project.links.demo });
+    if (project.links.github) out.push({ kind: "github", url: project.links.github });
+    for (const extra of project.extraLinks ?? [])
+        out.push({ kind: "github", url: extra.url, label: extra.label });
+    return out;
 }
+
+// True only when there is genuinely nothing public to read.
+export const hasPublicSource = (project: LinkedProject) =>
+    Boolean(project.links.github) || (project.extraLinks?.length ?? 0) > 0;
 
 // Experience as it's typically stated: whole years with a "+", months while under a year.
 export const calculateExperience = (start: Date, now = new Date()) => {

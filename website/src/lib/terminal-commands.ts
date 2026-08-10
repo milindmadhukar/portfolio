@@ -26,7 +26,7 @@ import {
     EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
-import { calculateExperience, formatUptime, pluralize, projectLink } from "./utils";
+import { calculateExperience, formatUptime, hasPublicSource, pluralize, projectLinks } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
 
@@ -221,7 +221,6 @@ export const getWhoami = () => {
 
     lines.push(`${subtext("hi, i am ")}${bold(green(personalInfo.name.toLowerCase()))}`);
     lines.push("");
-    lines.push(`${bold(blue(" bio"))}`);
     lines.push(subtext(personalInfo.bio.long));
 
     return lines.join("\n");
@@ -229,13 +228,19 @@ export const getWhoami = () => {
 
 const prettyUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-// The link line under a listing row: repo in cyan, or the live site in green
-// with the closed-source status spelled out rather than left to be inferred.
+// The link line under a listing row: repos in cyan, live site in green, with
+// the closed-source status spelled out rather than left to be inferred. Every
+// link is listed, not just the first — a project can span several repos.
 const linkFragment = (project: (typeof projects)[number]) => {
-    const link = projectLink(project);
-    if (!link) return subtext("source private");
-    if (link.kind === "github") return cyan(prettyUrl(link.url));
-    return `${green(prettyUrl(link.url))}  ${subtext("(source private)")}`;
+    const links = projectLinks(project);
+    if (links.length === 0) return subtext("source private");
+    const rendered = links.map((link) =>
+        link.kind === "github"
+            ? cyan(link.label ?? prettyUrl(link.url))
+            : green(prettyUrl(link.url)),
+    );
+    if (!hasPublicSource(project)) rendered.push(subtext("(source private)"));
+    return rendered.join(subtext("  ·  "));
 };
 
 export const getProjects = () => {

@@ -112,7 +112,7 @@ export const projects = [
     id: "kora",
     title: "Kora - Reading Feed",
     description: "A reading feed for articles, highlights, and notes",
-    longDescription: "A reading feed where curious people share the articles they save, the lines they highlight, and the notes they take. Built end to end: Go backend and scraper, a React web app, a browser extension, and a mobile app.",
+    longDescription: "A reading feed where curious people share the articles they save, the lines they highlight, and the notes they take.",
     technologies: ["Go", "TypeScript", "React", "PostgreSQL"],
     highlights: [
       "Built the full stack — Go API and scraper, React web app, browser extension, and mobile app",
@@ -145,22 +145,27 @@ export const projects = [
     tags: ["Go", "Discord", "API Integration"]
   },
   {
-    id: "dreamteam",
-    title: "DreamTeam - IPL Auction Portal",
-    description: "IPL auction sim with real-time WebSocket bidding",
-    longDescription: "A full-stack auction simulation platform built for IPL fantasy leagues, featuring real-time bidding, player statistics, and multi-room support.",
-    technologies: ["TypeScript", "Next.js", "Go", "WebSocket", "PostgreSQL"],
+    id: "piston-stack",
+    title: "Piston Stack",
+    description: "Code execution engine, Go client, and a playground UI",
+    longDescription: "Three pieces around Piston, the sandboxed code-execution engine: a fork of the engine itself, an idiomatic Go client for it, and a browser playground that runs 80+ languages with full execution stats and interactive stdin.",
+    technologies: ["Go", "TypeScript", "React", "Docker"],
     highlights: [
-      "Integrated player statistics API serving 200+ player profiles with sub-100ms response times",
-      "Delivered full-stack solution supporting 50+ simultaneous auction rooms with zero downtime during peak usage",
-      "Handled 500+ concurrent users with real-time bidding functionality"
+      "Playground runs 80+ languages in the browser on a Monaco editor, with interactive stdin",
+      "go-piston is a typed, chainable client covering the full API, and the most starred of my Go libraries",
+      "Runs on my own fork of the execution engine rather than a public instance"
     ],
     links: {
-      github: "https://github.com/milindmadhukar/dreamteam",
-      demo: null
+      github: null,
+      demo: "https://piston.milind.dev"
     },
+    extraLinks: [
+      { label: "piston-ui", url: "https://github.com/milindmadhukar/piston-ui" },
+      { label: "piston (engine fork)", url: "https://github.com/milindmadhukar/piston" },
+      { label: "go-piston", url: "https://github.com/milindmadhukar/go-piston" }
+    ],
     featured: true,
-    tags: ["Full-Stack", "Real-Time", "WebSocket"]
+    tags: ["Go", "Code Execution", "Full-Stack"]
   },
   {
     id: "stonksapi",
@@ -177,6 +182,9 @@ export const projects = [
       github: "https://github.com/milindmadhukar/stonksapi",
       demo: "https://stonksapi.milind.dev/"
     },
+    extraLinks: [
+      { label: "stonks.milind.dev", url: "https://stonks.milind.dev" }
+    ],
     featured: true,
     tags: ["Go", "API", "Finance"]
   },
@@ -199,21 +207,22 @@ export const projects = [
     tags: ["Go", "Graphics", "Performance"]
   },
   {
-    id: "go-piston",
-    title: "go-piston",
-    description: "Go wrapper for the Piston code-execution API",
-    longDescription: "An idiomatic Go client for Piston, the sandboxed code-execution engine behind a lot of Discord eval bots. Covers every endpoint with a typed, chainable API.",
-    technologies: ["Go", "REST"],
+    id: "dreamteam",
+    title: "DreamTeam - IPL Auction Portal",
+    description: "IPL auction sim with real-time WebSocket bidding",
+    longDescription: "The auction portal used to run the DreamTeam IPL auction simulation — real-time bidding over WebSockets, player statistics, and multiple concurrent rooms.",
+    technologies: ["TypeScript", "Next.js", "Go", "WebSocket", "PostgreSQL"],
     highlights: [
-      "Typed, chainable client covering the full Piston API surface",
-      "The most starred of my Go libraries, used by other people's bots"
+      "Handled 500+ concurrent users bidding in real time",
+      "Supported 50+ simultaneous auction rooms with no downtime at peak",
+      "Player statistics API serving 200+ profiles in under 100ms"
     ],
     links: {
-      github: "https://github.com/milindmadhukar/go-piston",
-      demo: "https://pkg.go.dev/github.com/milindmadhukar/go-piston"
+      github: "https://github.com/milindmadhukar/dreamteam",
+      demo: null
     },
-    featured: false,
-    tags: ["Go", "Library", "API Wrapper"]
+    featured: true,
+    tags: ["Full-Stack", "Real-Time", "WebSocket"]
   },
   {
     id: "go-musixmatch",

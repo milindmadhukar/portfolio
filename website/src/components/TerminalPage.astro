@@ -41,8 +41,12 @@ const {
         40px tall on this breakpoint — at pt-12 the first prompt line sat inside
         that band and `fastfetch` disappeared under the button on narrow phones
         (body is overflow-x-hidden, so it was clipped, not scrollable).
+
+        Horizontal padding is deliberately tighter than the vertical: on a phone
+        a 2rem gutter each side ate most of a line, and this is monospace output
+        that wants the width.
     -->
-    <div class="block lg:hidden pt-20 p-8">
+    <div class="block lg:hidden pt-20 px-3 pb-8">
         <MobileTerminal initialKey={initialKey} />
     </div>
 

@@ -1,6 +1,6 @@
 ---
 import { projects } from "../../lib/constants";
-import { projectLink } from "../../lib/utils";
+import { hasPublicSource, projectLinks } from "../../lib/utils";
 
 const prettyUrl = (url: string) =>
     url.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -14,63 +14,104 @@ const prettyUrl = (url: string) =>
     <div class="flex flex-col gap-1">
         {
             projects.map((p) => {
-                const link = projectLink(p);
+                const links = projectLinks(p);
                 return (
-                <details class="project group rounded">
-                    {/* Collapsed row: just the project name + a hint of the description */}
-                    <summary class="summary flex flex-wrap items-baseline gap-x-3 px-2 py-1.5 -ml-2 rounded cursor-pointer select-none">
-                        <span class="chevron text-ctp-overlay1 inline-block transition-transform duration-200">
-                            <i class="nf nf-fa-angle_right" />
-                        </span>
-                        <span class="text-ctp-blue font-bold group-hover:text-ctp-teal transition-colors">
-                            {p.id}/
-                        </span>
-                        <span class="hint text-ctp-subtext0 truncate">
-                            {p.description}
-                        </span>
-                    </summary>
+                    /*
+                     * Shared `name` makes these an exclusive accordion: opening
+                     * one closes the rest. The desktop terminal owns scrolling
+                     * and can't scroll its own output, so several rows open at
+                     * once would run off the bottom.
+                     */
+                    <details class="project group rounded" name="projects">
+                        {/* Collapsed row: just the project name + a hint of the description */}
+                        <summary class="summary flex flex-wrap items-baseline gap-x-3 px-2 py-1.5 -ml-2 rounded cursor-pointer select-none">
+                            <span class="chevron text-ctp-overlay1 inline-block transition-transform duration-200">
+                                <i class="nf nf-fa-angle_right" />
+                            </span>
+                            <span class="text-ctp-blue font-bold group-hover:text-ctp-teal transition-colors">
+                                {p.id}/
+                            </span>
+                            <span class="hint text-ctp-subtext0 min-w-0 truncate">
+                                {p.description}
+                            </span>
+                        </summary>
 
-                    {/* Expanded details: the fuller story, then where to find it */}
-                    <div class="pl-8 pr-2 pb-2 pt-1 flex flex-col gap-1">
-                        <div class="text-ctp-text">{p.longDescription}</div>
-                        <div>
-                            <span class="text-ctp-overlay1">↳</span>{" "}
-                            {link ? (
-                                <a
-                                    href={link.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class={
-                                        link.kind === "github"
-                                            ? "text-ctp-teal hover:underline"
-                                            : "text-ctp-green hover:underline"
-                                    }
-                                >
-                                    <i
-                                        class={
-                                            link.kind === "github"
-                                                ? "nf nf-fa-github"
-                                                : "nf nf-md-web"
-                                        }
-                                    />{" "}
-                                    {prettyUrl(link.url)}
-                                </a>
+                        {/* Expanded details: the fuller story, then where to find it */}
+                        <div class="min-w-0 pl-6 sm:pl-8 pr-2 pb-2 pt-1 flex flex-col gap-1">
+                            <div class="text-ctp-text">{p.longDescription}</div>
+
+                            {links.length === 0 ? (
+                                <div>
+                                    <span class="text-ctp-overlay1">↳</span>{" "}
+                                    <span class="text-ctp-subtext0">
+                                        source private
+                                    </span>
+                                </div>
                             ) : (
-                                <span class="text-ctp-subtext0">source private</span>
+                                links.map((link) => (
+                                    <div class="flex min-w-0 gap-2">
+                                        <span class="text-ctp-overlay1 shrink-0">
+                                            ↳
+                                        </span>
+                                        {/* break-all: a repo URL is one long
+                                            unbreakable token, and on a phone it
+                                            pushed the whole page into a
+                                            horizontal scroll. */}
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class={`min-w-0 break-all hover:underline ${
+                                                link.kind === "github"
+                                                    ? "text-ctp-teal"
+                                                    : "text-ctp-green"
+                                            }`}
+                                        >
+                                            <i
+                                                class={
+                                                    link.kind === "github"
+                                                        ? "nf nf-fa-github"
+                                                        : "nf nf-md-web"
+                                                }
+                                            />{" "}
+                                            {link.label ?? prettyUrl(link.url)}
+                                        </a>
+                                    </div>
+                                ))
                             )}
-                            {link?.kind === "web" && (
-                                <span class="text-ctp-subtext0">
-                                    {"  "}(source private)
-                                </span>
+
+                            {!hasPublicSource(p) && links.length > 0 && (
+                                <div class="text-ctp-subtext0">
+                                    (source private)
+                                </div>
                             )}
                         </div>
-                    </div>
-                </details>
+                    </details>
                 );
             })
         }
     </div>
 </div>
+
+<script>
+    // Fallback for browsers without exclusive <details name="...">. Harmless
+    // where it is supported, since the group is already closed by then.
+    if (!("name" in document.createElement("details"))) {
+        const group = Array.from(
+            document.querySelectorAll<HTMLDetailsElement>(
+                'details.project[name="projects"]',
+            ),
+        );
+        group.forEach((item) => {
+            item.addEventListener("toggle", () => {
+                if (!item.open) return;
+                group.forEach((other) => {
+                    if (other !== item) other.open = false;
+                });
+            });
+        });
+    }
+</script>
 
 <style>
     /* Kill the default disclosure triangle across browsers */

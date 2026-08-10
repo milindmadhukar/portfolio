@@ -38,12 +38,13 @@ export default function ThemeSwitcher() {
         // instantly instead of visibly lagging behind the rest of the page.
         root.classList.add("theme-switching");
 
-        // Apply theme to document
-        if (theme === "latte") {
-            root.classList.add("latte");
-        } else {
-            root.classList.remove("latte");
-        }
+        // Both classes are set explicitly, never just toggled off. Catppuccin
+        // publishes its dark values under a prefers-color-scheme media query,
+        // so dropping .latte only hands control back to the OS - on a
+        // light-mode device that made this button appear dead. .mocha pins the
+        // dark palette. See the matching comment in Layout.astro.
+        root.classList.toggle("latte", theme === "latte");
+        root.classList.toggle("mocha", theme === "mocha");
 
         // Persist to localStorage
         localStorage.setItem("theme", theme);
