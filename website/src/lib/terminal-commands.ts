@@ -142,6 +142,11 @@ export const getFastfetch = async () => {
     // SSH banner is as live as the web one.
     info.push(...row(blue(" Uptime"), formatUptime(new Date(BIRTH_DATE))));
 
+    // OS — the web surface renders the same row via nf-linux-archlinux.
+    // Escaped rather than pasted so the codepoint is greppable next to the
+    // class name it has to stay in sync with.
+    info.push(...row(blue(" OS"), "arch btw"));
+
     // Blog
     const blogCount = posts.length;
     if (blogCount > 0)
@@ -214,9 +219,9 @@ export const getFastfetch = async () => {
 export const getWhoami = () => {
     const lines = [];
 
-    lines.push(`${bold(green(personalInfo.name))}`);
+    lines.push(`${subtext("hi, i am ")}${bold(green(personalInfo.name.toLowerCase()))}`);
     lines.push("");
-    lines.push(`${bold(blue(" Bio"))}`);
+    lines.push(`${bold(blue(" bio"))}`);
     lines.push(subtext(personalInfo.bio.long));
 
     return lines.join("\n");

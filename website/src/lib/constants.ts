@@ -36,9 +36,16 @@ export const personalInfo = {
 
   bio: {
     short: "I build useful software and tinker with anything that has a chip in it.",
-    long: `I'm a ${calculateAge(BIRTH_DATE)} year old developer who's been hooked on tech for as long as I can remember. Gadgets, phones, computers, smart devices, servers, if it has a chip in it, it's always fascinated me. I started programming as a kid, taking things apart just to figure out how they worked, and these days I mostly care about building software that people actually find useful.
+    // One line per line - both surfaces render this broken up rather than as
+    // prose, and it follows the blog's lowercase house style.
+    long: `${calculateAge(BIRTH_DATE)} years old. hooked on tech before i could spell it.
+gadgets, phones, servers — if it has a chip, i've opened it.
+learned to code by breaking things. method unchanged.
+now i build software people actually use, which is progress.
 
-When I'm off the screen you'll usually catch me messing with electronics and soldering together dumb little circuits just because I can. The rest of my time goes to music. I've been a die-hard Martin Garrix fan since 2016 (${yearsSince(GARRIX_FAN_SINCE)} years and counting), and I run Plusxhub, a 100k+ Instagram community I grew from scratch for fans like me. Whatever I'm into, I'm always chasing a way to get a little better at it.`,
+off screen: soldering dumb little circuits, purely because i can.
+and music. die-hard martin garrix fan since 2016, ${yearsSince(GARRIX_FAN_SINCE)} years deep.
+i run plusxhub, a 100k+ instagram community for fans like me.`,
   },
 
   tagline: "Developer • Hardware tinkerer • Music obsessive",

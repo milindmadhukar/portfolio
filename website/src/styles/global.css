@@ -68,6 +68,24 @@
 
   --animate-gold-pulse: gold-pulse 3s infinite ease-in-out;
 
+  /* Same idea as gold-pulse on the Blog row, tinted to the green the name is
+   * set in so the highlight and the text aren't fighting each other. */
+  --animate-name-glow: name-glow 3s infinite ease-in-out;
+
+  @keyframes name-glow {
+
+    0%,
+    100% {
+      background-color: transparent;
+      text-shadow: none;
+    }
+
+    50% {
+      background-color: rgba(166, 227, 161, 0.12);
+      text-shadow: 0 0 12px rgba(166, 227, 161, 0.55);
+    }
+  }
+
   @keyframes gold-pulse {
 
     0%,

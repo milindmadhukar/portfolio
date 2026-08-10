@@ -1,7 +1,7 @@
 /*
  * GENERATED - do not edit. Run `bun scripts/subset-nerdfont.ts` to refresh.
  *
- * 28 of 10764 upstream icons, i.e. the ones this site
+ * 29 of 10764 upstream icons, i.e. the ones this site
  * actually references. Adding an `nf-` class without re-running the script
  * leaves that icon rendering as tofu.
  */
@@ -84,6 +84,10 @@
 
 .nf-fa-twitter:before {
   content: "\f099";
+}
+
+.nf-linux-archlinux:before {
+  content: "\f303";
 }
 
 .nf-md-briefcase:before {
