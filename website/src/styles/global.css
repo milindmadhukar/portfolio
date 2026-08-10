@@ -54,7 +54,9 @@
   --text-primary: var(--catppuccin-color-text);
   --text-secondary: var(--catppuccin-color-subtext1);
   --text-tertiary: var(--catppuccin-color-overlay1);
-  --bg-primary: var(--catppuccin-color-base);
+  /* crust, not base: this paints the full-page post wrapper, which sits
+   * directly on the bg-ctp-crust body. Anything lighter frames the page. */
+  --bg-primary: var(--catppuccin-color-crust);
   --bg-secondary: var(--catppuccin-color-mantle);
   --bg-elevated: var(--catppuccin-color-surface0);
   --border-color: var(--catppuccin-color-surface1);
