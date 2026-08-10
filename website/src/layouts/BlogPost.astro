@@ -224,7 +224,7 @@ const prevPost =
       aside as tall as the article, which is the distance the card sticks over.
     -->
     <div
-      class="max-w-[104rem] mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-16 lg:flex lg:gap-10 relative z-10"
+      class="max-w-[100rem] mx-auto px-1.5 sm:px-6 lg:px-8 py-8 sm:py-16 lg:flex lg:gap-12 relative z-10"
     >
       <!-- Main content -->
       <!-- flex-1 + min-w-0 already stops this squeezing the sidebar, which is
@@ -320,13 +320,13 @@ const prevPost =
 
         <!-- Article header with gradient -->
         <!--
-          Capped and centred inside the main column. Uncapped, the text ran
-          hard against the left edge with the whole sidebar's worth of space
-          idle on the right - 344px of gutter one side, 712px the other. This
-          is wider than that layout gave (1088 vs 864) while keeping the
-          leftover space balanced rather than all piled on one side.
+          No max-width here. Capping and centring the article inside its own
+          column left a dead strip between the text and the sidebar, on top of
+          the gap, which read as a misalignment. The column is sized by the
+          container cap and the sidebar instead, so the text runs the full
+          width it is given and the only space left is the gutter and the gap.
         -->
-        <article class="prose prose-invert prose-lg max-w-[68rem] mx-auto">
+        <article class="prose prose-invert prose-lg max-w-none">
           <header
             class="mb-8 sm:mb-12 pb-8 border-b border-[var(--border-color)]"
           >
@@ -349,8 +349,15 @@ const prevPost =
                 <div
                   class={
                     isExcalidrawBanner
-                      ? "relative my-12 -mx-2 sm:mx-0 rounded-2xl overflow-hidden"
-                      : "my-8 -mx-2 sm:mx-0 rounded-none sm:rounded-2xl overflow-hidden"
+                      /*
+                       * Capped and centred. At full column width a 16:9 banner
+                       * was ~650px tall on a desktop and ate the whole first
+                       * screen before any prose. The old -mx-2 pulled it past
+                       * the page gutter on mobile so it sat flush to the screen
+                       * edge, which is why the page looked like it had none.
+                       */
+                      ? "relative my-12 mx-auto max-w-3xl rounded-2xl overflow-hidden"
+                      : "my-8 mx-auto max-w-3xl rounded-2xl overflow-hidden"
                   }
                 >
                   {isExcalidrawBanner ? (
@@ -561,7 +568,7 @@ const prevPost =
       <!-- Desktop TOC Sidebar -->
       {
         tocHeadings.length > 0 && (
-          <aside class="hidden lg:block lg:w-64 xl:w-72 flex-shrink-0">
+          <aside class="hidden lg:block lg:w-72 xl:w-80 flex-shrink-0">
             <div class="sticky top-8">
               <div
                 class="toc-card max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-6 shadow-xl backdrop-blur-sm"

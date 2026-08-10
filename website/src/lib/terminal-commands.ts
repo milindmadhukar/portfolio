@@ -152,13 +152,13 @@ export const getFastfetch = async () => {
         info.push(...row(magenta(" Latest Post"), posts[0].title));
     }
 
-    // OS — sits directly above the Github stats block, matching the web
-    // surface, which renders the same row via nf-linux-archlinux.
+    // Rule and OS live outside the githubStats guard so the section still
+    // renders if the GitHub fetch fails. Mirrors FastfetchOutput.astro.
+    info.push(RULE);
     info.push(...row(blue(" OS"), "arch btw"));
 
     // Github Stats
     if (githubStats) {
-        info.push(RULE);
         info.push(...row(
             text(" Github Stats"),
             `Repos: ${githubStats.repos} | Followers: ${githubStats.followers} | Following: ${githubStats.following}`,

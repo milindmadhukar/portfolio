@@ -169,6 +169,9 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
                 )
             }
 
+            <!-- Rule and OS sit outside the githubStats guard so the section
+                 still renders if the GitHub fetch fails. -->
+            <TerminalRule />
             <div class="term-row">
                 <span class="text-ctp-blue"
                     ><i class="nf nf-linux-archlinux"></i> OS</span
@@ -179,7 +182,6 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
             {
                 githubStats && (
                     <>
-                        <TerminalRule />
                         <div class="term-row">
                             <i class="nf nf-fa-github" /> Github Stats
                             <span> : </span>
