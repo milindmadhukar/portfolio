@@ -149,6 +149,23 @@ const blogDescription =
 const tocHeadings =
   headings?.filter((h: any) => h.depth >= 2 && h.depth <= 3) || [];
 
+// Same headings as a two-level tree, so the desktop sidebar can collapse each
+// section's h3s. The flat list above still drives the mobile <details> TOC.
+// A post that opens on an h3 before any h2 would have nowhere to put it, so
+// those are promoted to top level rather than dropped.
+type TocNode = { slug: string; text: string; children: TocNode[] };
+const tocTree: TocNode[] = [];
+for (const heading of tocHeadings as any[]) {
+  const node: TocNode = {
+    slug: heading.slug,
+    text: heading.text,
+    children: [],
+  };
+  const parent = tocTree[tocTree.length - 1];
+  if (heading.depth === 3 && parent) parent.children.push(node);
+  else tocTree.push(node);
+}
+
 // Get previous and next posts
 const posts = getBlogPosts();
 const currentPath = Astro.url.pathname.replace(/\/$/, "");
@@ -185,8 +202,22 @@ const prevPost =
     <div class="scanlines absolute inset-0 pointer-events-none opacity-20">
     </div>
 
+    <!--
+      No overflow clipping on this element. It is the flex parent of the sticky
+      TOC aside, and `overflow-x: hidden` forces `overflow-y` to compute to
+      `auto`, which makes this a scroll container - the sticky child then sticks
+      relative to *it* rather than the viewport, and since it never scrolls, the
+      sidebar just sat there. Layout.astro already sets overflow-x-hidden on
+      <body>, which BlogPost overrides via bodyClass for the same reason; this
+      inner one was missed. Wide content is contained by `min-w-0` on the main
+      column and `overflow-hidden` on .blog-content instead.
+
+      No `items-start` either: that sizes the aside to its own content, leaving
+      the sticky card inside it no room to travel. Default `stretch` makes the
+      aside as tall as the article, which is the distance the card sticks over.
+    -->
     <div
-      class="max-w-7xl mx-auto px-2 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 lg:items-start relative z-10 overflow-x-hidden"
+      class="max-w-7xl mx-auto px-2 sm:px-6 py-8 sm:py-16 lg:flex lg:gap-12 relative z-10"
     >
       <!-- Main content -->
       <div class="flex-1 w-full min-w-0 max-w-none lg:max-w-[calc(100%-20rem)]">
@@ -428,20 +459,69 @@ const prevPost =
             <slot />
           </div>
 
-          <!-- Back to blog footer -->
-          <footer class="mt-8 pt-8 border-t border-[var(--border-color)]">
-            <div class="mb-4">
-              <p class="text-sm font-mono text-[var(--text-tertiary)] mb-4">
-                <span class="text-terminal-green">milind@blog</span>:<span
-                  class="text-terminal-blue">~/posts</span
-                >$ cd ..
-              </p>
+          <!--
+            Three bands: where to go next, how to reach him, and a closing rule
+            carrying the way out and the copyright. No prompt line and no `$` -
+            the site is going zsh-style, which has no dollar in it.
+          -->
+          <footer class="mt-16 pt-8 border-t border-[var(--border-color)]">
+            {
+              (prevPost || nextPost) && (
+                <nav
+                  class="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2"
+                  aria-label="More posts"
+                >
+                  {prevPost ? (
+                    <a
+                      href={prevPost.url}
+                      class="group flex flex-col rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-4 transition-colors hover:border-[var(--color-cyber-purple)]"
+                    >
+                      <span class="mb-2 text-sm text-[var(--text-tertiary)] transition-colors group-hover:text-[var(--color-cyber-purple)]">
+                        ← Previous
+                      </span>
+                      <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                        {prevPost.title}
+                      </span>
+                    </a>
+                  ) : (
+                    <div class="hidden sm:block" />
+                  )}
+
+                  {nextPost ? (
+                    <a
+                      href={nextPost.url}
+                      class="group flex flex-col items-end rounded-xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-4 text-right transition-colors hover:border-[var(--color-cyber-purple)]"
+                    >
+                      <span class="mb-2 text-sm text-[var(--text-tertiary)] transition-colors group-hover:text-[var(--color-cyber-purple)]">
+                        Next →
+                      </span>
+                      <span class="font-medium text-[var(--text-primary)] line-clamp-2">
+                        {nextPost.title}
+                      </span>
+                    </a>
+                  ) : (
+                    <div class="hidden sm:block" />
+                  )}
+                </nav>
+              )
+            }
+
+            <div class="mb-10">
+              <h3 class="mb-4 text-sm text-[var(--text-tertiary)]">
+                Connect with me
+              </h3>
+              <SocialIcons />
+            </div>
+
+            <div
+              class="flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border-color)] pt-6"
+            >
               <a
                 href="/blog"
-                class="group inline-flex items-center gap-2 text-cyber-purple hover:text-cyber-cyan transition-colors font-medium"
+                class="group inline-flex items-center gap-2 font-medium text-cyber-purple transition-colors hover:text-cyber-cyan"
               >
                 <svg
-                  class="w-5 h-5 group-hover:-translate-x-1 transition-transform"
+                  class="h-5 w-5 transition-transform group-hover:-translate-x-1"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -454,67 +534,9 @@ const prevPost =
                 </svg>
                 View all posts
               </a>
-            </div>
-
-            <!-- Social Links & RSS -->
-            <div class="mt-4 pt-4">
-              <div class="flex flex-col gap-6">
-                <div>
-                  <h3
-                    class="text-sm font-mono text-[var(--text-tertiary)] mb-4"
-                  >
-                    <span class="text-terminal-green">$</span> Connect with me:
-                  </h3>
-                  <div class="mt-2">
-                    <SocialIcons />
-                  </div>
-                </div>
-
-                {
-                  (nextPost || prevPost) && (
-                    <div class="mt-4 pt-4  grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      {prevPost ? (
-                        <a
-                          href={prevPost.url}
-                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all"
-                        >
-                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
-                            ← Previous Post
-                          </span>
-                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
-                            {prevPost.title}
-                          </span>
-                        </a>
-                      ) : (
-                        <div />
-                      )}
-
-                      {nextPost ? (
-                        <a
-                          href={nextPost.url}
-                          class="group flex flex-col p-4 bg-[var(--bg-elevated)] border border-[var(--border-color)] rounded-xl hover:border-[var(--color-cyber-purple)] transition-all text-right items-end"
-                        >
-                          <span class="text-sm text-[var(--text-tertiary)] mb-2 group-hover:text-[var(--color-cyber-purple)] transition-colors">
-                            Next Post →
-                          </span>
-                          <span class="font-medium text-[var(--text-primary)] line-clamp-2">
-                            {nextPost.title}
-                          </span>
-                        </a>
-                      ) : (
-                        <div />
-                      )}
-                    </div>
-                  )
-                }
-
-                <div class="mt-8 pt-4 border-t border-[var(--border-color)]">
-                  <p class="text-xs font-mono text-[var(--text-tertiary)]">
-                    <span class="text-terminal-blue">©</span>
-                    {new Date().getFullYear()} Milind Madhukar
-                  </p>
-                </div>
-              </div>
+              <p class="text-xs text-[var(--text-tertiary)]">
+                © {new Date().getFullYear()} Milind Madhukar
+              </p>
             </div>
           </footer>
         </article>
@@ -525,24 +547,76 @@ const prevPost =
         tocHeadings.length > 0 && (
           <aside class="hidden lg:block lg:w-72 xl:w-80 flex-shrink-0">
             <div class="sticky top-8">
-              <div class="bg-[var(--bg-elevated)] backdrop-blur-sm border border-[var(--border-color)] rounded-2xl p-6 shadow-xl">
-                <h2 class="text-lg font-bold mb-4 text-[var(--text-primary)]">
+              <div
+                class="toc-card max-h-[calc(100vh-4rem)] overflow-y-auto rounded-2xl border border-[var(--border-color)] bg-[var(--bg-elevated)] p-6 shadow-xl backdrop-blur-sm"
+              >
+                <h2 class="mb-4 text-lg font-bold text-[var(--text-primary)]">
                   Table of Contents
                 </h2>
                 <nav class="toc-nav">
                   <ul class="space-y-1">
-                    {tocHeadings.map((heading: any) => (
-                      <li
-                        style={`margin-left: ${(heading.depth - 2) * 0.75}rem`}
-                        class=""
-                      >
-                        <a
-                          href={`#${heading.slug}`}
-                          class="toc-link block py-2 px-3 text-[var(--text-secondary)] hover:text-cyber-purple hover:bg-cyber-purple/10 rounded transition-all text-sm border-l-2 border-transparent hover:border-cyber-purple"
-                          data-heading-id={heading.slug}
-                        >
-                          {heading.text}
-                        </a>
+                    {tocTree.map((section) => (
+                      <li class="toc-section" data-section={section.slug}>
+                        <div class="flex items-stretch gap-1">
+                          <a
+                            href={`#${section.slug}`}
+                            class="toc-link flex-1 rounded border-l-2 border-transparent px-3 py-2 text-sm text-[var(--text-secondary)] transition-all hover:border-cyber-purple hover:bg-cyber-purple/10 hover:text-cyber-purple"
+                            data-heading-id={section.slug}
+                          >
+                            {section.text}
+                          </a>
+
+                          {section.children.length > 0 && (
+                            <button
+                              type="button"
+                              class="toc-toggle shrink-0 rounded px-2 text-[var(--text-tertiary)] transition-colors hover:bg-cyber-purple/10 hover:text-cyber-purple"
+                              aria-expanded="false"
+                              aria-controls={`toc-group-${section.slug}`}
+                              aria-label={`Show sections under ${section.text}`}
+                            >
+                              <svg
+                                class="toc-chevron h-4 w-4 transition-transform"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M19 9l-7 7-7-7"
+                                />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+
+                        {section.children.length > 0 && (
+                          /*
+                           * grid-rows 0fr -> 1fr animates to the content's own
+                           * height, so nothing has to measure it in JS the way a
+                           * max-height guess would.
+                           */
+                          <div
+                            id={`toc-group-${section.slug}`}
+                            class="toc-group grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-out motion-reduce:transition-none"
+                          >
+                            <ul class="space-y-1 overflow-hidden">
+                              {section.children.map((child) => (
+                                <li class="ml-3 mt-1">
+                                  <a
+                                    href={`#${child.slug}`}
+                                    class="toc-link block rounded border-l-2 border-transparent px-3 py-1.5 text-sm text-[var(--text-tertiary)] transition-all hover:border-cyber-purple hover:bg-cyber-purple/10 hover:text-cyber-purple"
+                                    data-heading-id={child.slug}
+                                  >
+                                    {child.text}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -569,58 +643,147 @@ const prevPost =
     });
   }
 
-  // Active section highlighting with intersection observer
-  const observerOptions = {
-    rootMargin: "-80px 0px -80% 0px",
-    threshold: 0,
-  };
+  /*
+   * Active-section tracking for the TOC.
+   *
+   * This used to be an IntersectionObserver with rootMargin
+   * "-80px 0px -80% 0px", which only fires while a heading is crossing that
+   * thin band. Scrolling back up left the wrong entry lit, and a section taller
+   * than the band could be read end to end without anything updating. Reading
+   * positions directly on scroll is direction-agnostic and always resolves to
+   * exactly one heading.
+   */
+  const ACTIVE_CLASSES = [
+    "text-[var(--color-cyber-purple)]",
+    "bg-[oklch(0.65_0.28_290_/_0.15)]",
+    "border-l-[var(--color-cyber-purple)]",
+  ];
+  // Matches scroll-mt-8 on the headings, plus a little slack so a heading
+  // counts as "reached" just before it touches the top edge.
+  const ACTIVE_OFFSET = 96;
 
-  const headingElements = document.querySelectorAll(
-    ".blog-content h2, .blog-content h3",
+  const headingElements = Array.from(
+    document.querySelectorAll<HTMLElement>(".blog-content h2, .blog-content h3"),
   );
-  const tocLinks = document.querySelectorAll(".toc-link, .mobile-toc-link");
+  const tocLinks = Array.from(
+    document.querySelectorAll<HTMLElement>(".toc-link, .mobile-toc-link"),
+  );
+  const tocSections = Array.from(
+    document.querySelectorAll<HTMLElement>(".toc-section"),
+  );
+  const tocCard = document.querySelector<HTMLElement>(".toc-card");
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        // Remove active class from all links
-        tocLinks.forEach((link) => {
-          link.classList.remove("active");
-          // Remove Tailwind classes for active state if they were applied directly
-          link.classList.remove(
-            "text-[var(--color-cyber-purple)]",
-            "bg-[oklch(0.65_0.28_290_/_0.15)]",
-            "border-l-[var(--color-cyber-purple)]",
-          );
-        });
-        // Add active class to current link (both desktop and mobile)
-        const activeLinkDesktop = document.querySelector(
-          `.toc-link[data-heading-id="${id}"]`,
-        );
-        const activeLinkMobile = document.querySelector(
-          `.mobile-toc-link[data-heading-id="${id}"]`,
-        );
+  // slug -> the h2 that owns it, so an active h3 can expand its parent.
+  const sectionOf = new Map<string, string>();
+  tocSections.forEach((section) => {
+    const slug = section.dataset.section;
+    if (!slug) return;
+    sectionOf.set(slug, slug);
+    section
+      .querySelectorAll<HTMLElement>(".toc-group .toc-link")
+      .forEach((link) => {
+        if (link.dataset.headingId) sectionOf.set(link.dataset.headingId, slug);
+      });
+  });
 
-        const activeClasses = [
-          "text-[var(--color-cyber-purple)]",
-          "bg-[oklch(0.65_0.28_290_/_0.15)]",
-          "border-l-[var(--color-cyber-purple)]",
-        ];
+  // Set by the chevron, cleared as soon as the reader moves to another
+  // section, so scroll position is the default source of truth.
+  let manualSection: string | null = null;
+  let manualOpen = false;
+  let lastActiveSection: string | null = null;
 
-        if (activeLinkDesktop) {
-          activeLinkDesktop.classList.add("active");
-          activeLinkDesktop.classList.add(...activeClasses);
-        }
-        if (activeLinkMobile) {
-          activeLinkMobile.classList.add("active");
-          activeLinkMobile.classList.add(...activeClasses); // Mobile might use different styles? preserving previous logical parity
-        }
-      }
+  function setExpanded(section: HTMLElement, expanded: boolean) {
+    const group = section.querySelector<HTMLElement>(".toc-group");
+    if (!group) return;
+    group.classList.toggle("grid-rows-[1fr]", expanded);
+    group.classList.toggle("grid-rows-[0fr]", !expanded);
+
+    const toggle = section.querySelector<HTMLElement>(".toc-toggle");
+    if (toggle) toggle.setAttribute("aria-expanded", String(expanded));
+    const chevron = section.querySelector<HTMLElement>(".toc-chevron");
+    if (chevron) chevron.classList.toggle("rotate-180", expanded);
+  }
+
+  function render(activeId: string | null) {
+    const activeSection = activeId ? sectionOf.get(activeId) : null;
+
+    if (activeSection !== lastActiveSection) {
+      manualSection = null;
+      manualOpen = false;
+      lastActiveSection = activeSection ?? null;
+    }
+
+    tocSections.forEach((section) => {
+      const slug = section.dataset.section;
+      const expanded =
+        slug === manualSection ? manualOpen : slug === activeSection;
+      setExpanded(section, expanded);
     });
-  }, observerOptions);
 
-  headingElements.forEach((heading) => observer.observe(heading));
+    tocLinks.forEach((link) => {
+      const isActive = link.dataset.headingId === activeId;
+      link.classList.toggle("active", isActive);
+      link.classList[isActive ? "add" : "remove"](...ACTIVE_CLASSES);
+    });
+
+    // Keep the lit entry inside the card's own scrollport on long TOCs.
+    if (!tocCard || !activeId) return;
+    const activeLink = tocCard.querySelector<HTMLElement>(
+      `.toc-link[data-heading-id="${CSS.escape(activeId)}"]`,
+    );
+    if (!activeLink) return;
+    const cardBox = tocCard.getBoundingClientRect();
+    const linkBox = activeLink.getBoundingClientRect();
+    if (linkBox.top < cardBox.top || linkBox.bottom > cardBox.bottom) {
+      activeLink.scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  function currentHeadingId(): string | null {
+    let current: string | null = null;
+    for (const heading of headingElements) {
+      if (heading.getBoundingClientRect().top <= ACTIVE_OFFSET) {
+        current = heading.id;
+      } else {
+        break; // headings are in document order, so the first one below wins
+      }
+    }
+    // Above the first heading, treat the opening section as current.
+    return current ?? headingElements[0]?.id ?? null;
+  }
+
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      render(currentHeadingId());
+    });
+  }
+
+  if (headingElements.length > 0) {
+    tocSections.forEach((section) => {
+      const toggle = section.querySelector<HTMLElement>(".toc-toggle");
+      if (!toggle) return;
+      toggle.addEventListener("click", (event) => {
+        // Peek at a section without navigating away from the current one.
+        event.preventDefault();
+        const slug = section.dataset.section ?? null;
+        const isOpen =
+          section
+            .querySelector(".toc-group")
+            ?.classList.contains("grid-rows-[1fr]") ?? false;
+        manualSection = slug;
+        manualOpen = !isOpen;
+        setExpanded(section, manualOpen);
+      });
+    });
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    render(currentHeadingId());
+  }
 
   // Enhanced image zoom functionality
   function enhanceBlogImages() {
