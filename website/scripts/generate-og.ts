@@ -19,6 +19,7 @@ import { join } from "path";
 import satori from "satori";
 import decodeIco from "decode-ico";
 import sharp from "sharp";
+import { personalInfo, TERMINAL_CONFIG } from "../src/lib/constants";
 
 const ROOT = process.cwd();
 const OUT = join(ROOT, "public", "og.png");
@@ -84,25 +85,29 @@ function dot(color: string) {
   });
 }
 
-function chip(label: string, color: string) {
+/**
+ * A prompt line in the same shape the site renders: blue working directory, a
+ * green marker (never a `$` — the site is zsh-flavoured), then the command.
+ * Pass no command to get the waiting prompt with a parked block cursor.
+ */
+function prompt(command?: string) {
   return h(
     "div",
-    {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        paddingTop: 8,
-        paddingBottom: 8,
-        paddingLeft: 18,
-        paddingRight: 18,
-        borderRadius: 10,
-        border: `1px solid ${color}55`,
-        backgroundColor: `${color}1a`,
-        color,
-        fontSize: 24,
-      },
-    },
-    label,
+    { style: { display: "flex", alignItems: "center", fontSize: 26 } },
+    h("span", { style: { color: C.blue } }, "~"),
+    h("span", { style: { color: C.green, marginLeft: 14 } }, ">"),
+    command
+      ? h("span", { style: { color: C.text, marginLeft: 14 } }, command)
+      : h("div", {
+          style: {
+            width: 13,
+            height: 28,
+            marginLeft: 14,
+            borderRadius: 2,
+            backgroundColor: C.text,
+            opacity: 0.85,
+          },
+        }),
   );
 }
 
@@ -195,7 +200,7 @@ async function build() {
               fontSize: 24,
             },
           },
-          "portfolio@milind.dev",
+          `${TERMINAL_CONFIG.user}@${TERMINAL_CONFIG.host}`,
         ),
       ),
       // Body.
@@ -208,54 +213,38 @@ async function build() {
             padding: 48,
           },
         },
-        // Prompt line.
+        // The command that produced this card.
+        prompt("whoami"),
+        // Name — green and lowercase like the site's whoami output, wearing the
+        // glow that name-glow pulses to at its midpoint.
         h(
           "div",
-          { style: { display: "flex", alignItems: "center", fontSize: 26 } },
-          h("span", { style: { color: C.green } }, ">"),
-          h("span", { style: { color: C.subtext, marginLeft: 14 } }, "whoami"),
+          {
+            style: {
+              marginTop: 22,
+              color: C.green,
+              fontSize: 76,
+              fontWeight: 700,
+              letterSpacing: -1,
+              textShadow: `0 0 30px rgba(166, 227, 161, 0.35)`,
+            },
+          },
+          personalInfo.name.toLowerCase(),
         ),
-        // Name.
+        // Subtitle, in the bio's lowercase voice.
         h(
           "div",
           {
             style: {
               marginTop: 18,
-              color: C.text,
-              fontSize: 76,
-              fontWeight: 700,
-              letterSpacing: -1,
-            },
-          },
-          "Milind Madhukar",
-        ),
-        // Subtitle (bio voice).
-        h(
-          "div",
-          {
-            style: {
-              marginTop: 16,
               color: C.subtext,
               fontSize: 32,
             },
           },
-          "I build useful software people actually use",
+          "trying to build software people actually use",
         ),
-        // Tech chips.
-        h(
-          "div",
-          {
-            style: {
-              display: "flex",
-              gap: 14,
-              marginTop: 36,
-            },
-          },
-          chip("Go", C.blue),
-          chip("TypeScript", C.sapphire),
-          chip("Docker", C.blue),
-          chip("Kubernetes", C.mauve),
-        ),
+        // Waiting prompt, as the terminal parks it after output.
+        h("div", { style: { marginTop: 34 } }, prompt()),
       ),
     ),
 
@@ -272,8 +261,8 @@ async function build() {
           fontSize: 24,
         },
       },
-      h("span", { style: { color: C.mauve } }, "milind.dev"),
-      h("span", { style: { color: C.overlay } }, "Developer · DevOps · Mumbai"),
+      h("span", { style: { color: C.mauve } }, TERMINAL_CONFIG.host),
+      h("span", { style: { color: C.overlay } }, "developer · mumbai"),
     ),
   );
 
