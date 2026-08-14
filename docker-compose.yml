@@ -1,94 +1,76 @@
-# Dokploy deployment.
+# Production deployment on `limitless` (Hetzner, Tailscale 100.74.136.119).
 #
-# Dokploy runs its own Traefik, so routing happens with labels against the
-# shared `dokploy-network` instead of a self-managed reverse proxy. The
-# previous standalone setup is kept verbatim in docker-compose.traefik.yml.
+# Deployed from ~/docker/portfolio, which holds only this file and a .env -
+# no source, since prod pulls prebuilt images built by
+# .github/workflows/docker-publish.yml. Same convention as ~/docker/stonksapi.
 #
-# Differences that matter, versus that file:
-#   - no container_name: Dokploy needs to name containers itself, otherwise
-#     logs, metrics and the redeploy button break
-#   - no watchtower labels: Dokploy builds and deploys on its own
-#   - HTTP routing is configured in the dashboard (Domains tab), not here
-#   - ssh-portfolio publishes its port directly rather than routing through
-#     Traefik (see the note on that service)
+#   docker compose pull && docker compose up -d
 #
-# Both images are built here on the server rather than pulled from a registry.
-# That removes the race the previous setup had - Dokploy deployed on the push
-# webhook while CI was still building, so it kept redeploying the previous
-# image - because there is no longer a gap between "commit landed" and "image
-# exists".
+# The box already runs Traefik v3.7.10 (~/docker/traefik) on the external
+# `reverse_proxy` network, so this attaches to that rather than shipping a
+# proxy of its own. Certs come from `milindresolver`, which uses the Cloudflare
+# DNS-01 challenge - so issuance does not depend on DNS pointing here, and no
+# HTTP-01 entrypoint juggling is needed.
 #
-# This requires "Enable Submodules" ON in Dokploy (Provider tab), plus a Dokploy
-# SSH key registered as a deploy key on the private blog repo: the build reads
-# the posts from website/blog-content, and .gitmodules points at that repo over
-# SSH precisely so Dokploy's key can reach it.
-#
-# The domain is configured in Dokploy's Domains tab (host milind.dev, service
-# portfolio, port 4321, HTTPS via letsencrypt); Dokploy injects the router,
-# service and redirect labels at deploy time. Do not add traefik router labels
-# here as well - the two would fight over the same router names.
+# The GHCR packages are private (the web image contains the blog markdown,
+# unpublished drafts included), so the host needs `docker login ghcr.io` with a
+# read:packages token before the first pull.
 
 services:
   portfolio:
-    build:
-      context: ./website
+    image: ghcr.io/milindmadhukar/portfolio:latest
+    container_name: portfolio
     restart: always
     environment:
       - NODE_ENV=production
       - LANYARD_SOCKET_URL=${LANYARD_SOCKET_URL}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
     labels:
-      # Routers/services come from the Domains tab. This one stays: it is a
-      # network hint, not domain config, and it is still needed because this
-      # service sits on two networks - without pinning, Traefik can resolve the
-      # container on `internal` and fail to reach it.
-      - "traefik.docker.network=dokploy-network"
+      - "traefik.enable=true"
+      # Required because this service sits on two networks - without pinning,
+      # Traefik can resolve the container on `internal` and fail to reach it.
+      - "traefik.docker.network=reverse_proxy"
+      - "traefik.http.routers.portfolio.rule=Host(`milind.dev`)"
+      # websecure only: the `web` entrypoint already carries a global redirect
+      # to websecure, so listing it here would be shadowed anyway.
+      - "traefik.http.routers.portfolio.entrypoints=websecure"
+      - "traefik.http.routers.portfolio.tls.certresolver=milindresolver"
+      - "traefik.http.services.portfolio.loadbalancer.server.port=4321"
     networks:
-      - dokploy-network
+      - reverse_proxy
       - internal
 
   ssh-portfolio:
-    build:
-      context: ./ssh-server
+    image: ghcr.io/milindmadhukar/portfolio-ssh:latest
+    container_name: ssh-portfolio
     restart: always
     environment:
       - SSH_HOST=0.0.0.0
+      # Pinned to 2222, deliberately NOT ${SSH_PORT}. SSH_PORT is the *host*
+      # port Traefik publishes (22); the container always listens on 2222, which
+      # is what the TCP service below points at. Wiring ${SSH_PORT} in here
+      # would make the Go server bind :22 inside the container while Traefik
+      # forwarded to :2222 - a dead route.
       - SSH_PORT=2222
       - PORTFOLIO_API=http://portfolio:4321/api/commands
-    # Dokploy's Traefik only defines HTTP entrypoints. Routing raw SSH through
-    # it needs a TCP entrypoint added to Traefik's *static* config on the host
-    # plus that port bound on the Traefik container - server-side setup this
-    # file cannot express. Publishing the port directly keeps the deployment
-    # self-contained.
-    #
-    # Bound to one specific public address on port 22, so the advertised command
-    # is a bare `ssh milind.dev`. SSH carries no SNI, so a proxy cannot tell
-    # `ssh milind.dev` from `ssh <that ip>` - the split between the portfolio and
-    # the host's real sshd has to be made by address, not hostname.
-    #
-    # Three things this depends on, all outside this file:
-    #   - the host's sshd must not hold 0.0.0.0:22, or this bind fails. On
-    #     Ubuntu 24.04 sshd is socket-activated, so ListenAddress in
-    #     sshd_config is ignored; it is set via a drop-in at
-    #     /etc/systemd/system/ssh.socket.d/override.conf that binds the
-    #     Tailscale address only.
-    #   - milind.dev must be DNS-only in Cloudflare; the proxy carries HTTP(S)
-    #     only, so SSH to a proxied record just times out.
-    #   - milind.dev must have no AAAA pointing at the host, or v6 clients reach
-    #     the real sshd instead of this.
-    #
-    # Defaults stay 0.0.0.0:2222 so a local `docker compose up` is unaffected;
-    # Dokploy sets SSH_BIND_ADDR and SSH_PORT. The container always listens on
-    # 2222 internally, so cap_drop: ALL is fine - the host does the privileged
-    # bind.
-    ports:
-      - "${SSH_BIND_ADDR:-0.0.0.0}:${SSH_PORT:-2222}:2222"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=reverse_proxy"
+      # SSH carries no SNI, so this is a catch-all on a dedicated entrypoint.
+      # That entrypoint is published on the *public* IP only (see
+      # ~/docker/traefik/docker-compose.yml); the host's real sshd holds the
+      # Tailscale address, so the two never collide.
+      - "traefik.tcp.routers.ssh.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.ssh.entrypoints=ssh"
+      - "traefik.tcp.services.ssh.loadbalancer.server.port=2222"
+    # No published ports: everything reaches this over the docker network.
     read_only: true
     cap_drop:
       - ALL
     volumes:
       - ssh_data:/data
     networks:
+      - reverse_proxy
       - internal
 
 volumes:
@@ -99,8 +81,10 @@ volumes:
   ssh_data:
 
 networks:
-  # Created by Dokploy; Traefik is attached to it.
-  dokploy-network:
+  # Created by hand on the box (`docker network create reverse_proxy`); Traefik
+  # is attached to it.
+  reverse_proxy:
+    name: reverse_proxy
     external: true
   # Private hop for ssh-portfolio -> portfolio, so the service name cannot
   # collide with another app's service on the shared network.

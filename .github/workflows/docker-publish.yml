@@ -1,0 +1,139 @@
+name: Docker
+
+# Restored after the move off Dokploy. Dokploy built images on the host from a
+# git push; `limitless` pulls prebuilt images instead, so the build has to
+# happen here again.
+
+on:
+  push:
+    branches: [ "main" ]
+  # The blog repo dispatches this when a post changes.
+  repository_dispatch:
+    types: [blog_update]
+  # Allow manual runs
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # Bump and build live in one workflow on purpose. The bump pushes with
+  # GITHUB_TOKEN, and pushes made with GITHUB_TOKEN deliberately do not trigger
+  # further workflow runs - so a separate build workflow listening on `push`
+  # would never fire for a blog update. The `needs:` chain below is what closes
+  # that gap.
+  bump-blog:
+    if: github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      # PAT_TOKEN is what can read the private blog repo, so it has to be the
+      # checkout token for the submodule to resolve.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Bump blog content
+        run: |
+          git submodule update --remote website/blog-content
+
+          if git diff --quiet -- website/blog-content; then
+            echo "Blog content already up to date, nothing to do"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: bump blog content" -- website/blog-content
+
+          # PAT_TOKEN is read-only on this repo, so push as GITHUB_TOKEN, which
+          # has contents: write above.
+          #
+          # checkout persists PAT_TOKEN as an auth header for github.com, and it
+          # outranks credentials in the push URL, so drop it first. The submodule
+          # fetch above is already done by this point.
+          git config --unset-all http.https://github.com/.extraheader || true
+          git push "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:main
+
+  build:
+    # Runs on push/manual (bump-blog skipped) and after a successful bump.
+    needs: [bump-blog]
+    if: always() && (needs.bump-blog.result == 'success' || needs.bump-blog.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: portfolio
+            context: ./website
+            image-name: ${{ github.repository }}
+          - name: ssh-portfolio
+            context: ./ssh-server
+            image-name: ${{ github.repository }}-ssh
+
+    steps:
+      # PAT_TOKEN: the blog-content submodule lives in a private repo, which the
+      # default GITHUB_TOKEN cannot read.
+      # On a dispatch run, main has moved on since the event fired - check out
+      # the branch so the bump commit is included.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'repository_dispatch' && 'main' || github.sha }}
+          submodules: recursive
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ matrix.image-name }}
+          tags: |
+            type=raw,value=latest
+            type=sha
+
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # amd64 only. The previous version also built linux/arm64, which
+          # doubled build time and registry size for an image nothing consumes:
+          # the only puller is `limitless`, which is x86_64. QEMU emulation for
+          # the arm64 leg was the slowest part of the build.
+          platforms: linux/amd64
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+      - name: Sign the published Docker image
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
