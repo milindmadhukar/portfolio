@@ -157,11 +157,11 @@ export const projects = [
   {
     id: "martin-garrix-bot",
     title: "Martin Garrix Discord Bot",
-    description: "Discord bot for 6,000+ users across 150+ servers",
+    description: "Discord bot serving 6,000+ users",
     longDescription: "A multipurpose Discord bot built for the Martin Garrix community — music playback, fan trivia, levelling, and a lyrics engine. Rewritten from Python to Go and still running 24/7.",
     technologies: ["Go", "DiscordGo", "PostgreSQL", "Spotify API"],
     highlights: [
-      "Serves 6,000+ users across 150+ servers with 24/7 uptime",
+      "Serves 6,000+ users with 24/7 uptime",
       "Processes 10,000+ music requests daily with intelligent caching",
       "Rewritten from Python to Go for lower memory use and faster startup"
     ],
