@@ -27,6 +27,19 @@ export const formatUptime = (dob: Date, now = new Date()) => {
 export const pluralize = (count: number, singular: string, plural = `${singular}s`) =>
     `${count} ${count === 1 ? singular : plural}`;
 
+// 154900 -> "155k". Keeps counts short enough that a fastfetch row holding
+// several of them still fits the column.
+export const compactNumber = (count: number): string => {
+    if (count < 1000) return String(count);
+    if (count < 1_000_000) {
+        const thousands = Math.round(count / 1000);
+        // 999_500 rounds to 1000, which would read as "1000k" rather than
+        // rolling over — fall through to millions instead.
+        if (thousands < 1000) return `${thousands}k`;
+    }
+    return `${(count / 1_000_000).toFixed(1)}M`;
+};
+
 type LinkedProject = {
     links: { github: string | null; demo: string | null };
     extraLinks?: readonly { label: string; url: string }[];

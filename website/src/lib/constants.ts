@@ -44,6 +44,10 @@ export const DISCORD_ID = "421608483629301772"
 export const STATUS_PAGE_URL = "https://status.milind.dev";
 export const STATUS_PAGE_SLUG = "all";
 
+// Quartz publishes the Obsidian vault here, and emits a metrics.json describing
+// the corpus alongside it.
+export const VAULT_URL = "https://vault.milind.dev";
+
 export const personalInfo = {
   name: FULL_NAME,
   birthDate: BIRTH_DATE,

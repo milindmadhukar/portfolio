@@ -45,12 +45,17 @@ export interface ServicePart {
 
 /**
  * The row's wording, shared so the web and SSH banners cannot drift apart.
- * Zero counts are dropped: the row stays quiet at "37 up" when everything is
- * healthy and only grows when something actually needs attention.
+ * Zero counts are dropped: the row stays quiet at "37 operational" when
+ * everything is healthy and only grows when something needs attention.
+ *
+ * The tone keys stay on Kuma's own vocabulary since they key the colour maps
+ * in both renderers; only the labels are the public wording. "degraded" for
+ * PENDING is accurate rather than euphemistic - Kuma means the check is
+ * failing but has not yet exhausted its retries.
  */
 export const serviceParts = (stats: ServiceStats): ServicePart[] => {
-  const parts: ServicePart[] = [{ count: stats.up, label: "up", tone: "up" }];
-  if (stats.pending > 0) parts.push({ count: stats.pending, label: "pending", tone: "pending" });
+  const parts: ServicePart[] = [{ count: stats.up, label: "operational", tone: "up" }];
+  if (stats.pending > 0) parts.push({ count: stats.pending, label: "degraded", tone: "pending" });
   if (stats.down > 0) parts.push({ count: stats.down, label: "down", tone: "down" });
   if (stats.maintenance > 0)
     parts.push({ count: stats.maintenance, label: "maintenance", tone: "maintenance" });

@@ -37,5 +37,5 @@ ENV PORT=4321
 EXPOSE 4321
 
 # Start the server and the background monitors that keep the fastfetch caches
-# warm - GitHub push activity, and the Uptime Kuma service tally.
-CMD ["sh", "-c", "bun ./dist/server/entry.mjs & bun scripts/monitor-github.ts & bun scripts/monitor-uptime.ts"]
+# warm - GitHub push activity, the Uptime Kuma service tally, and the vault.
+CMD ["sh", "-c", "bun ./dist/server/entry.mjs & bun scripts/monitor-github.ts & bun scripts/monitor-uptime.ts & bun scripts/monitor-vault.ts"]

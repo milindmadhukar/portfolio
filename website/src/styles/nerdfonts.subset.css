@@ -1,7 +1,7 @@
 /*
  * GENERATED - do not edit. Run `bun scripts/subset-nerdfont.ts` to refresh.
  *
- * 29 of 10764 upstream icons, i.e. the ones this site
+ * 30 of 10764 upstream icons, i.e. the ones this site
  * actually references. Adding an `nf-` class without re-running the script
  * leaves that icon rendering as tofu.
  */
@@ -120,6 +120,10 @@
 
 .nf-md-file_document_outline:before {
   content: "\f09ee";
+}
+
+.nf-md-notebook:before {
+  content: "\f082e";
 }
 
 .nf-md-school:before {

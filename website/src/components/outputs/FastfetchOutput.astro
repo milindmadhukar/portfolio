@@ -4,11 +4,12 @@ import { formatTimeAgo } from "../../lib/date";
 import DiscordStatus from "../DiscordStatus";
 import SocialIcons from "../SocialIcons.astro";
 import TerminalRule from "../TerminalRule.astro";
-import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE, STATUS_PAGE_URL } from "../../lib/constants";
+import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE, STATUS_PAGE_URL, VAULT_URL } from "../../lib/constants";
 import { getBlogPosts } from "../../lib/blog";
 import { calculateExperience, formatUptime, pluralize } from "../../lib/utils";
 import { getPresence } from "../../lib/lanyard-server";
 import { fetchServiceStats, serviceParts, type ServiceTone } from "../../lib/uptime";
+import { fetchVaultStats, vaultParts } from "../../lib/vault";
 
 const githubStats = await fetchGithubStats();
 
@@ -16,6 +17,9 @@ const githubStats = await fetchGithubStats();
 // render nothing even though every request re-reads it.
 const serviceStats = await fetchServiceStats();
 const services = serviceStats ? serviceParts(serviceStats) : [];
+
+const vaultStats = await fetchVaultStats();
+const vault = vaultStats ? vaultParts(vaultStats) : [];
 
 const SERVICE_TONE: Record<ServiceTone, string> = {
     up: "text-ctp-green",
@@ -252,6 +256,31 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
                                     <span class={SERVICE_TONE[part.tone]}>
                                         {part.count} {part.label}
                                     </span>
+                                </>
+                            ))}
+                        </a>
+                    </div>
+                )
+            }
+
+            {
+                vault.length > 0 && (
+                    <div class="term-row">
+                        <span class="text-ctp-teal">
+                            <i class="nf nf-md-notebook" /> Vault
+                        </span>
+                        <span> : </span>
+                        <a
+                            href={VAULT_URL}
+                            target="_blank"
+                            class="text-ctp-text hover:underline"
+                        >
+                            {vault.map((part, i) => (
+                                <>
+                                    {i > 0 && (
+                                        <span class="text-ctp-overlay0"> · </span>
+                                    )}
+                                    <span>{part}</span>
                                 </>
                             ))}
                         </a>
