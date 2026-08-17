@@ -1,240 +1,315 @@
+// Package commands is the shell itself: dispatch, and the handful of builtins.
+//
+// Almost nothing here produces content. `ls` prints a listing the website
+// rendered, `whoami` prints a string the website rendered; the only thing this
+// package composes on its own are the error messages, which is exactly the part
+// that has to feel like a shell.
 package commands
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
-	"net/http"
 	"sort"
 	"strings"
+
+	"github.com/muesli/termenv"
+
+	"github.com/milindmadhukar/portfolio/ssh-server/content"
+	"github.com/milindmadhukar/portfolio/ssh-server/render"
+	"github.com/milindmadhukar/portfolio/ssh-server/vfs"
 )
 
-var apiURL string
-
-type APIResponse struct {
-	Fastfetch      string            `json:"fastfetch"`
-	Whoami         string            `json:"whoami"`
-	Projects       string            `json:"projects"`
-	ProjectDetails map[string]string `json:"projectDetails"`
-	ProjectIDs     []string          `json:"projectIds"`
-	Uptime         string            `json:"uptime"`
-	Help           string            `json:"help"`
+// Env is one session's view of the world. Cwd and PrevCwd are mutated by `cd`;
+// everything else is read-only for the length of a command.
+type Env struct {
+	Ctx     context.Context
+	Store   *content.Store
+	Snap    *content.Snapshot
+	Tree    *vfs.Tree
+	Cwd     string
+	PrevCwd string
+	Width   int
+	Profile termenv.Profile
 }
 
-// Commands that complete on their own, without an argument.
-var commandNames = []string{
-	"clear",
-	"exit",
-	"fastfetch",
-	"help",
-	"ls",
-	"projects",
-	"uptime",
-	"whoami",
+// Result is what the session loop acts on. Splitting Out and Err matters in
+// exec mode, where they go to different streams.
+type Result struct {
+	Out   string
+	Err   string
+	Code  int
+	Clear bool
+	Exit  bool
 }
 
-func Init(url string) {
-	apiURL = url
+func out(s string) Result { return Result{Out: s} }
+
+func fail(format string, args ...any) Result {
+	return Result{Err: fmt.Sprintf(format, args...), Code: 1}
 }
 
-// HandleCommand processes the input command and returns the output.
-func HandleCommand(input string, user string) string {
-	args := strings.Fields(input)
-	if len(args) == 0 {
-		return ""
+// Names is the completion vocabulary, sorted.
+var Names = []string{
+	"blog", "cat", "cd", "clear", "exit", "fastfetch",
+	"help", "ls", "projects", "pwd", "uptime", "whoami",
+}
+
+// pathArgs are the commands whose operands are paths, for tab completion.
+var pathArgs = map[string]bool{"cd": true, "cat": true, "ls": true}
+
+// Run executes one parsed command line.
+func Run(env *Env, argv []string) Result {
+	if len(argv) == 0 {
+		return Result{}
 	}
 
-	cmd := args[0]
+	name, args := argv[0], argv[1:]
 
-	// Fetch data from API
-	// TODO: Consider caching or error handling if API is down
-	data, err := fetchCommands()
-	if err != nil {
-		// Fallback or error message
-		return fmt.Sprintf("Error fetching commands: %v\n", err)
-	}
-
-	switch cmd {
-	case "whoami":
-		return data.Whoami + "\n"
-	case "fastfetch":
-		return data.Fastfetch + "\n"
-	case "projects":
-		return data.Projects + "\n"
-	case "uptime":
-		return data.Uptime + "\n"
+	switch name {
+	case "cd":
+		return cd(env, args)
+	case "pwd":
+		return out(vfs.Abs(env.Cwd) + "\n")
 	case "ls":
-		return handleLs(args[1:], data)
+		return ls(env, args)
+	case "cat":
+		return cat(env, args)
+	case "clear":
+		return Result{Clear: true}
+	case "exit", "logout":
+		return Result{Exit: true}
 	case "help":
-		return data.Help + "\n"
-	case "exit":
-		return "Goodbye!\n"
+		return out(env.Snap.Help + "\n")
+	case "whoami":
+		return out(env.Snap.Whoami + "\n")
+	case "fastfetch":
+		return out(env.Snap.Fastfetch + "\n")
+	case "uptime":
+		return out(env.Snap.Uptime + "\n")
+
+	// Shortcuts that predate the filesystem. Kept because they are in the
+	// muscle memory of anyone who used the old server, and they read fine.
+	case "projects":
+		return listDir(env, "projects", "projects")
+	case "blog":
+		return listDir(env, "blog", "blog")
+
 	default:
-		return fmt.Sprintf("command not found: %s\n", cmd)
+		return Result{
+			Err:  fmt.Sprintf("command not found: %s\n", name),
+			Code: 127,
+		}
 	}
 }
 
-// handleLs resolves the pseudo-filesystem: the home directory holds a single
-// `projects/` directory, and each project inside it is its own page.
-func handleLs(args []string, data *APIResponse) string {
-	// Bare `ls` — show what's in the home directory.
+func cd(env *Env, args []string) Result {
+	if len(args) > 1 {
+		return fail("cd: too many arguments\n")
+	}
+
+	target := ""
+	switch {
+	case len(args) == 0:
+		// Bare `cd` goes home.
+	case args[0] == "-":
+		target = env.PrevCwd
+	default:
+		target = vfs.Resolve(env.Cwd, args[0])
+	}
+
+	switch {
+	case env.Tree.IsDir(target):
+		env.PrevCwd, env.Cwd = env.Cwd, target
+		if len(args) > 0 && args[0] == "-" {
+			// zsh echoes the directory it moved to when you use `-`.
+			return out(vfs.Abs(env.Cwd) + "\n")
+		}
+		return Result{}
+	case env.Tree.IsFile(target):
+		return fail("cd: not a directory: %s\n", args[0])
+	default:
+		return fail("cd: no such file or directory: %s\n", args[0])
+	}
+}
+
+func ls(env *Env, args []string) Result {
+	// The listings are rendered server-side, so flags cannot change them.
+	// Swallowing them is friendlier than "command not found"-ing someone's
+	// reflexive `ls -la`.
+	operands := make([]string, 0, len(args))
+	for _, a := range args {
+		if strings.HasPrefix(a, "-") && a != "-" {
+			continue
+		}
+		operands = append(operands, a)
+	}
+
+	if len(operands) == 0 {
+		return listDir(env, env.Cwd, ".")
+	}
+	if len(operands) == 1 {
+		return listOne(env, operands[0])
+	}
+
+	// Multiple operands: GNU prints files first, then each directory under a
+	// `path:` header.
+	var sb, errs strings.Builder
+	code := 0
+	var dirs []string
+	for _, operand := range operands {
+		p := vfs.Resolve(env.Cwd, operand)
+		switch {
+		case env.Tree.IsFile(p):
+			sb.WriteString(operand + "\n")
+		case env.Tree.IsDir(p):
+			dirs = append(dirs, operand)
+		default:
+			errs.WriteString(fmt.Sprintf("ls: cannot access '%s': No such file or directory\n", operand))
+			code = 2
+		}
+	}
+	for i, operand := range dirs {
+		if sb.Len() > 0 || i > 0 {
+			sb.WriteString("\n")
+		}
+		sb.WriteString(operand + ":\n")
+		if listing, ok := env.Tree.Listing(vfs.Resolve(env.Cwd, operand)); ok {
+			sb.WriteString(listing + "\n")
+		}
+	}
+	return Result{Out: sb.String(), Err: errs.String(), Code: code}
+}
+
+func listOne(env *Env, operand string) Result {
+	p := vfs.Resolve(env.Cwd, operand)
+	switch {
+	case env.Tree.IsDir(p):
+		return listDir(env, p, operand)
+	case env.Tree.IsFile(p):
+		// `ls FILE` echoes the name, as real ls does.
+		return out(operand + "\n")
+	default:
+		return Result{
+			Err:  fmt.Sprintf("ls: cannot access '%s': No such file or directory\n", operand),
+			Code: 2,
+		}
+	}
+}
+
+func listDir(env *Env, path, operand string) Result {
+	listing, ok := env.Tree.Listing(path)
+	if !ok {
+		return Result{
+			Err:  fmt.Sprintf("ls: cannot access '%s': No such file or directory\n", operand),
+			Code: 2,
+		}
+	}
+	return out(listing + "\n")
+}
+
+func cat(env *Env, args []string) Result {
 	if len(args) == 0 {
-		return "projects/\n"
+		// Real cat would read stdin here. This shell has no stdin to give it —
+		// doing that would just hang the readline loop.
+		return fail("cat: missing operand\n")
 	}
 
-	target := strings.TrimSuffix(args[0], "/")
+	var sb, errs strings.Builder
+	code := 0
 
-	if target == "projects" {
-		return data.Projects + "\n"
-	}
+	for _, operand := range args {
+		p := vfs.Resolve(env.Cwd, operand)
 
-	if id, ok := strings.CutPrefix(target, "projects/"); ok {
-		if details, found := data.ProjectDetails[id]; found {
-			return details + "\n"
+		switch {
+		case env.Tree.IsDir(p):
+			errs.WriteString(fmt.Sprintf("cat: %s: Is a directory\n", operand))
+			code = 1
+
+		case !env.Tree.IsFile(p):
+			errs.WriteString(fmt.Sprintf("cat: %s: No such file or directory\n", operand))
+			code = 1
+
+		// A pre-rendered body wins over the markdown path even for a .md name.
+		// about.md is the case: it is prose authored one line per line, and
+		// running it through a markdown renderer would reflow those breaks into
+		// a single paragraph, which is not how either surface presents it.
+		case hasPreRendered(env, p):
+			body, _ := env.Tree.File(p)
+			sb.WriteString(body + "\n")
+
+		case vfs.IsMarkdown(p):
+			body, err := env.Store.Markdown(env.Ctx, p)
+			if err != nil {
+				errs.WriteString(fmt.Sprintf("cat: %s: cannot reach content service\n", operand))
+				code = 1
+				continue
+			}
+			rendered, err := render.Markdown(body, env.Width, env.Profile)
+			if err != nil {
+				// Falling back to the source beats printing nothing.
+				sb.WriteString(body)
+				continue
+			}
+			sb.WriteString(rendered)
+
+		default:
+			// A file the tree lists but nothing can produce a body for. Should
+			// not happen; say so honestly rather than printing nothing.
+			errs.WriteString(fmt.Sprintf("cat: %s: cannot read file\n", operand))
+			code = 1
 		}
 	}
 
-	return fmt.Sprintf("ls: cannot access '%s': No such file or directory\n", strings.Join(args, " "))
+	return Result{Out: sb.String(), Err: errs.String(), Code: code}
 }
 
-// ProjectIDs fetches just the project names, for tab completion. Called once
-// per session — the completion callback itself must never hit the network.
-func ProjectIDs() []string {
-	data, err := fetchCommands()
-	if err != nil {
+func hasPreRendered(env *Env, path string) bool {
+	_, ok := env.Tree.File(path)
+	return ok
+}
+
+// Candidates lists what could follow the given partial word, for completion.
+// It never touches the network — the tree is a snapshot taken between commands.
+func Candidates(env *Env, cmd, word string) []string {
+	if cmd == "" {
+		return matches(Names, word)
+	}
+	if !pathArgs[cmd] {
 		return nil
 	}
-	return data.ProjectIDs
-}
 
-// Completion is the outcome of a tab press: either rewrite the line, or show
-// the caller the ambiguous candidates so it can print them.
-type Completion struct {
-	Line       string
-	Pos        int
-	Replace    bool
-	Candidates []string
-}
-
-// Complete implements tab completion over commands and project paths. It is
-// wired to x/term's AutoCompleteCallback, which fires on *every* keypress, so
-// anything but a tab is passed straight through untouched.
-func Complete(line string, pos int, key rune, projectIDs []string) Completion {
-	if key != '\t' {
-		return Completion{}
+	// Split at the last slash: the directory part is kept verbatim so `~/pro`
+	// completes to `~/projects` rather than being rewritten to an absolute path.
+	dirPart, stem := "", word
+	if i := strings.LastIndex(word, "/"); i >= 0 {
+		dirPart, stem = word[:i+1], word[i+1:]
 	}
 
-	// Only complete at the end of the line — mid-line completion would need to
-	// splice the remainder back in, and nobody edits mid-line here.
-	if pos != len(line) {
-		return Completion{}
-	}
-
-	prefix, word := splitLastWord(line)
-
-	var candidates []string
-	switch {
-	case strings.TrimSpace(prefix) == "":
-		candidates = matches(commandNames, word)
-	case strings.TrimSpace(prefix) == "ls":
-		candidates = matches(projectPaths(projectIDs), word)
-	}
-
-	if len(candidates) == 0 {
-		return Completion{}
-	}
-
-	completed := longestCommonPrefix(candidates)
-	if len(candidates) == 1 {
-		// A finished command gets a trailing space; a directory gets a slash
-		// instead, so the next tab can descend into it.
-		if strings.HasPrefix(completed, "projects") {
-			completed = strings.TrimSuffix(completed, "/") + "/"
-		} else {
-			completed += " "
+	base := vfs.Resolve(env.Cwd, dirPart)
+	var found []string
+	for _, e := range env.Tree.Children(base) {
+		if !strings.HasPrefix(e.Name, stem) {
+			continue
 		}
+		if cmd == "cd" && e.Kind != "dir" {
+			continue
+		}
+		name := e.Name
+		if e.Kind == "dir" {
+			name += "/"
+		}
+		found = append(found, dirPart+name)
 	}
-
-	// No further prefix to share — show what's on offer instead of doing nothing.
-	if completed == word {
-		return Completion{Candidates: candidates}
-	}
-
-	newLine := prefix + completed
-	return Completion{Line: newLine, Pos: len(newLine), Replace: true}
-}
-
-// projectPaths is what `ls <tab>` offers: the projects directory itself, plus
-// every project inside it.
-func projectPaths(projectIDs []string) []string {
-	paths := []string{"projects/"}
-	for _, id := range projectIDs {
-		paths = append(paths, "projects/"+id)
-	}
-	sort.Strings(paths)
-	return paths
-}
-
-// splitLastWord splits a line into everything before the final word and the
-// final word itself — the part a tab press is trying to complete.
-func splitLastWord(line string) (prefix string, word string) {
-	i := strings.LastIndex(line, " ")
-	if i < 0 {
-		return "", line
-	}
-	return line[:i+1], line[i+1:]
+	sort.Strings(found)
+	return found
 }
 
 func matches(candidates []string, word string) []string {
-	var out []string
+	var found []string
 	for _, c := range candidates {
 		if strings.HasPrefix(c, word) {
-			out = append(out, c)
+			found = append(found, c)
 		}
 	}
-	return out
-}
-
-func longestCommonPrefix(items []string) string {
-	if len(items) == 0 {
-		return ""
-	}
-	prefix := items[0]
-	for _, item := range items[1:] {
-		for !strings.HasPrefix(item, prefix) {
-			prefix = prefix[:len(prefix)-1]
-			if prefix == "" {
-				return ""
-			}
-		}
-	}
-	return prefix
-}
-
-func fetchCommands() (*APIResponse, error) {
-	if apiURL == "" {
-		return nil, fmt.Errorf("API URL not set")
-	}
-
-	resp, err := http.Get(apiURL)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API returned status: %s", resp.Status)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var data APIResponse
-	if err := json.Unmarshal(body, &data); err != nil {
-		return nil, err
-	}
-
-	return &data, nil
+	return found
 }

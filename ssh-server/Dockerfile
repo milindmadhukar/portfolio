@@ -7,8 +7,13 @@ RUN go mod download
 
 COPY . .
 
-# Build valid static binary
-RUN CGO_ENABLED=0 GOOS=linux go build -o ssh-server .
+# Build valid static binary.
+#
+# -s -w and -trimpath offset glamour, which pulls in chroma's full lexer set for
+# syntax highlighting inside code blocks and is most of the binary by itself.
+# The Catppuccin style is compiled in via go:embed (see render/styles), so the
+# scratch image below still needs no filesystem.
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o ssh-server .
 
 FROM scratch
 
