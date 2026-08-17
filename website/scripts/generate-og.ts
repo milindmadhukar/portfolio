@@ -87,7 +87,9 @@ function dot(color: string) {
 
 /**
  * A prompt line in the same shape the site renders: blue working directory, a
- * green marker (never a `$` — the site is zsh-flavoured), then the command.
+ * mauve marker (never a `$` — the site is zsh-flavoured), then the command.
+ * Mauve rather than green to match the SSH prompt, and because green now only
+ * signals liveness.
  * Pass no command to get the waiting prompt with a parked block cursor.
  */
 function prompt(command?: string) {
@@ -95,7 +97,7 @@ function prompt(command?: string) {
     "div",
     { style: { display: "flex", alignItems: "center", fontSize: 26 } },
     h("span", { style: { color: C.blue } }, "~"),
-    h("span", { style: { color: C.green, marginLeft: 14 } }, ">"),
+    h("span", { style: { color: C.mauve, marginLeft: 14 } }, ">"),
     command
       ? h("span", { style: { color: C.text, marginLeft: 14 } }, command)
       : h("div", {
@@ -215,18 +217,18 @@ async function build() {
         },
         // The command that produced this card.
         prompt("whoami"),
-        // Name — green and lowercase like the site's whoami output, wearing the
+        // Name — mauve and lowercase like the site's whoami output, wearing the
         // glow that name-glow pulses to at its midpoint.
         h(
           "div",
           {
             style: {
               marginTop: 22,
-              color: C.green,
+              color: C.mauve,
               fontSize: 76,
               fontWeight: 700,
               letterSpacing: -1,
-              textShadow: `0 0 30px rgba(166, 227, 161, 0.35)`,
+              textShadow: `0 0 30px rgba(203, 166, 247, 0.35)`,
             },
           },
           personalInfo.name.toLowerCase(),

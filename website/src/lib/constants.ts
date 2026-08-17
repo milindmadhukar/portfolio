@@ -97,7 +97,7 @@ i run plusxhub, a 100k+ instagram community for fans like me.`,
   // og:image:alt — describes the share card itself, which the title used to do
   // badly once it became a shell prompt.
   ogImageAlt:
-    "A terminal window: the whoami command, the name milind madhukar in green, and the line trying to build software people actually use.",
+    "A terminal window: the whoami command, the name milind madhukar in mauve, and the line trying to build software people actually use.",
 
   links: {
     plusxhub: "https://www.instagram.com/plusxhub/",

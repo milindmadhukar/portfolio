@@ -1,0 +1,217 @@
+---
+// One project's README, at its own URL.
+//
+// This is the web half of `cat projects/<id>/README.md`. The SSH side fetches
+// the markdown from /api/fs and renders it with glamour; here the same content
+// is rendered as HTML from the same `projects` entry, the way fastfetch already
+// has an ANSI renderer and an Astro one. Keeping both derived from
+// constants.ts is what stops them drifting.
+//
+// Single segment under /projects/, so `/projects` itself still falls through to
+// [cmd].astro and renders the listing.
+import Layout from "../../layouts/Layout.astro";
+import SocialIcons from "../../components/SocialIcons.astro";
+import TerminalPrompt from "../../components/TerminalPrompt.astro";
+import TerminalCommand from "../../components/TerminalCommand.astro";
+import VimCursor from "../../components/VimCursor.astro";
+import { pageTitle, projects } from "../../lib/constants";
+import { hasPublicSource, projectLinks } from "../../lib/utils";
+
+export const prerender = false;
+
+const project = projects.find((p) => p.id === Astro.params.id);
+if (!project) {
+    return new Response(null, { status: 404 });
+}
+
+const links = projectLinks(project);
+const prettyUrl = (url: string) =>
+    url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+const path = `projects/${project.id}/README.md`;
+---
+
+<Layout
+    title={pageTitle(`cat ${path}`)}
+    description={project.longDescription}
+    includePadding={false}
+>
+    <!-- Same layout primitives as /blog: see the note in blog/index.astro. -->
+    <div class="min-h-screen p-8 pt-20 lg:pt-12 bg-ctp-crust relative">
+        <div
+            class="w-fit max-w-4xl relative z-10 font-mono text-base md:text-base lg:text-lg xl:text-xl leading-tight"
+        >
+            <div class="mb-4">
+                <div class="mb-4">
+                    <a
+                        href="/projects"
+                        class="group flex items-center gap-2 text-ctp-overlay2 hover:text-ctp-teal transition-colors"
+                    >
+                        <svg
+                            class="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        <span class="text-[0.75em] font-medium">
+                            Back to projects
+                        </span>
+                    </a>
+                </div>
+
+                <h1
+                    class="text-3xl sm:text-4xl md:text-5xl font-black mb-4 pb-2 flex items-baseline"
+                >
+                    <span class="text-ctp-text inline-block"
+                        >{project.title}</span
+                    ><VimCursor width="22px" height="44px" />
+                </h1>
+
+                <div class="mb-6">
+                    <SocialIcons />
+                </div>
+
+                <div class="mb-4 text-ctp-text">
+                    <TerminalPrompt
+                        user="portfolio"
+                        host="milind.dev"
+                        directory="~/projects"
+                    >
+                        <TerminalCommand
+                            command={`cat ${project.id}/README.md`}
+                            startDelay={500}
+                            id="readme-command"
+                            onCompleteEventName="readme-typing-complete"
+                        />
+                    </TerminalPrompt>
+                </div>
+            </div>
+
+            <!-- Starts hidden; uncovered by the shared reveal-sweep once the
+                 command finishes typing, same as the /blog listing. -->
+            <div class="readme-output hidden flex flex-col gap-5">
+                <p class="text-ctp-text">{project.longDescription}</p>
+
+                <div>
+                    <span class="text-ctp-blue font-bold">Built with</span>
+                    <span class="text-ctp-overlay2"> : </span>
+                    <span class="text-ctp-subtext0"
+                        >{project.technologies.join(" · ")}</span
+                    >
+                </div>
+
+                {
+                    project.highlights.length > 0 && (
+                        <div>
+                            <div class="text-ctp-blue font-bold mb-1">
+                                Highlights
+                            </div>
+                            <ul class="flex flex-col gap-1">
+                                {project.highlights.map((highlight) => (
+                                    <li class="flex gap-2">
+                                        <span class="text-ctp-overlay1 shrink-0">
+                                            ▹
+                                        </span>
+                                        <span class="text-ctp-subtext0">
+                                            {highlight}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
+                }
+
+                <div>
+                    <div class="text-ctp-blue font-bold mb-1">Links</div>
+                    {
+                        links.length === 0 ? (
+                            <div class="text-ctp-subtext0">
+                                Source is private.
+                            </div>
+                        ) : (
+                            <ul class="flex flex-col gap-1">
+                                {links.map((link) => (
+                                    <li class="flex min-w-0 gap-2">
+                                        <span class="text-ctp-overlay1 shrink-0">
+                                            ↳
+                                        </span>
+                                        <a
+                                            href={link.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class={`min-w-0 break-all hover:underline ${
+                                                link.kind === "github"
+                                                    ? "text-ctp-teal"
+                                                    : "text-ctp-sapphire"
+                                            }`}
+                                        >
+                                            <i
+                                                class={
+                                                    link.kind === "github"
+                                                        ? "nf nf-fa-github"
+                                                        : "nf nf-md-web"
+                                                }
+                                            />{" "}
+                                            {link.label ?? prettyUrl(link.url)}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
+                        )
+                    }
+                    {
+                        !hasPublicSource(project) && links.length > 0 && (
+                            <div class="text-ctp-subtext0 mt-1">
+                                Source is private.
+                            </div>
+                        )
+                    }
+                </div>
+
+                {
+                    project.tags.length > 0 && (
+                        <div class="text-ctp-overlay2 border-l-2 border-ctp-surface1 pl-3">
+                            {project.tags.join(" · ")}
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </div>
+</Layout>
+
+<script>
+    // Mirrors the /blog listing reveal: hide the cursor, then uncover the
+    // output with the shared sweep and strip the class once it lands, since the
+    // mask clips to the border box while applied.
+    //
+    // Registered at module top level, not inside DOMContentLoaded: this script
+    // and TerminalCommand's are both deferred modules with no ordering
+    // guarantee between them, so waiting for DOMContentLoaded risks subscribing
+    // after the typing has already finished and the event has gone.
+    window.addEventListener("readme-typing-complete", () => {
+        const cursor = document.getElementById("readme-command-cursor");
+        const output = document.querySelector(".readme-output");
+
+        setTimeout(() => {
+            if (cursor) cursor.style.display = "none";
+            if (!output) return;
+
+            output.classList.remove("hidden");
+            output.classList.add("reveal-sweep");
+            output.addEventListener("animationend", function done(e) {
+                if ((e as AnimationEvent).animationName !== "reveal-sweep")
+                    return;
+                output.classList.remove("reveal-sweep");
+                output.removeEventListener("animationend", done);
+            });
+        }, 200);
+    });
+</script>

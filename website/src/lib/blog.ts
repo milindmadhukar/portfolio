@@ -15,7 +15,9 @@ export interface BlogPost {
     isExcalidrawCover: boolean;
     draft: boolean;
     wordCount: number;
-    rawContent?: () => string;
+    /** The post body, frontmatter stripped. Astro's own prop of the same name
+     *  is a function; this is already called. */
+    rawContent: string;
     frontmatter?: any;
 }
 
@@ -104,6 +106,10 @@ export function getBlogPosts() {
             isExcalidrawCover: isExcalidrawBanner,
             draft: frontmatter.draft || false,
             wordCount,
+            // Kept, not just measured: `cat blog/<slug>.md` over SSH renders
+            // this body through glamour. Astro's rawContent() excludes the
+            // frontmatter, which is what we want to hand a markdown renderer.
+            rawContent,
         };
     });
 

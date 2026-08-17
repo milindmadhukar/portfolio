@@ -134,7 +134,7 @@ export default function DiscordStatus({
 
       {spotify && (
         <div className="term-row">
-          <span className="text-ctp-green">
+          <span className="text-ctp-mauve">
             <i className="nf nf-fa-spotify"></i> Listening to
           </span>
           <span> : </span>
@@ -142,7 +142,7 @@ export default function DiscordStatus({
             href={`https://open.spotify.com/track/${spotify.trackId}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:underline hover:text-ctp-green transition-colors"
+            className="hover:underline hover:text-ctp-mauve transition-colors"
           >
             {spotify.song}
             <span> by {spotify.artist}</span>

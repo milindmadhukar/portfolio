@@ -4,9 +4,11 @@ import {
     cyan,
     green,
     magenta,
+    mauve,
     overlay,
     peach,
     red,
+    sapphire,
     subtext,
     text,
     yellow,
@@ -200,7 +202,7 @@ export const getFastfetch = async () => {
         const summary = serviceParts(serviceStats)
             .map((part) => SERVICE_ANSI[part.tone](`${part.count} ${part.label}`))
             .join(overlay(" · "));
-        info.push(`${green("󰒍 Services")} : ${summary}`);
+        info.push(`${sapphire("󰒍 Services")} : ${summary}`);
     }
 
     // Same hand-built treatment as Services, and for the same reason. This one
@@ -221,7 +223,7 @@ export const getFastfetch = async () => {
     ));
     if (presence.spotify) {
         info.push(...row(
-            green(" Listening to"),
+            mauve(" Listening to"),
             `${presence.spotify.song} by ${presence.spotify.artist}`,
         ));
     }
@@ -256,7 +258,7 @@ export const getFastfetch = async () => {
 export const getWhoami = () => {
     const lines = [];
 
-    lines.push(`${subtext("hi, i am ")}${bold(green(personalInfo.name.toLowerCase()))}`);
+    lines.push(`${subtext("hi, i am ")}${bold(mauve(personalInfo.name.toLowerCase()))}`);
     lines.push("");
     lines.push(subtext(personalInfo.bio.long));
 
@@ -265,16 +267,20 @@ export const getWhoami = () => {
 
 const prettyUrl = (url: string) => url.replace(/^https?:\/\//, "").replace(/\/$/, "");
 
-// The link line under a listing row: repos in cyan, live site in green, with
+// The link line under a listing row: repos in cyan, live site in sapphire, with
 // the closed-source status spelled out rather than left to be inferred. Every
 // link is listed, not just the first — a project can span several repos.
+//
+// Live sites used to be green. Green is now reserved for liveness signals
+// (services up, Discord online) so it reads as status rather than decoration —
+// five stacked green URLs in this listing were the bulk of the problem.
 const linkFragment = (project: (typeof projects)[number]) => {
     const links = projectLinks(project);
     if (links.length === 0) return subtext("source private");
     const rendered = links.map((link) =>
         link.kind === "github"
             ? cyan(link.label ?? prettyUrl(link.url))
-            : green(prettyUrl(link.url)),
+            : sapphire(prettyUrl(link.url)),
     );
     if (!hasPublicSource(project)) rendered.push(subtext("(source private)"));
     return rendered.join(subtext("  ·  "));
@@ -309,37 +315,67 @@ export const getProjects = () => {
     return lines.join("\n");
 };
 
-// One project's own page, shown by `ls projects/<name>` over SSH.
-export const getProjectDetails = () => {
-    return Object.fromEntries(projects.map(p => {
-        const lines: string[] = [];
-
-        lines.push(bold(blue(`${p.id}/`)));
-        lines.push(`${overlay("├─")} ${text(p.title)}`);
-        lines.push(`${overlay("├─")} ${subtext(p.longDescription)}`);
-        lines.push(`${overlay("├─")} ${subtext(p.technologies.join(" · "))}`);
-        p.highlights.forEach(h => lines.push(`${overlay("│")}  ${subtext("•")} ${text(h)}`));
-        lines.push(`${overlay("└─")} ${linkFragment(p)}`);
-
-        return [p.id, lines.join("\n")];
-    }));
-};
+// `ls projects/<name>` used to print a box-drawing detail page from here. A
+// project is a directory now, holding a README.md — so the detail lives in
+// `projectReadme()` in filesystem.ts as real markdown, and glamour renders it.
 
 export const getUptime = () => {
     return ` ${blue("up")} ${text(formatUptime(new Date(BIRTH_DATE)))}`;
 };
 
-export const getProjectIds = () => projects.map(p => p.id);
+// Grouped rather than one flat list: the command set grew past the point where
+// eight alphabetised lines told you anything about which ones go together.
+// Names are mauve, not green — green means "alive" now, and a solid block of it
+// here was most of what made the palette read as green.
+const HELP_GROUPS: { title: string; commands: [string, string][] }[] = [
+    {
+        title: "navigate",
+        commands: [
+            ["ls [path]", "list a directory"],
+            ["cd <dir>", "change directory"],
+            ["pwd", "print the working directory"],
+            ["cat <file>", "print a file — markdown is rendered"],
+        ],
+    },
+    {
+        title: "me",
+        commands: [
+            ["fastfetch", "the banner you got on connect"],
+            ["whoami", "the long version"],
+            ["uptime", "how long I've been running"],
+        ],
+    },
+    {
+        title: "session",
+        commands: [
+            ["help", "this"],
+            ["clear", "clear the screen"],
+            ["exit", "close the connection"],
+        ],
+    },
+];
 
 export const getHelp = () => {
-    return `Available commands:
-  ${green("fastfetch")}          - Display system information
-  ${green("whoami")}             - Display user information
-  ${green("ls projects/")}       - List my projects
-  ${green("ls projects/<name>")} - Show one project in detail
-  ${green("uptime")}             - How long I've been running
-  ${green("help")}               - Show this help message
-  ${green("clear")}              - Clear the screen
-  ${green("exit")}               - Close the connection
-`;
+    // Padded on the raw name, before the colour wrapper — padEnd counts escape
+    // bytes and would misalign every row otherwise.
+    const nameWidth = Math.max(
+        ...HELP_GROUPS.flatMap((g) => g.commands.map(([name]) => name.length)),
+    );
+
+    const lines: string[] = [];
+    for (const group of HELP_GROUPS) {
+        lines.push(bold(blue(group.title)));
+        for (const [name, description] of group.commands) {
+            lines.push(`  ${mauve(name.padEnd(nameWidth))}  ${subtext(description)}`);
+        }
+        lines.push("");
+    }
+
+    // Both of these are single commands on purpose: there is no operator
+    // parsing here, so a `cmd && cmd` hint would fail if anyone pasted it.
+    lines.push(
+        `${subtext("try")} ${text("cd projects")}${subtext(", or")} ${text("cat blog/<slug>.md")}${subtext(". tab completes paths.")}`,
+    );
+
+    return lines.join("\n");
 };

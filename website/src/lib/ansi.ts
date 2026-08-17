@@ -43,6 +43,7 @@ export const wrap = (text: string, color: string) => `${color}${text}${ANSI.RESE
 export const green = (text: string) => wrap(text, ANSI.GREEN_CTP);
 export const red = (text: string) => wrap(text, ANSI.RED_CTP);
 export const blue = (text: string) => wrap(text, ANSI.BLUE_CTP);
+export const sapphire = (text: string) => wrap(text, ANSI.SAPPHIRE);
 export const yellow = (text: string) => wrap(text, ANSI.YELLOW_CTP);
 export const magenta = (text: string) => wrap(text, ANSI.MAUVE);
 export const cyan = (text: string) => wrap(text, ANSI.TEAL);

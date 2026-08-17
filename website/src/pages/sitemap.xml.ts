@@ -1,5 +1,6 @@
 import type { APIContext } from 'astro';
 import { getBlogPosts } from '../lib/blog';
+import { projects } from '../lib/constants';
 
 // SSR so the sitemap is generated per-request and always reflects the current
 // set of blog posts (getBlogPosts globs the markdown files, so new posts are
@@ -47,6 +48,15 @@ export async function GET(context: APIContext) {
     const lastmod = latest ? `\n    <lastmod>${latest.toISOString()}</lastmod>` : '';
     urls.push(
       `  <url>\n    <loc>${xmlEscape(siteUrl + route.path)}</loc>${lastmod}\n    <changefreq>${route.changefreq}</changefreq>\n    <priority>${route.priority}</priority>\n  </url>`,
+    );
+  }
+
+  // One URL per project README (see pages/projects/[id].astro). Derived from
+  // the same `projects` array the listing is, so a new project needs no edit
+  // here.
+  for (const project of projects) {
+    urls.push(
+      `  <url>\n    <loc>${xmlEscape(`${siteUrl}/projects/${project.id}`)}</loc>\n    <changefreq>monthly</changefreq>\n    <priority>0.6</priority>\n  </url>`,
     );
   }
 
