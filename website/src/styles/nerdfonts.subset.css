@@ -22,10 +22,6 @@
   -webkit-font-smoothing: antialiased;
 }
 
-.nf-fa-address_card:before {
-  content: "\f2bb";
-}
-
 .nf-fa-adjust:before {
   content: "\f042";
 }
@@ -128,6 +124,10 @@
 
 .nf-md-school:before {
   content: "\f0474";
+}
+
+.nf-md-server_network:before {
+  content: "\f048d";
 }
 
 .nf-md-web:before {

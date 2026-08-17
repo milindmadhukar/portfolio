@@ -26,6 +26,7 @@ import {
     EXPERIENCE_START_DATE,
 } from "./constants";
 import { fetchGithubStats } from "./github";
+import { fetchServiceStats, serviceParts, type ServiceTone } from "./uptime";
 import { calculateExperience, formatUptime, hasPublicSource, pluralize, projectLinks } from "./utils";
 import { formatTimeAgo } from "./date";
 import { getBlogPosts } from "./blog";
@@ -45,6 +46,14 @@ const STATUS_ANSI: Record<PresenceStatus, (s: string) => string> = {
     idle: yellow,
     dnd: red,
     offline: subtext,
+};
+
+// Mirrors SERVICE_TONE in FastfetchOutput.astro.
+const SERVICE_ANSI: Record<ServiceTone, (s: string) => string> = {
+    up: green,
+    pending: yellow,
+    down: red,
+    maintenance: blue,
 };
 
 // A `label : value` row, word-wrapped to MAX_COLS. Continuation lines get a
@@ -78,8 +87,9 @@ const row = (label: string, value: string, paint = text): string[] => {
 export const getFastfetch = async () => {
     // The presence read is an in-memory snapshot once the socket is warm, so
     // it costs the SSH path nothing even though it re-fetches per command.
-    const [githubStats, presence] = await Promise.all([
+    const [githubStats, serviceStats, presence] = await Promise.all([
         fetchGithubStats(),
+        fetchServiceStats(),
         getPresence(),
     ]);
     const posts = getBlogPosts();
@@ -170,6 +180,21 @@ export const getFastfetch = async () => {
                 `${githubStats.lastPush.repo} - ${formatTimeAgo(githubStats.lastPush.at)}`,
             ));
         }
+    }
+
+    // Outside the githubStats guard on purpose: a GitHub outage must not take
+    // the Services row down with it. Mirrors FastfetchOutput.astro.
+    //
+    // Built by hand rather than through row(), which wraps by splitting on
+    // spaces — that would cut through an ANSI run in a per-part-coloured value
+    // and leak colour onto the next line. Safe here because the value cannot
+    // wrap: the widest it gets is every monitor in a different state, and with
+    // 37 monitors that is ~59 cells including the label, under MAX_COLS.
+    if (serviceStats) {
+        const summary = serviceParts(serviceStats)
+            .map((part) => SERVICE_ANSI[part.tone](`${part.count} ${part.label}`))
+            .join(overlay(" · "));
+        info.push(`${green("󰒍 Services")} : ${summary}`);
     }
 
     // Discord presence, read from the socket the server already holds open —

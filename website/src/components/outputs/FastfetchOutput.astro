@@ -4,12 +4,25 @@ import { formatTimeAgo } from "../../lib/date";
 import DiscordStatus from "../DiscordStatus";
 import SocialIcons from "../SocialIcons.astro";
 import TerminalRule from "../TerminalRule.astro";
-import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE } from "../../lib/constants";
+import { experience, education, DISCORD_ID, EXPERIENCE_START_DATE, BIRTH_DATE, STATUS_PAGE_URL } from "../../lib/constants";
 import { getBlogPosts } from "../../lib/blog";
 import { calculateExperience, formatUptime, pluralize } from "../../lib/utils";
 import { getPresence } from "../../lib/lanyard-server";
+import { fetchServiceStats, serviceParts, type ServiceTone } from "../../lib/uptime";
 
 const githubStats = await fetchGithubStats();
+
+// Served from the cache the background poller keeps warm, so this costs the
+// render nothing even though every request re-reads it.
+const serviceStats = await fetchServiceStats();
+const services = serviceStats ? serviceParts(serviceStats) : [];
+
+const SERVICE_TONE: Record<ServiceTone, string> = {
+    up: "text-ctp-green",
+    pending: "text-ctp-yellow",
+    down: "text-ctp-red",
+    maintenance: "text-ctp-blue",
+};
 const experienceLabel = calculateExperience(new Date(EXPERIENCE_START_DATE));
 const posts = getBlogPosts();
 const latestPost = posts.length > 0 ? posts[0] : null;
@@ -214,6 +227,35 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
                             </div>
                         )}
                     </>
+                )
+            }
+
+            <!-- Outside the githubStats guard on purpose: a GitHub outage must
+                 not take the Services row down with it. -->
+            {
+                services.length > 0 && (
+                    <div class="term-row">
+                        <span class="text-ctp-green">
+                            <i class="nf nf-md-server_network" /> Services
+                        </span>
+                        <span> : </span>
+                        <a
+                            href={STATUS_PAGE_URL}
+                            target="_blank"
+                            class="hover:underline"
+                        >
+                            {services.map((part, i) => (
+                                <>
+                                    {i > 0 && (
+                                        <span class="text-ctp-overlay0"> · </span>
+                                    )}
+                                    <span class={SERVICE_TONE[part.tone]}>
+                                        {part.count} {part.label}
+                                    </span>
+                                </>
+                            ))}
+                        </a>
+                    </div>
                 )
             }
 

@@ -37,6 +37,13 @@ export const GITHUB_USERNAME = "milindmadhukar";
 export const GITHUB_API_URL = "https://api.github.com";
 export const DISCORD_ID = "421608483629301772"
 
+// The Uptime Kuma status page. Deliberately status.milind.dev and not the Kuma
+// dashboard at uptime.milind.dev: the dashboard sits behind Authelia, so every
+// path on it - including /metrics and /api/status-page/* - redirects to
+// auth.milind.dev. The status page host serves the same JSON unauthenticated.
+export const STATUS_PAGE_URL = "https://status.milind.dev";
+export const STATUS_PAGE_SLUG = "all";
+
 export const personalInfo = {
   name: FULL_NAME,
   birthDate: BIRTH_DATE,
