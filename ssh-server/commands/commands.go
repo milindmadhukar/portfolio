@@ -288,7 +288,7 @@ func Candidates(env *Env, cmd, word string) []string {
 	base := vfs.Resolve(env.Cwd, dirPart)
 	var found []string
 	for _, e := range env.Tree.Children(base) {
-		if !strings.HasPrefix(e.Name, stem) {
+		if !hasPrefixFold(e.Name, stem) {
 			continue
 		}
 		if cmd == "cd" && e.Kind != "dir" {
@@ -300,16 +300,36 @@ func Candidates(env *Env, cmd, word string) []string {
 		}
 		found = append(found, dirPart+name)
 	}
-	sort.Strings(found)
+	// Fold-aware, so an uppercase name like README.md sorts among the others
+	// rather than ahead of every lowercase one the way byte order would put it.
+	sort.Slice(found, func(i, j int) bool {
+		li, lj := strings.ToLower(found[i]), strings.ToLower(found[j])
+		if li != lj {
+			return li < lj
+		}
+		return found[i] < found[j]
+	})
 	return found
 }
 
 func matches(candidates []string, word string) []string {
 	var found []string
 	for _, c := range candidates {
-		if strings.HasPrefix(c, word) {
+		if hasPrefixFold(c, word) {
 			found = append(found, c)
 		}
 	}
 	return found
+}
+
+// hasPrefixFold is strings.HasPrefix, ignoring case.
+//
+// Completion matches case-insensitively so `rea<tab>` finds README.md, the way
+// zsh's m:{a-zA-Z}={A-Za-z} matcher does. Resolution stays case-sensitive —
+// this tree is a map, and a real filesystem on Linux would not accept
+// `cat readme.md` either. The two only stay consistent because completion
+// always writes back the *candidate's* case, so what lands on the line is a
+// path that resolves.
+func hasPrefixFold(s, prefix string) bool {
+	return strings.HasPrefix(strings.ToLower(s), strings.ToLower(prefix))
 }

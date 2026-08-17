@@ -1,6 +1,9 @@
 package commands
 
-import "strings"
+import (
+	"strings"
+	"unicode"
+)
 
 // Completion is the outcome of a tab press: either rewrite the line, or hand
 // the caller the ambiguous candidates so it can print them.
@@ -67,18 +70,35 @@ func splitLastWord(line string) (prefix, word string) {
 	return line[:i+1], line[i+1:]
 }
 
+// longestCommonPrefix returns the longest prefix every item shares, compared
+// without regard to case.
+//
+// The text comes from the first item, so the result carries a real candidate's
+// capitalisation rather than whatever was typed — that is what turns `rea` into
+// `README.md` instead of leaving `reaDME.md` on the line. Runes, not bytes: a
+// byte-wise trim could split a multi-byte character in a slug.
 func longestCommonPrefix(items []string) string {
 	if len(items) == 0 {
 		return ""
 	}
-	prefix := items[0]
+
+	first := []rune(items[0])
+	n := len(first)
+
 	for _, item := range items[1:] {
-		for !strings.HasPrefix(item, prefix) {
-			prefix = prefix[:len(prefix)-1]
-			if prefix == "" {
-				return ""
+		other := []rune(item)
+		if len(other) < n {
+			n = len(other)
+		}
+		for i := 0; i < n; i++ {
+			if unicode.ToLower(first[i]) != unicode.ToLower(other[i]) {
+				n = i
+				break
 			}
 		}
+		if n == 0 {
+			return ""
+		}
 	}
-	return prefix
+	return string(first[:n])
 }
