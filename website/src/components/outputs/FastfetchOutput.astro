@@ -294,6 +294,7 @@ const uptime = formatUptime(new Date(BIRTH_DATE));
                     userId={DISCORD_ID}
                     socketUrl={process.env.LANYARD_SOCKET_URL || ""}
                     initialData={presence}
+                    serverNow={Date.now()}
                 />
             </div>
             <TerminalRule />

@@ -13,6 +13,9 @@ export interface RawLanyard {
         artist: string;
         album: string;
         album_art_url: string;
+        // Absolute epoch ms. Present whenever Spotify is actually playing, but
+        // typed optional because a frame that arrives mid-transition can omit it.
+        timestamps?: { start: number; end: number };
     } | null;
     activities?: Array<{
         type: number;
@@ -28,7 +31,18 @@ export type PresenceStatus = "online" | "idle" | "dnd" | "offline";
 // small and makes the SSR -> hydration contract impossible to drift.
 export interface PresenceSnapshot {
     status: PresenceStatus;
-    spotify: { trackId: string; song: string; artist: string } | null;
+    spotify: {
+        trackId: string;
+        song: string;
+        artist: string;
+        album: string;
+        albumArt: string;
+        // Absolute epoch ms, never a precomputed elapsed: this snapshot is
+        // serialized into the HTML and then ticked against the visitor's clock,
+        // so anything relative would be stale the moment it was written.
+        startedAt: number | null;
+        endsAt: number | null;
+    } | null;
     playing: Array<{ name: string; state: string | null }>;
 }
 
@@ -49,6 +63,40 @@ export const OFFLINE_SNAPSHOT: PresenceSnapshot = {
     spotify: null,
     playing: [],
 };
+
+// "1:23" — minutes are never padded, seconds always are, which is how every
+// music player on earth writes a position. Hours are folded into the minutes
+// rather than getting their own field; nothing on Spotify runs that long, and
+// a "0:63:12" would be worse than a "63:12" if something ever did.
+export const formatTrackTime = (ms: number): string => {
+    const total = Math.floor(Math.max(0, ms) / 1000);
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+};
+
+/**
+ * "(1:23 / 3:52)", or null when Lanyard gave us no timestamps to work with —
+ * the row then renders the track without a counter rather than "NaN:NaN".
+ *
+ * `now` is the visitor's clock, which is the only clock available once the
+ * page is live. That clock can be minutes off, so elapsed is clamped into the
+ * track: an unclamped counter would otherwise count backwards from a negative
+ * number, or sail past the song's own length.
+ */
+export function formatTrackProgress(
+    startedAt: number | null,
+    endsAt: number | null,
+    now: number,
+): string | null {
+    if (startedAt === null || endsAt === null) return null;
+
+    const duration = endsAt - startedAt;
+    if (duration <= 0) return null;
+
+    const elapsed = Math.min(Math.max(now - startedAt, 0), duration);
+    return `(${formatTrackTime(elapsed)} / ${formatTrackTime(duration)})`;
+}
 
 const isStatus = (s: unknown): s is PresenceStatus =>
     s === "online" || s === "idle" || s === "dnd" || s === "offline";
@@ -71,6 +119,10 @@ export function toSnapshot(d: RawLanyard | null | undefined): PresenceSnapshot {
                       trackId: d.spotify.track_id,
                       song: d.spotify.song,
                       artist: cut === -1 ? artist : artist.slice(0, cut),
+                      album: d.spotify.album,
+                      albumArt: d.spotify.album_art_url,
+                      startedAt: d.spotify.timestamps?.start ?? null,
+                      endsAt: d.spotify.timestamps?.end ?? null,
                   }
                 : null,
         // Type 2 is "Listening", which is Spotify duplicated into the activity
