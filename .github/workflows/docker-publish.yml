@@ -13,6 +13,15 @@ on:
   # Allow manual runs
   workflow_dispatch:
 
+# Vault backups dispatch on every commit, so a post can arrive here before
+# Obsidian has exported its excalidraw PNGs - the build then dies on an
+# unresolved image and the next backup fixes it a minute later. Superseding the
+# older run turns that into a cancellation instead of a red X, and it also stops
+# two dispatches racing to push the same submodule bump.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   REGISTRY: ghcr.io
 
