@@ -16,6 +16,9 @@ const STATIC_ROUTES: { path: string; changefreq: string; priority: string }[] = 
   // deliberately absent — it renders the same page as '/', which is canonical.
   { path: '/whoami', changefreq: 'monthly', priority: '0.7' },
   { path: '/projects', changefreq: 'weekly', priority: '0.9' },
+  // The markdown index for agents (see lib/llms.ts).
+  { path: '/llms.txt', changefreq: 'weekly', priority: '0.5' },
+  { path: '/llms-full.txt', changefreq: 'weekly', priority: '0.5' },
 ];
 
 function xmlEscape(value: string): string {

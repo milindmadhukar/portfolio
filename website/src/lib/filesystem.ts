@@ -45,7 +45,7 @@ export const ROOT = ".";
  * body from leaving the container. Filtering in one place also keeps `ls blog/`
  * and `cat blog/<slug>.md` agreeing with each other.
  */
-const publishedPosts = () => getBlogPosts().filter((p) => !p.draft);
+export const publishedPosts = () => getBlogPosts().filter((p) => !p.draft);
 
 /** Every markdown path is fetched on demand from /api/fs rather than shipped
  *  in the command payload. */

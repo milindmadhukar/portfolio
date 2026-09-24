@@ -19,6 +19,9 @@ Allow: /
 Disallow: /api/
 
 Sitemap: ${siteUrl}/sitemap.xml
+
+# LLM-readable index: ${siteUrl}/llms.txt
+# Full content: ${siteUrl}/llms-full.txt
 `;
 
   return new Response(body, {
